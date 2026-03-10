@@ -208,53 +208,59 @@ class NFEMS_Admin_Sessioni {
         </div>
 
         <script>
-        (function(){
-            const cb = document.getElementById('nfems_generate_special');
-            const std = document.getElementById('nfems_gen_standard');
-            const sp  = document.getElementById('nfems_gen_special');
-            if (!cb) return;
-            function toggle(){
-                if (cb.checked) { std.style.display='none'; sp.style.display='block'; }
-                else { std.style.display='block'; sp.style.display='none'; }
-            }
-            cb.addEventListener('change', toggle);
-            toggle();
-        })();
-        
-        // Client-side hint: makes issues visible (does not replace server-side checks)
-        (function(){
-            const genForm = document.querySelector('input[name="nfems_action"][value="generate"]')?.closest('form');
-            if (!genForm) return;
+        document.addEventListener('DOMContentLoaded', function(){
+            (function(){
+                const cb = document.getElementById('nfems_generate_special');
+                const std = document.getElementById('nfems_gen_standard');
+                const sp  = document.getElementById('nfems_gen_special');
+                if (!cb) return;
+                function toggle(){
+                    if (cb.checked) { std.style.display='none'; sp.style.display='block'; }
+                    else { std.style.display='block'; sp.style.display='none'; }
+                }
+                cb.addEventListener('change', toggle);
+                toggle();
+            })();
 
-            genForm.addEventListener('submit', function(e){
-                const special = document.getElementById('nfems_generate_special');
-                const isSpecial = special && special.checked;
-
-                const sel = document.getElementById(isSpecial ? 'nfems_special_course_id' : 'nfems_course_id');
-                if (sel && !sel.value) {
-                    e.preventDefault();
-                    alert('Select a Tutor LMS course before generating sessions.');
-                    sel.focus();
+            // Client-side hint: makes issues visible (does not replace server-side checks)
+            (function(){
+                const genForm = document.querySelector('input[name="nfems_action"][value="generate"]')?.closest('form');
+                if (!genForm) {
+                    console.warn('[MC-EMS] Generate form not found.');
                     return;
                 }
 
-                // Standard: ensure times has at least one HH:MM
-                if (!isSpecial) {
-                    const ta = document.getElementById('nfems_times');
-                    if (ta) {
-                        const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(l => /^\s*\d{2}:\d{2}\s*$/.test(l));
-                        if (!hasTime) {
-                            e.preventDefault();
-                            alert('Enter at least one valid time (HH:MM), one per line.');
-                            ta.focus();
+                genForm.addEventListener('submit', function(e){
+                    const special = document.getElementById('nfems_generate_special');
+                    const isSpecial = special && special.checked;
+
+                    const sel = document.getElementById(isSpecial ? 'nfems_special_course_id' : 'nfems_course_id');
+                    if (sel && !sel.value) {
+                        e.preventDefault();
+                        alert('Select a Tutor LMS course before generating sessions.');
+                        sel.focus();
+                        return;
+                    }
+
+                    // Standard: ensure times has at least one HH:MM
+                    if (!isSpecial) {
+                        const ta = document.getElementById('nfems_times');
+                        if (ta) {
+                            const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(l => /^\s*\d{2}:\d{2}\s*$/.test(l));
+                            if (!hasTime) {
+                                e.preventDefault();
+                                alert('Enter at least one valid time (HH:MM), one per line.');
+                                ta.focus();
+                            }
                         }
                     }
-                }
-            });
-        })();
+                });
+            })();
+        });
         /* nfems-validate-generate */
 
         // Candidate email search (special sessions)
+        document.addEventListener('DOMContentLoaded', function(){
         (function(){
             const input = document.getElementById('nfems_special_user_email');
             const hidden = document.getElementById('nfems_special_user_id');
@@ -316,9 +322,11 @@ class NFEMS_Admin_Sessioni {
                 if (!box.contains(e.target) && e.target !== input) clearSuggest();
             });
         })();
+        });
         </script>
 <script>
 // nfems_prevent_past_date
+document.addEventListener('DOMContentLoaded', function(){
 (function(){
     function pad(n){ return (n<10?'0':'')+n; }
     function todayYMD(){
@@ -354,6 +362,7 @@ class NFEMS_Admin_Sessioni {
     setMinDate('nfems_special_date');
     bindDateTime('nfems_special_date', 'nfems_special_time');
 })();
+});
 </script>
 
         <?php
