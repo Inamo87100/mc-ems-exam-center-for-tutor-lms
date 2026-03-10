@@ -349,7 +349,9 @@ document.addEventListener('DOMContentLoaded', function(){
         function update(){
             var t=todayYMD();
             if(dEl.value===t){
-                tEl.setAttribute('min', nowHM());
+                var minTime=nowHM();
+                tEl.setAttribute('min', minTime);
+                if(tEl.value < minTime){ tEl.value=minTime; }
             } else {
                 tEl.removeAttribute('min');
             }
