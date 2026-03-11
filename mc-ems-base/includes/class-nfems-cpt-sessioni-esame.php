@@ -180,12 +180,16 @@ echo '</td></tr>';
 
 
         echo '<tr><th><label>Max seats</label></th><td>';
-        printf('<input type="number" min="1" max="500" name="nfems_capacity" value="%d" %s %s />',
+        $is_premium = defined('EMS_PREMIUM_VERSION');
+        $cap_max = $is_premium ? 500 : NFEMS_Admin_Sessioni::BASE_MAX_CAPACITY;
+        printf('<input type="number" min="1" max="%d" name="nfems_capacity" value="%d" %s %s />',
+            $cap_max,
             (int)$capacity,
             ($is_spec ? 'readonly' : ''),
             esc_attr($disabled)
         );
         if ($is_spec) echo '<p class="description"><strong>Forced to 1</strong> because it is a special requirements session.</p>';
+        elseif (!$is_premium) echo '<p class="description">Base license: max ' . (int)$cap_max . ' seats per session.</p>';
         echo '</td></tr>';
 
         echo '<tr><th><label>Booked</label></th><td>';
@@ -280,6 +284,11 @@ echo '</td></tr>';
 
         $capacity = isset($_POST['nfems_capacity']) ? (int) $_POST['nfems_capacity'] : 10;
         if ($capacity < 1) $capacity = 1;
+
+        // Base license: cap capacity to the allowed maximum.
+        if (!defined('EMS_PREMIUM_VERSION') && !$is_spec) {
+            $capacity = min($capacity, NFEMS_Admin_Sessioni::BASE_MAX_CAPACITY);
+        }
 
         // In modalità ♿: capienza sempre 1
         if ($is_spec) $capacity = 1;

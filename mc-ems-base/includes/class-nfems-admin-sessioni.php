@@ -6,6 +6,9 @@ class NFEMS_Admin_Sessioni {
     /** Maximum number of future (active) sessions allowed on the Base license. */
     const BASE_MAX_ACTIVE_SESSIONS = 5;
 
+    /** Maximum seats per session allowed on the Base license. */
+    const BASE_MAX_CAPACITY = 5;
+
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'menu']);
     }
@@ -203,7 +206,12 @@ class NFEMS_Admin_Sessioni {
                             <tr>
                                 <th><label for="nfems_capacity"><?php echo esc_html__('Seats per exam session', 'mc-ems'); ?></label></th>
                                 <td>
-                                    <input type="number" id="nfems_capacity" name="capacity" value="25" min="1" max="500">
+                                    <?php if (!$is_premium): ?>
+                                        <input type="number" id="nfems_capacity" name="capacity" min="1" max="<?php echo (int) self::BASE_MAX_CAPACITY; ?>">
+                                        <p class="description"><?php echo esc_html(sprintf(__('Base license: max %d seats per session.', 'mc-ems'), self::BASE_MAX_CAPACITY)); ?></p>
+                                    <?php else: ?>
+                                        <input type="number" id="nfems_capacity" name="capacity" min="1" max="500">
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         </table>
@@ -627,10 +635,11 @@ class NFEMS_Admin_Sessioni {
             return ['', __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems')];
         }
 
-        // Base license limits: max 1 time per day, max BASE_MAX_ACTIVE_SESSIONS future sessions.
+        // Base license limits: max 1 time per day, max BASE_MAX_ACTIVE_SESSIONS future sessions, max BASE_MAX_CAPACITY seats.
         $is_premium = defined('EMS_PREMIUM_VERSION');
         if (!$is_premium) {
             $times = [$times[0]];
+            $capacity = min($capacity, self::BASE_MAX_CAPACITY);
 
             $future_count = self::count_future_sessions();
             if ($future_count >= self::BASE_MAX_ACTIVE_SESSIONS) {
