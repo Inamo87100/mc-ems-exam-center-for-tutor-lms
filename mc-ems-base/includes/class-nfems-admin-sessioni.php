@@ -207,7 +207,7 @@ class NFEMS_Admin_Sessioni {
                                 <th><label for="nfems_capacity"><?php echo esc_html__('Seats per exam session', 'mc-ems'); ?></label></th>
                                 <td>
                                     <?php if (!$is_premium): ?>
-                                        <input type="number" id="nfems_capacity" name="capacity" min="1" max="<?php echo (int) self::BASE_MAX_CAPACITY; ?>">
+                                        <input type="number" id="nfems_capacity" name="capacity" min="1">
                                         <p class="description"><?php echo esc_html(sprintf(__('Base license: max %d seats per session.', 'mc-ems'), self::BASE_MAX_CAPACITY)); ?></p>
                                     <?php else: ?>
                                         <input type="number" id="nfems_capacity" name="capacity" min="1" max="500">
@@ -412,6 +412,15 @@ class NFEMS_Admin_Sessioni {
                                 return;
                             }
                         }
+                    }
+
+                    const capInput = document.getElementById('nfems_capacity');
+                    const maxCap = <?php echo $is_premium ? 'null' : (int) self::BASE_MAX_CAPACITY; ?>;
+                    if (capInput && maxCap !== null && parseInt(capInput.value, 10) > maxCap) {
+                        e.preventDefault();
+                        alert('Base license: max ' + maxCap + ' seats per session.');
+                        capInput.focus();
+                        return;
                     }
                 } else {
                     const sDate = document.getElementById('nfems_special_date');
