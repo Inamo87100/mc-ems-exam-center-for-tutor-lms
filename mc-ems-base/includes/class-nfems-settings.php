@@ -678,8 +678,6 @@ class NFEMS_Settings {
         echo '</h2>';
 
         if ($tab === 'shortcodes') {
-            $premium_active = defined('EMS_PREMIUM_VERSION') || class_exists('EMS_Premium_Bootstrap');
-
             echo '<div style="margin:16px 0;padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">';
             echo '<h2 style="margin:0 0 10px 0;">' . esc_html__('Available shortcodes', 'mc-ems') . '</h2>';
             echo '<table class="widefat striped" style="margin:0;">';
@@ -688,12 +686,7 @@ class NFEMS_Settings {
             echo '<tr><td><code>[mcems_book_exam]</code></td><td>' . esc_html__('Exam booking (select course → calendar → choose exam session).', 'mc-ems') . '</td><td><span style="font-weight:800;color:#067647;">' . esc_html__('Base', 'mc-ems') . '</span></td></tr>';
             echo '<tr><td><code>[mcems_manage_booking]</code></td><td>' . esc_html__('Shows the logged-in user exam bookings and allows cancellation.', 'mc-ems') . '</td><td><span style="font-weight:800;color:#067647;">' . esc_html__('Base', 'mc-ems') . '</span></td></tr>';
             echo '<tr><td><code>[mcems_sessions_calendar]</code></td><td>' . esc_html__('Calendar to assign proctors to exam sessions.', 'mc-ems') . '</td><td><span style="font-weight:800;color:#067647;">' . esc_html__('Base', 'mc-ems') . '</span></td></tr>';
-
-            $tag = $premium_active
-                ? '<span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:#e8f0fe;color:#1a73e8;font-weight:900;font-size:12px;">' . esc_html__('Premium active', 'mc-ems') . '</span>'
-                : '<span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:#fffbfa;color:#b42318;font-weight:900;font-size:12px;">' . esc_html__('🔒 Premium', 'mc-ems') . '</span>';
-
-            echo '<tr><td><code>[mcems_bookings_list]</code></td><td>' . esc_html__('Full exam bookings list (with filters/search). Available only with MC-EMS Premium.', 'mc-ems') . '</td><td>' . $tag . '</td></tr>';
+            echo '<tr><td><code>[mcems_bookings_list]</code></td><td>' . esc_html__('Exam bookings list (with date and course filters).', 'mc-ems') . '</td><td><span style="font-weight:800;color:#067647;">' . esc_html__('Base', 'mc-ems') . '</span></td></tr>';
 
             echo '</tbody></table>';
             echo '</div>';
