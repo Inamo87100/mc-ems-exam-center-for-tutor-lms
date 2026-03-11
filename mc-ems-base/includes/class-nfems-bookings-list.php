@@ -1,9 +1,10 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-class NFEMS_Bookings_List {
+class NFEMS_Bookings_List_Base {
 
     public static function init(): void {
+        add_shortcode('mcems_bookings_list', [__CLASS__, 'shortcode']);
         add_shortcode('mcems_exam_bookings_list', [__CLASS__, 'shortcode']);
     }
 

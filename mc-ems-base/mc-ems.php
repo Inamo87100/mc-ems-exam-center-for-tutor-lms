@@ -24,6 +24,7 @@ require_once NFEMS_PLUGIN_DIR . 'includes/class-nfems-upgrader.php';
 require_once NFEMS_PLUGIN_DIR . 'includes/class-nfems-cpt-sessioni-esame.php';
 require_once NFEMS_PLUGIN_DIR . 'includes/class-ems-session-id-column.php';
 require_once NFEMS_PLUGIN_DIR . 'includes/class-nfems-booking.php';
+require_once NFEMS_PLUGIN_DIR . 'includes/class-nfems-bookings-list.php';
 require_once NFEMS_PLUGIN_DIR . 'includes/class-nfems-calendar-sessioni.php';
 require_once NFEMS_PLUGIN_DIR . 'includes/class-nfems-admin-sessioni.php';
 require_once NFEMS_PLUGIN_DIR . 'includes/class-nfems-admin-banner.php';
@@ -46,41 +47,7 @@ add_action('plugins_loaded', function () {
     EMS_Session_ID_Column::init();
     NFEMS_Booking::init();
     NFEMS_Tutor_Gate::init();
-
-    // Premium placeholder: elenco prenotazioni (sbloccabile con EMS Premium)
-    if (!shortcode_exists('mcems_bookings_list')) {
-        add_shortcode('mcems_bookings_list', function () {
-
-            // Se il Premium è attivo, non mostriamo nulla: penserà il plugin Premium
-            if (defined('EMS_PREMIUM_VERSION') || class_exists('EMS_Premium_Bootstrap')) {
-                return '';
-            }
-
-            $title = esc_html__('Premium feature', 'mc-ems');
-            $msg1  = esc_html__('The', 'mc-ems');
-            $msg2  = esc_html__('Exam bookings list', 'mc-ems');
-            $msg3  = esc_html__('feature is available only with', 'mc-ems');
-            $msg4  = esc_html__('MC-EMS Premium', 'mc-ems');
-
-            return '
-            <div style="
-                max-width: 800px;
-                margin: 30px auto;
-                padding: 24px;
-                border: 1px solid #fda29b;
-                border-radius: 14px;
-                background: #fffbfa;
-                text-align: center;
-            ">
-                <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
-                <h2 style="margin: 0 0 10px 0;">' . $title . '</h2>
-                <p style="margin: 0; font-size: 16px;">
-                    ' . $msg1 . ' <strong>' . $msg2 . '</strong> ' . $msg3 . '
-                    <strong>' . $msg4 . '</strong>.
-                </p>
-            </div>';
-        });
-    }
+    NFEMS_Bookings_List_Base::init();
 
     NFEMS_Calendar_Sessioni::init();
 

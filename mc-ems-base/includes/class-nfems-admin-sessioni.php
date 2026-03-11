@@ -3,6 +3,9 @@ if (!defined('ABSPATH')) exit;
 
 class NFEMS_Admin_Sessioni {
 
+    /** Maximum number of future (active) sessions allowed on the Base license. */
+    const BASE_MAX_ACTIVE_SESSIONS = 5;
+
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'menu']);
     }
@@ -69,6 +72,24 @@ class NFEMS_Admin_Sessioni {
 
             <div class="card" style="max-width: 1100px;">
                 <h2><?php echo esc_html__('Generate new sessions', 'mc-ems'); ?></h2>
+
+                <?php
+                $is_premium = defined('EMS_PREMIUM_VERSION');
+                if (!$is_premium) :
+                    $future_count = self::count_future_sessions();
+                    $remaining    = max(0, self::BASE_MAX_ACTIVE_SESSIONS - $future_count);
+                ?>
+                <div style="margin-bottom:16px;padding:12px 16px;border-radius:10px;border:1px solid #fed7aa;background:#fff7ed;">
+                    <strong>📋 <?php echo esc_html__('Base license – session limits', 'mc-ems'); ?></strong><br>
+                    <?php echo esc_html(sprintf(
+                        __('Active future sessions: %d / %d — you can still create %d more session(s).', 'mc-ems'),
+                        (int) $future_count,
+                        (int) self::BASE_MAX_ACTIVE_SESSIONS,
+                        (int) $remaining
+                    )); ?>
+                    <br><small style="color:#92400e;"><?php echo esc_html__('Base license: max 1 session per day and max 5 active sessions. Upgrade to Premium to remove these limits.', 'mc-ems'); ?></small>
+                </div>
+                <?php endif; ?>
 
                 <form method="post" id="nfems-generate-form">
                     <?php wp_nonce_field('nfems_generate', 'nfems_generate_nonce'); ?>
@@ -154,16 +175,29 @@ class NFEMS_Admin_Sessioni {
                             </tr>
 
                             <tr>
-                                <th><label for="nfems_times"><?php echo esc_html__('Exam session times (one per line)', 'mc-ems'); ?></label></th>
-                                <td>
-                                    <textarea
-                                        id="nfems_times"
-                                        name="times"
-                                        rows="5"
-                                        cols="40"
-                                        placeholder="08:30&#10;10:30&#10;12:30"
-                                    ></textarea>
-                                </td>
+                                <?php if (!$is_premium): ?>
+                                    <th><label for="nfems_times"><?php echo esc_html__('Exam session time', 'mc-ems'); ?></label></th>
+                                    <td>
+                                        <input
+                                            type="time"
+                                            id="nfems_times"
+                                            name="times"
+                                            required
+                                        >
+                                        <p class="description"><?php echo esc_html__('Base license: only one time per day allowed.', 'mc-ems'); ?></p>
+                                    </td>
+                                <?php else: ?>
+                                    <th><label for="nfems_times"><?php echo esc_html__('Exam session times (one per line)', 'mc-ems'); ?></label></th>
+                                    <td>
+                                        <textarea
+                                            id="nfems_times"
+                                            name="times"
+                                            rows="5"
+                                            cols="40"
+                                            placeholder="08:30&#10;10:30&#10;12:30"
+                                        ></textarea>
+                                    </td>
+                                <?php endif; ?>
                             </tr>
 
                             <tr>
@@ -349,15 +383,26 @@ class NFEMS_Admin_Sessioni {
                 if (!isSpecial) {
                     const ta = document.getElementById('nfems_times');
                     if (ta) {
-                        const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(function(l){
-                            return /^\s*\d{2}:\d{2}\s*$/.test(l);
-                        });
+                        // Support both <input type="time"> (base) and <textarea> (premium)
+                        const isTimeInput = (ta.tagName === 'INPUT');
+                        if (isTimeInput) {
+                            if (!ta.value || !/^\d{2}:\d{2}$/.test(ta.value.trim())) {
+                                e.preventDefault();
+                                alert('Enter a valid time (HH:MM).');
+                                ta.focus();
+                                return;
+                            }
+                        } else {
+                            const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(function(l){
+                                return /^\s*\d{2}:\d{2}\s*$/.test(l);
+                            });
 
-                        if (!hasTime) {
-                            e.preventDefault();
-                            alert('Enter at least one valid time (HH:MM), one per line.');
-                            ta.focus();
-                            return;
+                            if (!hasTime) {
+                                e.preventDefault();
+                                alert('Enter at least one valid time (HH:MM), one per line.');
+                                ta.focus();
+                                return;
+                            }
                         }
                     }
                 } else {
@@ -582,6 +627,21 @@ class NFEMS_Admin_Sessioni {
             return ['', __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems')];
         }
 
+        // Base license limits: max 1 time per day, max BASE_MAX_ACTIVE_SESSIONS future sessions.
+        $is_premium = defined('EMS_PREMIUM_VERSION');
+        if (!$is_premium) {
+            $times = [$times[0]];
+
+            $future_count = self::count_future_sessions();
+            if ($future_count >= self::BASE_MAX_ACTIVE_SESSIONS) {
+                return ['', sprintf(
+                    __('Base license limit reached: you already have %d active (future) sessions (maximum %d). Delete or wait for existing sessions to pass before creating new ones.', 'mc-ems'),
+                    (int) $future_count,
+                    (int) self::BASE_MAX_ACTIVE_SESSIONS
+                )];
+            }
+        }
+
         $created = 0;
         $skipped = 0;
         $insert_errors = [];
@@ -592,11 +652,38 @@ class NFEMS_Admin_Sessioni {
         $cur   = strtotime($start);
         $endTs = strtotime($end);
 
+        // For base license, track how many sessions we've created in this batch so we don't
+        // exceed the maximum together with the already-existing future sessions.
+        // Reuse the $future_count already obtained above to avoid a second DB query.
+        $future_count_start = $is_premium ? 0 : $future_count;
+        $batch_created      = 0;
+
+        // For base license, pre-fetch all existing session dates in the range to avoid
+        // one DB query per day inside the loop.
+        $existing_dates_in_range = [];
+        if (!$is_premium) {
+            $existing_dates_in_range = self::get_session_dates_in_range($start, $end);
+        }
+
         while ($cur <= $endTs) {
             $dow = strtolower(date('l', $cur));
 
             if (in_array($dow, $days, true)) {
                 $date = date('Y-m-d', $cur);
+
+                // Base license: block if max future sessions would be exceeded.
+                if (!$is_premium && ($future_count_start + $batch_created) >= self::BASE_MAX_ACTIVE_SESSIONS) {
+                    $skipped++;
+                    $cur = strtotime('+1 day', $cur);
+                    continue;
+                }
+
+                // Base license: skip days that already have a session.
+                if (!$is_premium && in_array($date, $existing_dates_in_range, true)) {
+                    $skipped++;
+                    $cur = strtotime('+1 day', $cur);
+                    continue;
+                }
 
                 foreach ($times as $time) {
                     try {
@@ -619,6 +706,7 @@ class NFEMS_Admin_Sessioni {
 
                     if ($sid) {
                         $created++;
+                        $batch_created++;
                     } else {
                         $skipped++;
                         $insert_errors[] = $date . ' ' . $time;
@@ -744,6 +832,80 @@ class NFEMS_Admin_Sessioni {
         }
 
         return [sprintf(__('Update completed: %d sessions updated.', 'mc-ems'), $updated), ''];
+    }
+
+    /**
+     * Count published sessions whose date is today or in the future.
+     * Used to enforce the Base license limit of BASE_MAX_ACTIVE_SESSIONS.
+     */
+    private static function count_future_sessions(): int {
+        $today = current_time('Y-m-d');
+        $q = new WP_Query([
+            'post_type'      => NFEMS_CPT_Sessioni_Esame::CPT,
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => NFEMS_CPT_Sessioni_Esame::MK_DATE,
+                    'value'   => $today,
+                    'compare' => '>=',
+                    'type'    => 'DATE',
+                ],
+            ],
+        ]);
+        return (int) $q->found_posts;
+    }
+
+    /**
+     * Check whether any published session (of any time) exists for the given date.
+     * Used to enforce the Base license "one session per day" rule.
+     */
+    private static function has_session_on_date(string $date): bool {
+        $q = new WP_Query([
+            'post_type'      => NFEMS_CPT_Sessioni_Esame::CPT,
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'   => NFEMS_CPT_Sessioni_Esame::MK_DATE,
+                    'value' => $date,
+                ],
+            ],
+        ]);
+        return $q->have_posts();
+    }
+
+    /**
+     * Return a flat array of all published session dates (Y-m-d strings) that fall
+     * within the given inclusive date range. Used to pre-fetch existing dates before
+     * iterating over a range so we avoid one query per day inside the loop.
+     */
+    private static function get_session_dates_in_range(string $start, string $end): array {
+        $ids = get_posts([
+            'post_type'      => NFEMS_CPT_Sessioni_Esame::CPT,
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => NFEMS_CPT_Sessioni_Esame::MK_DATE,
+                    'value'   => [$start, $end],
+                    'compare' => 'BETWEEN',
+                    'type'    => 'DATE',
+                ],
+            ],
+        ]);
+
+        $dates = [];
+        foreach ($ids as $sid) {
+            $d = (string) get_post_meta((int) $sid, NFEMS_CPT_Sessioni_Esame::MK_DATE, true);
+            if ($d) {
+                $dates[] = $d;
+            }
+        }
+        return array_values(array_unique($dates));
     }
 
     private static function session_exists(string $date, string $time, int $course_id, bool $special_only = false): bool {
