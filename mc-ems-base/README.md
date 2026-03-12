@@ -7,9 +7,10 @@ MC-EMS is a WordPress plugin that adds exam session management (Custom Post Type
 - PHP 7.0+
 
 ## Main features (Base)
-- Exam sessions CPT (`slot_esame`)
+- Exam sessions CPT (`mcems_exam_session`)
 - Candidate exam booking calendar (shortcode: `[mcems_book_exam]`)
 - Manage exam booking page (shortcode: `[mcems_manage_booking]`)
+- Bookings list with advanced search and CSV export (shortcode: `[mcems_bookings_list]`)
 - Tutor LMS course access gate (exam-booking based)
 - Admin session management & proctor assignment calendar
 
@@ -24,4 +25,4 @@ MC-EMS is a WordPress plugin that adds exam session management (Custom Post Type
 - `[mcems_sessions_calendar]` – proctor assignment calendar (admin use)
 
 ## Uninstall
-On uninstall, the plugin removes its options. It does **not** delete `slot_esame` posts automatically.
+On uninstall, the plugin removes its options. It does **not** delete `mcems_exam_session` posts automatically.
