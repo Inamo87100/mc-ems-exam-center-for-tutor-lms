@@ -513,12 +513,12 @@ class MCEMS_Settings {
             $out['tutor_gate_booking_expiry_unit'] = in_array($u, ['minutes','hours'], true) ? $u : 'hours';
         }
 
-        if (isset($input['tutor_gate_course_ids'])) {
-            $out['tutor_gate_course_ids'] = self::sanitize_course_ids_input($input['tutor_gate_course_ids']);
+        if ($tab === 'course_access' || isset($input['tutor_gate_course_ids'])) {
+            $out['tutor_gate_course_ids'] = self::sanitize_course_ids_input($input['tutor_gate_course_ids'] ?? []);
         }
 
-        if (isset($input['booking_course_ids'])) {
-            $out['booking_course_ids'] = self::sanitize_course_ids_input($input['booking_course_ids']);
+        if ($tab === 'course_access' || isset($input['booking_course_ids'])) {
+            $out['booking_course_ids'] = self::sanitize_course_ids_input($input['booking_course_ids'] ?? []);
         }
 
         if (isset($input['anticipo_ore_prenotazione'])) $out['anticipo_ore_prenotazione'] = max(0, min(720, (int) $input['anticipo_ore_prenotazione']));
@@ -733,34 +733,60 @@ class MCEMS_Settings {
             $courses = MCEMS_Tutor::get_courses();
         }
 
-        $id_filter = 'mcems_course_filter_' . $key;
-        $id_select = 'mcems_course_select_' . $key;
+        $id_filter    = 'mcems_course_filter_' . $key;
+        $id_list      = 'mcems_course_list_' . $key;
+        $field_name   = self::OPTION_KEY . '[' . $key . '][]';
 
         echo '<div style="max-width:560px">';
-        echo '<input type="text" id="'.esc_attr($id_filter).'" placeholder="Search course…" style="width:100%;max-width:520px;padding:8px 10px;border-radius:10px;border:1px solid #d0d5dd;margin-bottom:8px;">';
 
         if (!$courses) {
-            echo '<p><em>No published Tutor LMS course found.</em></p>';
+            echo '<p><em>' . esc_html__('No published Tutor LMS course found.', 'mc-ems') . '</em></p>';
         } else {
-            echo '<select id="'.esc_attr($id_select).'" name="'.esc_attr(self::OPTION_KEY).'['.esc_attr($key).'][]" multiple size="10" style="width:100%;max-width:520px;border-radius:10px;border:1px solid #d0d5dd;padding:6px;">';
-            foreach ($courses as $cid => $title) {
-                $cid = (int) $cid;
-                $label = $title . ' (#' . $cid . ')';
-                printf(
-                    '<option value="%d"%s>%s</option>',
-                    $cid,
-                    in_array($cid, $sel, true) ? ' selected' : '',
-                    esc_html($label)
-                );
-            }
-            echo '</select>';
-            if ($desc) {
-                echo '<p class="description" style="margin-top:8px;">'.esc_html($desc).'</p>';
-            }
-            echo '<p class="description">Tip: hold CTRL / ⌘ to select multiple courses.</p>';
-        }
+            // Search input
+            echo '<input type="text" id="' . esc_attr($id_filter) . '" placeholder="' . esc_attr__('Search course…', 'mc-ems') . '" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #d0d5dd;margin-bottom:8px;box-sizing:border-box;">';
 
-        echo '<script>(function(){var input=document.getElementById("'.esc_js($id_filter).'");var sel=document.getElementById("'.esc_js($id_select).'");if(!input||!sel)return;var opts=Array.prototype.slice.call(sel.options).map(function(o){return {el:o,text:(o.text||"").toLowerCase()};});input.addEventListener("input",function(){var q=(input.value||"").toLowerCase().trim();opts.forEach(function(o){o.el.style.display=(!q||o.text.indexOf(q)!==-1)?"":"none";});});})();</script>';
+            // Select-all / Deselect-all links
+            echo '<div style="margin-bottom:6px;font-size:13px;">';
+            echo '<a href="#" id="' . esc_attr($id_list) . '_all" style="text-decoration:none;">' . esc_html__('Select all', 'mc-ems') . '</a>';
+            echo ' &nbsp;|&nbsp; ';
+            echo '<a href="#" id="' . esc_attr($id_list) . '_none" style="text-decoration:none;">' . esc_html__('Deselect all', 'mc-ems') . '</a>';
+            echo '</div>';
+
+            // Checkbox list
+            echo '<div id="' . esc_attr($id_list) . '" style="max-height:260px;overflow-y:auto;border:1px solid #d0d5dd;border-radius:10px;padding:8px 12px;background:#fff;">';
+            foreach ($courses as $cid => $title) {
+                $cid      = (int) $cid;
+                $label    = esc_html($title . ' (#' . $cid . ')');
+                $checked  = in_array($cid, $sel, true) ? ' checked' : '';
+                $cb_id    = esc_attr('mcems_cb_' . $key . '_' . $cid);
+                echo '<label for="' . $cb_id . '" style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f2f4f7;cursor:pointer;" data-label="' . strtolower(esc_attr($title)) . '">';
+                echo '<input type="checkbox" id="' . $cb_id . '" name="' . esc_attr($field_name) . '" value="' . $cid . '"' . $checked . ' style="width:16px;height:16px;flex-shrink:0;">';
+                echo '<span>' . $label . '</span>';
+                echo '</label>';
+            }
+            echo '</div>';
+
+            if ($desc) {
+                echo '<p class="description" style="margin-top:8px;">' . esc_html($desc) . '</p>';
+            }
+
+            // Inline JS: search filter + select-all / deselect-all
+            echo '<script>(function(){';
+            echo 'var input=document.getElementById("' . esc_js($id_filter) . '");';
+            echo 'var list=document.getElementById("' . esc_js($id_list) . '");';
+            echo 'var btnAll=document.getElementById("' . esc_js($id_list . '_all') . '");';
+            echo 'var btnNone=document.getElementById("' . esc_js($id_list . '_none') . '");';
+            echo 'if(input&&list){';
+            echo 'input.addEventListener("input",function(){';
+            echo 'var q=(input.value||"").toLowerCase().trim();';
+            echo 'Array.prototype.forEach.call(list.querySelectorAll("label"),function(lbl){';
+            echo 'lbl.style.display=(!q||(lbl.dataset.label||"").indexOf(q)!==-1)?"":"none";';
+            echo '});});';
+            echo '}';
+            echo 'if(btnAll){btnAll.addEventListener("click",function(e){e.preventDefault();Array.prototype.forEach.call(list.querySelectorAll("input[type=checkbox]"),function(cb){cb.checked=true;});});}';
+            echo 'if(btnNone){btnNone.addEventListener("click",function(e){e.preventDefault();Array.prototype.forEach.call(list.querySelectorAll("input[type=checkbox]"),function(cb){cb.checked=false;});});}';
+            echo '})();</script>';
+        }
 
         echo '</div>';
     }

@@ -764,10 +764,6 @@ class MCEMS_Booking {
         $user_id = (int) get_current_user_id();
 
         if ($user_id) {
-            if (!MCEMS_Tutor::is_user_enrolled($user_id, $course_id)) {
-                wp_send_json(['error' => __('You are not enrolled in this course.', 'mc-ems')]);
-            }
-
             $active = self::get_active_booking_for_course($user_id, $course_id);
             if (!empty($active['slot_id'])) {
                 $manage_url = MCEMS_Settings::get_manage_booking_page_url();
@@ -850,10 +846,6 @@ class MCEMS_Booking {
         $user_id = (int) get_current_user_id();
 
         if ($user_id) {
-            if (!MCEMS_Tutor::is_user_enrolled($user_id, $course_id)) {
-                wp_send_json(['error' => __('You are not enrolled in this course.', 'mc-ems')]);
-            }
-
             $active = self::get_active_booking_for_course($user_id, $course_id);
             if (!empty($active['slot_id'])) {
                 $manage_url = MCEMS_Settings::get_manage_booking_page_url();
@@ -946,11 +938,6 @@ class MCEMS_Booking {
         $active_for_course = self::get_active_booking_for_course($user_id, $course_id);
         if (!empty($active_for_course['slot_id']) && (int) $active_for_course['slot_id'] !== $slot_id) {
             echo '<p style="color:#f44336; font-weight:bold; text-align:center;">You already have an active exam booking for this course.</p>';
-            wp_die();
-        }
-
-        if (!MCEMS_Tutor::is_user_enrolled($user_id, $course_id)) {
-            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('You are not enrolled in this course.', 'mc-ems') . '</p>';
             wp_die();
         }
 
