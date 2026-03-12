@@ -12,10 +12,34 @@ class MCEMS_Upgrader {
             add_option(MCEMS_Settings::OPTION_KEY, MCEMS_Settings::defaults());
         }
 
+        // Rename CPT slug from Italian 'slot_esame' to English 'mcems_exam_session'
+        // Must run before migrate_legacy_meta() so that meta migration finds the renamed posts.
+        if (version_compare($installed, '1.5.0', '<')) {
+            self::migrate_cpt_slug();
+        }
+
         // Migrate legacy meta (from earlier NF-EMS builds) -> canonical slot_* meta keys
         self::migrate_legacy_meta();
 
         update_option('mcems_db_version', MCEMS_DB_VERSION);
+    }
+
+    private static function migrate_cpt_slug(): void {
+        global $wpdb;
+
+        // Rename post_type from legacy Italian slug to English slug in a single query.
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $result = $wpdb->update(
+            $wpdb->posts,
+            ['post_type' => MCEMS_CPT_Sessioni_Esame::CPT],
+            ['post_type' => 'slot_esame'],
+            ['%s'],
+            ['%s']
+        );
+
+        if ($result === false) {
+            error_log('MC-EMS: CPT slug migration failed – ' . $wpdb->last_error);
+        }
     }
 
     private static function migrate_legacy_meta(): void {

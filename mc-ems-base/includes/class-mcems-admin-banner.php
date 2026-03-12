@@ -21,7 +21,7 @@ class MCEMS_Admin_Banner {
 
         $allowed = [
             MCEMS_CPT_Sessioni_Esame::CPT . '_page_mcems-settings-cpt',
-            MCEMS_CPT_Sessioni_Esame::CPT . '_page_mcems-gestione-sessioni',
+            MCEMS_CPT_Sessioni_Esame::CPT . '_page_mcems-manage-sessions',
         ];
 
         return in_array($screen_id, $allowed, true);

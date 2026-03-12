@@ -34,7 +34,7 @@ class MCEMS_Calendar_Sessioni {
         if (class_exists('MCEMS_CPT_Sessioni_Esame') && defined('MCEMS_CPT_Sessioni_Esame::CPT')) {
             return MCEMS_CPT_Sessioni_Esame::CPT;
         }
-        return 'slot_esame';
+        return 'mcems_exam_session';
     }
 
     private static function mk(string $const, string $fallback) {
