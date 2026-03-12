@@ -331,5 +331,3 @@ class MCEMS_Tutor_Gate {
         );
     }
 }
-
-MCEMS_Tutor_Gate::init();
