@@ -135,49 +135,31 @@ class MCEMS_Admin_Sessioni {
                             </tr>
 
                             <tr>
-                                <th><label for="mcems_date_start"><?php echo esc_html__('Start date', 'mc-ems'); ?></label></th>
+                                <th><?php echo esc_html__('Select dates', 'mc-ems'); ?></th>
                                 <td>
-                                    <input
-                                        type="date"
-                                        id="mcems_date_start"
-                                        name="date_start"
-                                        value="<?php echo esc_attr($today); ?>"
-                                        min="<?php echo esc_attr($today); ?>"
-                                    >
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th><label for="mcems_date_end"><?php echo esc_html__('End date', 'mc-ems'); ?></label></th>
-                                <td>
-                                    <input
-                                        type="date"
-                                        id="mcems_date_end"
-                                        name="date_end"
-                                        value="<?php echo esc_attr($week); ?>"
-                                        min="<?php echo esc_attr($today); ?>"
-                                    >
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th><?php echo esc_html__('Weekdays', 'mc-ems'); ?></th>
-                                <td>
-                                    <?php
-                                    $days = [
-                                        'monday'    => __('Monday', 'mc-ems'),
-                                        'tuesday'   => __('Tuesday', 'mc-ems'),
-                                        'wednesday' => __('Wednesday', 'mc-ems'),
-                                        'thursday'  => __('Thursday', 'mc-ems'),
-                                        'friday'    => __('Friday', 'mc-ems'),
-                                        'saturday'  => __('Saturday', 'mc-ems'),
-                                        'sunday'    => __('Sunday', 'mc-ems'),
-                                    ];
-
-                                    foreach ($days as $k => $lbl) {
-                                        echo '<label style="display:inline-block;margin-right:12px;"><input type="checkbox" name="days[]" value="' . esc_attr($k) . '" checked> ' . esc_html($lbl) . '</label>';
-                                    }
-                                    ?>
+                                    <div id="mcems-date-picker-wrap">
+                                        <style>
+                                        #mcems-calendar{max-width:308px;font-family:inherit;}
+                                        .mcems-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+                                        .mcems-cal-header button{background:none;border:1px solid #c3c4c7;border-radius:4px;cursor:pointer;padding:3px 10px;font-size:15px;line-height:1.4;}
+                                        .mcems-cal-header button:hover{background:#f0f0f1;}
+                                        .mcems-cal-header span{font-weight:600;font-size:14px;}
+                                        .mcems-cal-table{border-collapse:collapse;width:100%;}
+                                        .mcems-cal-table th{text-align:center;font-size:11px;padding:4px 2px;color:#646970;font-weight:600;}
+                                        .mcems-cal-table td{padding:2px;text-align:center;}
+                                        .mcems-cal-day{display:inline-block;width:34px;height:34px;line-height:34px;border-radius:50%;font-size:13px;box-sizing:border-box;}
+                                        .mcems-cal-day[data-date]{cursor:pointer;}
+                                        .mcems-cal-day[data-date]:hover{background:#e8f0fe;}
+                                        .mcems-cal-day.mcems-cal-selected{background:#2271b1;color:#fff !important;}
+                                        .mcems-cal-day.mcems-cal-today{font-weight:700;border:2px solid #2271b1;}
+                                        .mcems-cal-day.mcems-cal-past{color:#c3c4c7;cursor:default;}
+                                        .mcems-cal-day.mcems-cal-past:hover{background:none;}
+                                        #mcems-selected-count{margin-top:6px;font-size:12px;color:#646970;}
+                                        </style>
+                                        <div id="mcems-calendar"></div>
+                                        <div id="mcems-selected-count"></div>
+                                        <div id="mcems-selected-dates"></div>
+                                    </div>
                                 </td>
                             </tr>
 
@@ -393,6 +375,13 @@ class MCEMS_Admin_Sessioni {
                 }
 
                 if (!isSpecial) {
+                    const calContainer = document.getElementById('mcems-selected-dates');
+                    if (calContainer && calContainer.querySelectorAll('input[name="selected_dates[]"]').length === 0) {
+                        e.preventDefault();
+                        alert('<?php echo esc_js(__('Select at least one date from the calendar.', 'mc-ems')); ?>');
+                        return;
+                    }
+
                     const ta = document.getElementById('mcems_times');
                     if (ta) {
                         // Support both <input type="time"> (base) and <textarea> (premium)
@@ -599,20 +588,150 @@ class MCEMS_Admin_Sessioni {
                 update();
             }
 
-            setMinDate('mcems_date_start');
-            setMinDate('mcems_date_end');
             setMinDate('mcems_special_date');
 
             bindDateTime('mcems_special_date', 'mcems_special_time');
+        })();
+        </script>
+
+        <script>
+        (function(){
+            var selected = {};
+            var currentYear, currentMonth;
+
+            function pad(n){ return (n < 10 ? '0' : '') + n; }
+
+            function todayYMD(){
+                var d = new Date();
+                return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+            }
+
+            var today = todayYMD();
+            var td = new Date();
+            currentYear  = td.getFullYear();
+            currentMonth = td.getMonth(); // 0-indexed
+
+            var monthNames = <?php echo wp_json_encode([
+                __('January','mc-ems'),__('February','mc-ems'),__('March','mc-ems'),
+                __('April','mc-ems'),__('May','mc-ems'),__('June','mc-ems'),
+                __('July','mc-ems'),__('August','mc-ems'),__('September','mc-ems'),
+                __('October','mc-ems'),__('November','mc-ems'),__('December','mc-ems'),
+            ]); ?>;
+            var dayNames = <?php echo wp_json_encode([
+                __('Mo','mc-ems'),__('Tu','mc-ems'),__('We','mc-ems'),
+                __('Th','mc-ems'),__('Fr','mc-ems'),__('Sa','mc-ems'),__('Su','mc-ems'),
+            ]); ?>;
+
+            function updateHidden(){
+                var container = document.getElementById('mcems-selected-dates');
+                var countEl   = document.getElementById('mcems-selected-count');
+                if (!container) return;
+                container.innerHTML = '';
+                var keys = Object.keys(selected).sort();
+                keys.forEach(function(d){
+                    var inp = document.createElement('input');
+                    inp.type  = 'hidden';
+                    inp.name  = 'selected_dates[]';
+                    inp.value = d;
+                    container.appendChild(inp);
+                });
+                if (countEl) {
+                    if (keys.length) {
+                        var ul = document.createElement('ul');
+                        ul.style.margin  = '4px 0 0 0';
+                        ul.style.padding = '0 0 0 16px';
+                        ul.setAttribute('aria-label', <?php echo wp_json_encode(__('Selected dates', 'mc-ems')); ?>);
+                        keys.forEach(function(d){
+                            var li = document.createElement('li');
+                            li.textContent = d;
+                            li.style.fontSize = '12px';
+                            ul.appendChild(li);
+                        });
+                        countEl.innerHTML = '';
+                        countEl.appendChild(ul);
+                    } else {
+                        countEl.innerHTML = '';
+                    }
+                }
+            }
+
+            function render(){
+                var cal = document.getElementById('mcems-calendar');
+                if (!cal) return;
+
+                var firstDay = new Date(currentYear, currentMonth, 1);
+                var totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+                var startDow = (firstDay.getDay() + 6) % 7; // Monday=0
+
+                var html = '<div class="mcems-cal-header">'
+                    + '<button type="button" id="mcems-cal-prev">&#8249;</button>'
+                    + '<span>' + monthNames[currentMonth] + ' ' + currentYear + '</span>'
+                    + '<button type="button" id="mcems-cal-next">&#8250;</button>'
+                    + '</div>'
+                    + '<table class="mcems-cal-table"><thead><tr>';
+
+                dayNames.forEach(function(d){ html += '<th>' + d + '</th>'; });
+                html += '</tr></thead><tbody><tr>';
+
+                var col = 0;
+                for (var i = 0; i < startDow; i++){ html += '<td></td>'; col++; }
+
+                for (var day = 1; day <= totalDays; day++){
+                    if (col === 7){ html += '</tr><tr>'; col = 0; }
+                    var dateStr = currentYear + '-' + pad(currentMonth+1) + '-' + pad(day);
+                    var cls = 'mcems-cal-day';
+                    var isPast = dateStr < today;
+                    if (isPast)             cls += ' mcems-cal-past';
+                    if (selected[dateStr])  cls += ' mcems-cal-selected';
+                    if (dateStr === today)  cls += ' mcems-cal-today';
+                    var attr = isPast ? ' aria-disabled="true"' : ' data-date="' + dateStr + '" role="button" tabindex="0"';
+                    html += '<td><span class="' + cls + '"' + attr + '>' + day + '</span></td>';
+                    col++;
+                }
+                while (col > 0 && col < 7){ html += '<td></td>'; col++; }
+                html += '</tr></tbody></table>';
+
+                cal.innerHTML = html;
+
+                document.getElementById('mcems-cal-prev').addEventListener('click', function(){
+                    currentMonth--;
+                    if (currentMonth < 0){ currentMonth = 11; currentYear--; }
+                    render();
+                });
+                document.getElementById('mcems-cal-next').addEventListener('click', function(){
+                    currentMonth++;
+                    if (currentMonth > 11){ currentMonth = 0; currentYear++; }
+                    render();
+                });
+
+                cal.querySelectorAll('[data-date]').forEach(function(el){
+                    el.addEventListener('click', function(){
+                        var d = el.getAttribute('data-date');
+                        if (selected[d]){
+                            delete selected[d];
+                            el.classList.remove('mcems-cal-selected');
+                        } else {
+                            selected[d] = true;
+                            el.classList.add('mcems-cal-selected');
+                        }
+                        updateHidden();
+                    });
+                    el.addEventListener('keydown', function(e){
+                        if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); el.click(); }
+                    });
+                });
+            }
+
+            render();
         })();
         </script>
         <?php
     }
 
     private static function handle_generate_standard(): array {
-        $start     = sanitize_text_field(wp_unslash($_POST['date_start'] ?? ''));
-        $end       = sanitize_text_field(wp_unslash($_POST['date_end'] ?? ''));
-        $days      = isset($_POST['days']) && is_array($_POST['days']) ? array_map('sanitize_text_field', wp_unslash($_POST['days'])) : [];
+        $selected_dates_raw = isset($_POST['selected_dates']) && is_array($_POST['selected_dates'])
+            ? array_map('sanitize_text_field', wp_unslash($_POST['selected_dates']))
+            : [];
         $times_raw = (string) wp_unslash($_POST['times'] ?? '');
         $capacity  = max(1, (int) ($_POST['capacity'] ?? 1));
         $course_id = isset($_POST['course_id']) ? (int) $_POST['course_id'] : 0;
@@ -621,16 +740,18 @@ class MCEMS_Admin_Sessioni {
             return ['', 'Select a Tutor LMS course.'];
         }
 
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $start) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $end)) {
-            return ['', __('Invalid date(s).', 'mc-ems')];
+        // Validate and deduplicate selected dates.
+        $selected_dates = [];
+        foreach ($selected_dates_raw as $d) {
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)) {
+                $selected_dates[] = $d;
+            }
         }
+        $selected_dates = array_values(array_unique($selected_dates));
+        sort($selected_dates);
 
-        if (strtotime($end) < strtotime($start)) {
-            return ['', __('End date cannot be earlier than start date.', 'mc-ems')];
-        }
-
-        if (!$days) {
-            return ['', 'Select at least one weekday.'];
+        if (!$selected_dates) {
+            return ['', __('Select at least one date from the calendar.', 'mc-ems')];
         }
 
         $times = [];
@@ -671,72 +792,57 @@ class MCEMS_Admin_Sessioni {
         $tz  = wp_timezone();
         $now = new \DateTimeImmutable('now', $tz);
 
-        $cur   = strtotime($start);
-        $endTs = strtotime($end);
-
-        // For base license, track how many sessions we've created in this batch so we don't
-        // exceed the maximum together with the already-existing future sessions.
-        // Reuse the $future_count already obtained above to avoid a second DB query.
+        // For base license, track how many sessions we've created in this batch.
         $future_count_start = $is_premium ? 0 : $future_count;
         $batch_created      = 0;
 
-        // For base license, pre-fetch all existing session dates in the range to avoid
-        // one DB query per day inside the loop.
+        // For base license, pre-fetch all existing session dates in the selected range to avoid
+        // one DB query per date inside the loop.
         $existing_dates_in_range = [];
-        if (!$is_premium) {
-            $existing_dates_in_range = self::get_session_dates_in_range($start, $end);
+        if (!$is_premium && $selected_dates) {
+            $existing_dates_in_range = self::get_session_dates_in_range($selected_dates[0], end($selected_dates));
         }
 
-        while ($cur <= $endTs) {
-            $dow = strtolower(date('l', $cur));
-
-            if (in_array($dow, $days, true)) {
-                $date = date('Y-m-d', $cur);
-
-                // Base license: block if max future sessions would be exceeded.
-                if (!$is_premium && ($future_count_start + $batch_created) >= self::BASE_MAX_ACTIVE_SESSIONS) {
-                    $skipped++;
-                    $cur = strtotime('+1 day', $cur);
-                    continue;
-                }
-
-                // Base license: skip days that already have a session.
-                if (!$is_premium && in_array($date, $existing_dates_in_range, true)) {
-                    $skipped++;
-                    $cur = strtotime('+1 day', $cur);
-                    continue;
-                }
-
-                foreach ($times as $time) {
-                    try {
-                        $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);
-                        if ($session_dt < $now) {
-                            $skipped++;
-                            continue;
-                        }
-                    } catch (\Throwable $e) {
-                        $skipped++;
-                        continue;
-                    }
-
-                    if (self::session_exists($date, $time, $course_id)) {
-                        $skipped++;
-                        continue;
-                    }
-
-                    $sid = self::create_session($date, $time, $capacity, 0, 0, $course_id);
-
-                    if ($sid) {
-                        $created++;
-                        $batch_created++;
-                    } else {
-                        $skipped++;
-                        $insert_errors[] = $date . ' ' . $time;
-                    }
-                }
+        foreach ($selected_dates as $date) {
+            // Base license: block if max future sessions would be exceeded.
+            if (!$is_premium && ($future_count_start + $batch_created) >= self::BASE_MAX_ACTIVE_SESSIONS) {
+                $skipped++;
+                continue;
             }
 
-            $cur = strtotime('+1 day', $cur);
+            // Base license: skip days that already have a session.
+            if (!$is_premium && in_array($date, $existing_dates_in_range, true)) {
+                $skipped++;
+                continue;
+            }
+
+            foreach ($times as $time) {
+                try {
+                    $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);
+                    if ($session_dt < $now) {
+                        $skipped++;
+                        continue;
+                    }
+                } catch (\Throwable $e) {
+                    $skipped++;
+                    continue;
+                }
+
+                if (self::session_exists($date, $time, $course_id)) {
+                    $skipped++;
+                    continue;
+                }
+
+                $sid = self::create_session($date, $time, $capacity, 0, 0, $course_id);
+
+                if ($sid) {
+                    $created++;
+                    $batch_created++;
+                } else {
+                    $skipped++;
+                    $insert_errors[] = $date . ' ' . $time;
+                }
+            }
         }
 
         if (!$created && $insert_errors) {
