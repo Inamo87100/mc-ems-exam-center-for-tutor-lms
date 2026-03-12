@@ -129,7 +129,7 @@ class MCEMS_Tutor_Gate {
 
         $cpt = class_exists('MCEMS_CPT_Sessioni_Esame')
             ? MCEMS_CPT_Sessioni_Esame::CPT
-            : 'slot_esame';
+            : 'mcems_exam_session';
 
         if ($slot_id > 0 && get_post_type($slot_id) !== $cpt) {
             unset($map[$course_id]);

@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) exit;
 
 class MCEMS_CPT_Sessioni_Esame {
 
-    const CPT = 'slot_esame'; // keep technical slug for compatibility
+    const CPT = 'mcems_exam_session';
 
     // === Meta keys (COMPAT with your original snippets) ===
     const MK_DATE            = 'slot_data';            // Y-m-d
@@ -50,14 +50,14 @@ class MCEMS_CPT_Sessioni_Esame {
 
         if (empty($submenu[$parent])) return;
 
-        $create   = null; // mcems-gestione-sessioni
-        $list     = null; // edit.php?post_type=slot_esame  (the CPT "all items" page)
+        $create   = null; // mcems-manage-sessions
+        $list     = null; // edit.php?post_type=mcems_exam_session  (the CPT "all items" page)
         $settings = null; // mcems-settings-cpt
         $others   = [];
 
         foreach ($submenu[$parent] as $item) {
             $slug = isset($item[2]) ? (string) $item[2] : '';
-            if ($slug === 'mcems-gestione-sessioni') {
+            if ($slug === 'mcems-manage-sessions') {
                 $create = $item;
             } elseif ($slug === $parent) {
                 $list = $item;
@@ -88,7 +88,7 @@ class MCEMS_CPT_Sessioni_Esame {
         if (!$screen) return;
         if ($screen->id !== 'edit-' . self::CPT) return;
 
-        $manage_url = admin_url('edit.php?post_type=' . self::CPT . '&page=mcems-gestione-sessioni');
+        $manage_url = admin_url('edit.php?post_type=' . self::CPT . '&page=mcems-manage-sessions');
         echo '<style>a.page-title-action[href*="post-new.php?post_type=' . esc_attr(self::CPT) . '"]{display:none !important;}</style>';
         echo '<script>(function(){
             var h1=document.querySelector(".wrap h1");

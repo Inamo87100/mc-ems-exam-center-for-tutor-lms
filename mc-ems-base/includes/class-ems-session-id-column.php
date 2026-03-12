@@ -4,8 +4,8 @@ if (!defined('ABSPATH')) exit;
 class EMS_Session_ID_Column {
 
     public static function init(): void {
-        add_filter('manage_edit-slot_esame_columns', [__CLASS__, 'add_col'], 20);
-        add_action('manage_slot_esame_posts_custom_column', [__CLASS__, 'render'], 10, 2);
+        add_filter('manage_edit-' . MCEMS_CPT_Sessioni_Esame::CPT . '_columns', [__CLASS__, 'add_col'], 20);
+        add_action('manage_' . MCEMS_CPT_Sessioni_Esame::CPT . '_posts_custom_column', [__CLASS__, 'render'], 10, 2);
     }
 
     public static function add_col($columns) {

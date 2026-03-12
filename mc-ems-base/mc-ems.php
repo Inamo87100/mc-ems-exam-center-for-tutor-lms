@@ -13,7 +13,7 @@ Requires PHP: 7.0
 if (!defined('ABSPATH')) exit;
 
 define('MCEMS_VERSION', '2.4.2-base');
-define('MCEMS_DB_VERSION', '1.4.5');
+define('MCEMS_DB_VERSION', '1.5.0');
 define('MCEMS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('MCEMS_PLUGIN_URL', plugin_dir_url(__FILE__));
 

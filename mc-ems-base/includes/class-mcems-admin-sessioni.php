@@ -19,7 +19,7 @@ class MCEMS_Admin_Sessioni {
             __('Create sessions', 'mc-ems'),
             __('Create sessions', 'mc-ems'),
             'manage_options',
-            'mcems-gestione-sessioni',
+            'mcems-manage-sessions',
             [__CLASS__, 'render']
         );
     }
