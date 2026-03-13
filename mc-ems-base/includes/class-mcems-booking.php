@@ -241,7 +241,7 @@ class MCEMS_Booking {
 
     public static function shortcode_prenota(): string {
         if (!MCEMS_Settings::user_can_view_shortcode('mcems_book_exam')) {
-            return '';
+            return '<p>Insufficient permissions.</p>';
         }
 
         $user_id   = (int) get_current_user_id();
@@ -717,7 +717,7 @@ class MCEMS_Booking {
 
     public static function shortcode_gestisci(): string {
         if (!MCEMS_Settings::user_can_view_shortcode('mcems_manage_booking')) {
-            return '';
+            return '<p>Insufficient permissions.</p>';
         }
 
         $user_id = (int) get_current_user_id();
