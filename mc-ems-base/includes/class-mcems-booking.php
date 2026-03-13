@@ -57,6 +57,13 @@ class MCEMS_Booking {
         wp_localize_script('mcems-booking', 'MCEMS_BOOKING', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce'   => wp_create_nonce('mcems_booking'),
+            'i18n'    => [
+                'errorLoadSessions' => __('Error loading sessions.', 'mc-ems'),
+                'bookingFailed'     => __('Exam booking failed.', 'mc-ems'),
+                'bookingConfirmed'  => __('Exam booking confirmed!', 'mc-ems'),
+                'bookingCancelled'  => __('Exam booking cancelled.', 'mc-ems'),
+                'cancellationFailed' => __('Cancellation failed.', 'mc-ems'),
+            ],
         ]);
     }
 

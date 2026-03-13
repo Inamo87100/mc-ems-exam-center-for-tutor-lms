@@ -2,6 +2,13 @@
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $all(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
 
+  function i18n(key, fallback) {
+    if (typeof MCEMS_BOOKING !== 'undefined' && MCEMS_BOOKING.i18n && MCEMS_BOOKING.i18n[key]) {
+      return MCEMS_BOOKING.i18n[key];
+    }
+    return fallback || key;
+  }
+
   function post(action, data) {
     const fd = new FormData();
     fd.append("action", action);
@@ -51,7 +58,7 @@
           date: dateInput.value
         }).then(function (res) {
           if (!res || !res.success) {
-            setMsg((res && res.data && res.data.message) ? res.data.message : __('Error loading sessions.', 'mc-ems'), true);
+            setMsg((res && res.data && res.data.message) ? res.data.message : i18n('errorLoadSessions', 'Error loading sessions.'), true);
             return;
           }
           renderSessions(res.data.sessions);
@@ -78,10 +85,10 @@
         }).then(function (res) {
           bookBtn.disabled = false;
           if (!res || !res.success) {
-            setMsg((res && res.data && res.data.message) ? res.data.message : __('Exam booking failed.', 'mc-ems'), true);
+            setMsg((res && res.data && res.data.message) ? res.data.message : i18n('bookingFailed', 'Exam booking failed.'), true);
             return;
           }
-          setMsg(__('Exam booking confirmed!', 'mc-ems'));
+          setMsg(i18n('bookingConfirmed', 'Exam booking confirmed!'));
           window.location.reload();
         });
       });
@@ -110,10 +117,10 @@
           .then(function (res) {
             cancelBtn.disabled = false;
             if (!res || !res.success) {
-              setMsg((res && res.data && res.data.message) ? res.data.message : "Cancellazione non riuscita.", true);
+              setMsg((res && res.data && res.data.message) ? res.data.message : i18n('cancellationFailed', 'Cancellation failed.'), true);
               return;
             }
-            setMsg(__('Exam booking cancelled.', 'mc-ems'));
+            setMsg(i18n('bookingCancelled', 'Exam booking cancelled.'));
             window.location.reload();
           });
       });
