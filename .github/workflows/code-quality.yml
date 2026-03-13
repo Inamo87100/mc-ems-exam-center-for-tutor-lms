@@ -1,0 +1,39 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+    
+    - name: Check file permissions
+      run: |
+        find . -name "*.php" -type f ! -path "./vendor/*" -print0 | xargs -0 ls -l | head -20
+    
+    - name: Validate composer.json
+      run: |
+        if [ -f "composer.json" ]; then
+          php -r "json_decode(file_get_contents('composer.json'), null, 512, JSON_THROW_ON_ERROR);"
+        fi
+    
+    - name: Check for common issues
+      run: |
+        # Check for debugging statements
+        if grep -r "var_dump\|print_r\|echo.*debug" --include="*.php" . 2>/dev/null | grep -v node_modules | grep -v vendor; then
+          echo "❌ Found debugging statements"
+          exit 1
+        else
+          echo "✅ No debugging statements found"
+        fi
