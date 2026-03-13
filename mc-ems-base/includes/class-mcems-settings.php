@@ -654,8 +654,10 @@ class MCEMS_Settings {
      */
     public static function get_access_control_shortcodes(): array {
         return [
-            'mcems_book_exam'      => __('Exam Booking', 'mc-ems'),
-            'mcems_manage_booking' => __('Manage Booking', 'mc-ems'),
+            'mcems_book_exam'          => __('Exam Booking', 'mc-ems'),
+            'mcems_manage_booking'     => __('Manage Booking', 'mc-ems'),
+            'mcems_sessions_calendar'  => __('Sessions Calendar', 'mc-ems'),
+            'mcems_bookings_list'      => __('Bookings List', 'mc-ems'),
         ];
     }
 
