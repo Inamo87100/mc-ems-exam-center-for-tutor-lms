@@ -113,11 +113,11 @@ class MCEMS_Calendar_Sessioni {
                 '_mcems_occupati',
                 'occupati',
             ],
-            'course_id' => [
+            'exam_id' => [
                 'slot_corso_id',
-                self::mk('MK_COURSE_ID', 'slot_corso_id'),
-                '_mcems_course_id',
-                'course_id',
+                self::mk('MK_EXAM_ID', 'slot_corso_id'),
+                '_mcems_exam_id',
+                'exam_id',
             ],
             'is_special' => [
                 MC_SLOT_ESIGENZE_SPECIALI,
@@ -250,16 +250,16 @@ class MCEMS_Calendar_Sessioni {
     private static function get_slot_placeholders(int $slot_id, string $proctor_name = ''): array {
         $date      = (string) self::get_first_meta($slot_id, 'date', '');
         $time      = self::normalize_time(self::get_first_meta($slot_id, 'time', ''));
-        $course_id = (int) self::get_first_meta($slot_id, 'course_id', 0);
+        $exam_id = (int) self::get_first_meta($slot_id, 'exam_id', 0);
 
-        $course_title = $course_id > 0 ? get_the_title($course_id) : '';
-        if (!$course_title) {
-            $course_title = $course_id > 0 ? ('Course #' . $course_id) : '';
+        $exam_title = $exam_id > 0 ? get_the_title($exam_id) : '';
+        if (!$exam_title) {
+            $exam_title = $exam_id > 0 ? ('Exam #' . $exam_id) : '';
         }
 
         return [
             '{site_name}'     => wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES),
-            '{course_title}'  => $course_title,
+            '{exam_title}'  => $exam_title,
             '{session_date}'  => $date,
             '{session_time}'  => $time,
             '{proctor_name}'  => $proctor_name,
@@ -284,9 +284,9 @@ class MCEMS_Calendar_Sessioni {
         ];
 
         $default_bodies = [
-            'cal_email_body' => "An exam session has been assigned.\n\nCourse: {course_title}\nDate: {session_date}\nTime: {session_time}\nProctor: {proctor_name}\nSession ID: {session_id}",
-            'cal_email_body_unassign' => "An exam session assignment has been removed.\n\nCourse: {course_title}\nDate: {session_date}\nTime: {session_time}\nPrevious proctor: {proctor_name}\nSession ID: {session_id}",
-            'cal_email_body_warning' => "The following exam session is scheduled for tomorrow and still has no assigned proctor.\n\nCourse: {course_title}\nDate: {session_date}\nTime: {session_time}\nSession ID: {session_id}",
+            'cal_email_body' => "An exam session has been assigned.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nProctor: {proctor_name}\nSession ID: {session_id}",
+            'cal_email_body_unassign' => "An exam session assignment has been removed.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nPrevious proctor: {proctor_name}\nSession ID: {session_id}",
+            'cal_email_body_warning' => "The following exam session is scheduled for tomorrow and still has no assigned proctor.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nSession ID: {session_id}",
         ];
 
         $subject = MCEMS_Settings::get_email_template($subject_key, $default_subjects[$subject_key] ?? '');
@@ -653,7 +653,7 @@ class MCEMS_Calendar_Sessioni {
                                         return `<div class="slot-row" id="slot-row-${s.id}">
                                             <div class="slot-meta">
                                                 <div>${oraHtml}</div>
-                                                ${s.course_title ? `<div class="muted"><strong>Course:</strong> ${s.course_title}</div>` : ''}
+                                                ${s.exam_title ? `<div class="muted"><strong>Exam:</strong> ${s.exam_title}</div>` : ''}
                                                 <div class="muted">${s.prenotati}/${s.totali} seats occupied</div>
                                             </div>
                                             ${right}
@@ -701,7 +701,7 @@ class MCEMS_Calendar_Sessioni {
                                 <div class="slot-meta">
                                     <div><strong>${s.data_it}</strong></div>
                                     <div><strong>${s.ora}</strong> ${s.speciale ? specialBadgeHTML(true) : ''}</div>
-                                    ${s.course_title ? `<div class="muted"><strong>Course:</strong> ${s.course_title}</div>` : ''}
+                                    ${s.exam_title ? `<div class="muted"><strong>Exam:</strong> ${s.exam_title}</div>` : ''}
                                 </div>
                                 <div class="actions">
                                     <button class="btn-elimina" data-slot="${s.id}" data-data="${s.data}">Remove assignment</button>
@@ -743,7 +743,7 @@ class MCEMS_Calendar_Sessioni {
                                 <div class="slot-meta">
                                     <div><strong>${s.data_it}</strong></div>
                                     <div><strong>${s.ora}</strong> <span class="slot-id">ID: ${s.id}</span> ${s.speciale ? specialBadgeHTML(true) : ''}</div>
-                                    ${s.course_title ? `<div class="muted"><strong>Course:</strong> ${s.course_title}</div>` : ''}
+                                    ${s.exam_title ? `<div class="muted"><strong>Exam:</strong> ${s.exam_title}</div>` : ''}
                                 </div>
                                 ${actionHTML}
                             </div>`;
@@ -964,10 +964,10 @@ class MCEMS_Calendar_Sessioni {
 
             $speciale = ((int) self::get_first_meta($post->ID, 'is_special', 0) === 1);
 
-            $course_id = (int) self::get_first_meta($post->ID, 'course_id', 0);
-            $course_title = $course_id > 0 ? get_the_title($course_id) : '';
-            if (!$course_title) {
-                $course_title = $course_id > 0 ? ('Course #' . $course_id) : '';
+            $exam_id = (int) self::get_first_meta($post->ID, 'exam_id', 0);
+            $exam_title = $exam_id > 0 ? get_the_title($exam_id) : '';
+            if (!$exam_title) {
+                $exam_title = $exam_id > 0 ? ('Exam #' . $exam_id) : '';
             }
 
             if (!isset($output[$data])) {
@@ -985,8 +985,8 @@ class MCEMS_Calendar_Sessioni {
                 'assegnato_user'  => $assegnato_user ? intval($assegnato_user) : null,
                 'assegnato_nome'  => $assegnato_nome ?: null,
                 'speciale'        => $speciale,
-                'course_id'       => $course_id,
-                'course_title'    => $course_title,
+                'exam_id'       => $exam_id,
+                'exam_title'    => $exam_title,
             ];
         }
 
@@ -1022,10 +1022,10 @@ class MCEMS_Calendar_Sessioni {
             $ora  = self::normalize_time(self::get_first_meta($slot_id, 'time', ''));
             $speciale = ((int) self::get_first_meta($slot_id, 'is_special', 0) === 1);
 
-            $course_id = (int) self::get_first_meta($slot_id, 'course_id', 0);
-            $course_title = $course_id > 0 ? get_the_title($course_id) : '';
-            if (!$course_title) {
-                $course_title = $course_id > 0 ? ('Course #' . $course_id) : '';
+            $exam_id = (int) self::get_first_meta($slot_id, 'exam_id', 0);
+            $exam_title = $exam_id > 0 ? get_the_title($exam_id) : '';
+            if (!$exam_title) {
+                $exam_title = $exam_id > 0 ? ('Exam #' . $exam_id) : '';
             }
 
             $out[] = [
@@ -1034,8 +1034,8 @@ class MCEMS_Calendar_Sessioni {
                 'data_it'      => $data ? date_i18n('d/m/Y', strtotime($data)) : '',
                 'ora'          => $ora ?: '',
                 'speciale'     => $speciale,
-                'course_id'    => $course_id,
-                'course_title' => $course_title,
+                'exam_id'    => $exam_id,
+                'exam_title' => $exam_title,
             ];
         }
 
@@ -1075,10 +1075,10 @@ class MCEMS_Calendar_Sessioni {
             $nome = $ass ? self::get_slot_assigned_name($slot_id) : '';
             $speciale = ((int) self::get_first_meta($slot_id, 'is_special', 0) === 1);
 
-            $course_id = (int) self::get_first_meta($slot_id, 'course_id', 0);
-            $course_title = $course_id > 0 ? get_the_title($course_id) : '';
-            if (!$course_title) {
-                $course_title = $course_id > 0 ? ('Course #' . $course_id) : '';
+            $exam_id = (int) self::get_first_meta($slot_id, 'exam_id', 0);
+            $exam_title = $exam_id > 0 ? get_the_title($exam_id) : '';
+            if (!$exam_title) {
+                $exam_title = $exam_id > 0 ? ('Exam #' . $exam_id) : '';
             }
 
             $out[] = [
@@ -1089,8 +1089,8 @@ class MCEMS_Calendar_Sessioni {
                 'assegnato'      => $ass,
                 'assegnato_nome' => $ass ? ($nome ?: '') : '',
                 'speciale'       => $speciale,
-                'course_id'      => $course_id,
-                'course_title'   => $course_title,
+                'exam_id'      => $exam_id,
+                'exam_title'   => $exam_title,
             ];
         }
 

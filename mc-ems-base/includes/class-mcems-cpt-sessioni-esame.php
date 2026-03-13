@@ -13,7 +13,7 @@ class MCEMS_CPT_Sessioni_Esame {
     const MK_PROCTOR_USER_ID = 'slot_sorvegliante';    // int
     const MK_IS_SPECIAL      = 'slot_esigenze_speciali';      // 1|0
     const MK_SPECIAL_USER_ID = 'slot_esigenze_speciali_user'; // int
-    const MK_COURSE_ID      = 'slot_corso_id'; // int Tutor LMS course ID
+    const MK_EXAM_ID      = 'slot_corso_id'; // int Tutor LMS exam ID
 
     // === Legacy meta keys from previous NF-EMS builds (auto-migrated) ===
     const L_MK_DATE            = '_mcems_slot_date';
@@ -169,9 +169,9 @@ class MCEMS_CPT_Sessioni_Esame {
         if (!$spec_uid) $spec_uid = (int) get_post_meta($post->ID, self::L_MK_SPECIAL_USER_ID, true);
 
         $users = get_users(['fields' => ['ID', 'display_name', 'user_email'], 'number' => 500]);
-        $courses = MCEMS_Tutor::get_courses();
-        $course_pt = MCEMS_Tutor::course_post_type();
-        $course_id = (int) get_post_meta($post->ID, self::MK_COURSE_ID, true);
+        $exams = MCEMS_Tutor::get_exams();
+        $exam_pt = MCEMS_Tutor::exam_post_type();
+        $exam_id = (int) get_post_meta($post->ID, self::MK_EXAM_ID, true);
         $is_past = self::is_past_session($date, $time);
 
         if ($is_past) {
@@ -182,21 +182,21 @@ class MCEMS_CPT_Sessioni_Esame {
 
         echo '<table class="form-table"><tbody>';
 
-        echo '<tr><th><label>Tutor LMS course</label></th><td>';
-if (!$course_pt) {
-    echo '<em>Tutor LMS not detected (course post type not found: <code>courses</code> / <code>tutor_course</code>).</em>';
+        echo '<tr><th><label>Tutor LMS exam</label></th><td>';
+if (!$exam_pt) {
+    echo '<em>Tutor LMS not detected (exam post type not found: <code>exams</code> / <code>tutor_exam</code>).</em>';
 } else {
-    echo '<select name="mcems_course_id" required ' . $disabled . '><option value="0">— Select course —</option>';
-    foreach ($courses as $cid => $title) {
+    echo '<select name="mcems_exam_id" required ' . $disabled . '><option value="0">— Select exam —</option>';
+    foreach ($exams as $cid => $title) {
         printf('<option value="%d" %s>%s</option>',
             (int)$cid,
-            selected($course_id, (int)$cid, false),
+            selected($exam_id, (int)$cid, false),
             esc_html($title)
         );
     }
     echo '</select>';
 }
-echo '<p class="description">This session will be bookable only by selecting this course during booking.</p>';
+echo '<p class="description">This session will be bookable only by selecting this exam during booking.</p>';
 echo '</td></tr>';
 
         echo '<tr><th><label>Date</label></th><td>';
@@ -314,7 +314,7 @@ echo '</td></tr>';
         $is_spec  = !empty($_POST['mcems_is_special']) ? 1 : 0;
         $spec_uid = isset($_POST['mcems_special_user_id']) ? (int) $_POST['mcems_special_user_id'] : 0;
 
-        $course_id = isset($_POST['mcems_course_id']) ? (int) $_POST['mcems_course_id'] : 0;
+        $exam_id = isset($_POST['mcems_exam_id']) ? (int) $_POST['mcems_exam_id'] : 0;
 
         $capacity = isset($_POST['mcems_capacity']) ? (int) $_POST['mcems_capacity'] : 10;
         if ($capacity < 1) $capacity = 1;
@@ -333,7 +333,7 @@ echo '</td></tr>';
         update_post_meta($post_id, self::MK_PROCTOR_USER_ID, $proctor);
         update_post_meta($post_id, self::MK_IS_SPECIAL, $is_spec);
         update_post_meta($post_id, self::MK_SPECIAL_USER_ID, $spec_uid);
-        update_post_meta($post_id, self::MK_COURSE_ID, $course_id);
+        update_post_meta($post_id, self::MK_EXAM_ID, $exam_id);
 
         // Se ♿ e candidato impostato: garantisci che sia in lista prenotati
         if ($is_spec && $spec_uid > 0) {
@@ -399,7 +399,7 @@ echo '</td></tr>';
         $new['cb'] = $cols['cb'] ?? '';
         $new['title'] = __('Session', 'mc-ems');
         // Subito dopo __('Session', 'mc-ems')
-        $new['mcems_course'] = 'Course';
+        $new['mcems_exam'] = 'Exam';
         $new['mcems_date'] = __('Date', 'mc-ems');
         $new['mcems_time'] = 'Time';
         $new['mcems_cap']  = __('Seats', 'mc-ems');
@@ -409,9 +409,9 @@ echo '</td></tr>';
     }
 
     public static function column_render($col, $post_id) {
-        if ($col === 'mcems_course') {
-            $course_id = (int) get_post_meta($post_id, self::MK_COURSE_ID, true);
-            echo $course_id ? esc_html(get_the_title($course_id)) : '—';
+        if ($col === 'mcems_exam') {
+            $exam_id = (int) get_post_meta($post_id, self::MK_EXAM_ID, true);
+            echo $exam_id ? esc_html(get_the_title($exam_id)) : '—';
             return;
         }
 

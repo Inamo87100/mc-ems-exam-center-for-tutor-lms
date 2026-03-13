@@ -64,8 +64,8 @@ class MCEMS_Admin_Sessioni {
         $today = date('Y-m-d');
         $week  = date('Y-m-d', strtotime('+7 days'));
 
-        $courses   = MCEMS_Tutor::get_courses();
-        $course_pt = MCEMS_Tutor::course_post_type();
+        $exams   = MCEMS_Tutor::get_exams();
+        $exam_pt = MCEMS_Tutor::exam_post_type();
 
         $notice = '';
         $error  = '';
@@ -149,16 +149,16 @@ class MCEMS_Admin_Sessioni {
                     <div id="mcems_gen_standard">
                         <table class="form-table">
                             <tr>
-                                <th><label for="mcems_course_id"><?php echo esc_html__('Tutor LMS course', 'mc-ems'); ?></label></th>
+                                <th><label for="mcems_exam_id"><?php echo esc_html__('Tutor LMS exam', 'mc-ems'); ?></label></th>
                                 <td>
-                                    <?php if (!$course_pt): ?>
-                                        <em><?php echo esc_html__('Tutor LMS not detected (course post type not found).', 'mc-ems'); ?></em>
-                                    <?php elseif (!$courses): ?>
-                                        <em><?php echo esc_html__('No published Tutor LMS course found.', 'mc-ems'); ?></em>
+                                    <?php if (!$exam_pt): ?>
+                                        <em><?php echo esc_html__('Tutor LMS not detected (exam post type not found).', 'mc-ems'); ?></em>
+                                    <?php elseif (!$exams): ?>
+                                        <em><?php echo esc_html__('No published Tutor LMS exam found.', 'mc-ems'); ?></em>
                                     <?php else: ?>
-                                        <select id="mcems_course_id" name="course_id">
-                                            <option value=""><?php echo esc_html__('— Select course —', 'mc-ems'); ?></option>
-                                            <?php foreach ($courses as $cid => $title): ?>
+                                        <select id="mcems_exam_id" name="exam_id">
+                                            <option value=""><?php echo esc_html__('— Select exam —', 'mc-ems'); ?></option>
+                                            <?php foreach ($exams as $cid => $title): ?>
                                                 <option value="<?php echo (int) $cid; ?>"><?php echo esc_html($title); ?></option>
                                             <?php endforeach; ?>
                                         </select>
@@ -236,16 +236,16 @@ class MCEMS_Admin_Sessioni {
                     <div id="mcems_gen_special" style="display:none;">
                         <table class="form-table">
                             <tr>
-                                <th><label for="mcems_special_course_id"><?php echo esc_html__('Tutor LMS course', 'mc-ems'); ?></label></th>
+                                <th><label for="mcems_special_exam_id"><?php echo esc_html__('Tutor LMS exam', 'mc-ems'); ?></label></th>
                                 <td>
-                                    <?php if (!$course_pt): ?>
+                                    <?php if (!$exam_pt): ?>
                                         <em><?php echo esc_html__('Tutor LMS not detected.', 'mc-ems'); ?></em>
-                                    <?php elseif (!$courses): ?>
-                                        <em><?php echo esc_html__('No published Tutor LMS course found.', 'mc-ems'); ?></em>
+                                    <?php elseif (!$exams): ?>
+                                        <em><?php echo esc_html__('No published Tutor LMS exam found.', 'mc-ems'); ?></em>
                                     <?php else: ?>
-                                        <select id="mcems_special_course_id" name="special_course_id" disabled>
-                                            <option value=""><?php echo esc_html__('— Select course —', 'mc-ems'); ?></option>
-                                            <?php foreach ($courses as $cid => $title): ?>
+                                        <select id="mcems_special_exam_id" name="special_exam_id" disabled>
+                                            <option value=""><?php echo esc_html__('— Select exam —', 'mc-ems'); ?></option>
+                                            <?php foreach ($exams as $cid => $title): ?>
                                                 <option value="<?php echo (int) $cid; ?>"><?php echo esc_html($title); ?></option>
                                             <?php endforeach; ?>
                                         </select>
@@ -328,12 +328,12 @@ class MCEMS_Admin_Sessioni {
             const std = document.getElementById('mcems_gen_standard');
             const sp  = document.getElementById('mcems_gen_special');
 
-            const specialCourse = document.getElementById('mcems_special_course_id');
+            const specialExam = document.getElementById('mcems_special_exam_id');
             const specialDate   = document.getElementById('mcems_special_date');
             const specialTime   = document.getElementById('mcems_special_time');
             const specialEmail  = document.getElementById('mcems_special_user_email');
 
-            const standardCourse = document.getElementById('mcems_course_id');
+            const standardExam = document.getElementById('mcems_exam_id');
             const standardStart  = document.getElementById('mcems_date_start');
             const standardEnd    = document.getElementById('mcems_date_end');
             const standardTimes  = document.getElementById('mcems_times');
@@ -352,12 +352,12 @@ class MCEMS_Admin_Sessioni {
                     if (std) std.style.display = 'none';
                     if (sp) sp.style.display = 'block';
 
-                    setDisabled(specialCourse, false);
+                    setDisabled(specialExam, false);
                     setDisabled(specialDate, false);
                     setDisabled(specialTime, false);
                     setDisabled(specialEmail, false);
 
-                    setDisabled(standardCourse, true);
+                    setDisabled(standardExam, true);
                     setDisabled(standardStart, true);
                     setDisabled(standardEnd, true);
                     setDisabled(standardTimes, true);
@@ -366,7 +366,7 @@ class MCEMS_Admin_Sessioni {
                     if (std) std.style.display = 'block';
                     if (sp) sp.style.display = 'none';
 
-                    setDisabled(specialCourse, true);
+                    setDisabled(specialExam, true);
                     setDisabled(specialDate, true);
                     setDisabled(specialTime, true);
                     setDisabled(specialEmail, true);
@@ -376,7 +376,7 @@ class MCEMS_Admin_Sessioni {
                         specialTime.removeAttribute('min');
                     }
 
-                    setDisabled(standardCourse, false);
+                    setDisabled(standardExam, false);
                     setDisabled(standardStart, false);
                     setDisabled(standardEnd, false);
                     setDisabled(standardTimes, false);
@@ -396,10 +396,10 @@ class MCEMS_Admin_Sessioni {
                 const special = document.getElementById('mcems_generate_special');
                 const isSpecial = special && special.checked;
 
-                const sel = document.getElementById(isSpecial ? 'mcems_special_course_id' : 'mcems_course_id');
+                const sel = document.getElementById(isSpecial ? 'mcems_special_exam_id' : 'mcems_exam_id');
                 if (sel && !sel.value) {
                     e.preventDefault();
-                    alert('Select a Tutor LMS course before generating sessions.');
+                    alert('Select a Tutor LMS exam before generating sessions.');
                     sel.focus();
                     return;
                 }
@@ -745,10 +745,10 @@ class MCEMS_Admin_Sessioni {
             : [];
         $times_raw = (string) wp_unslash($_POST['times'] ?? '');
         $capacity  = max(1, (int) ($_POST['capacity'] ?? 1));
-        $course_id = isset($_POST['course_id']) ? (int) $_POST['course_id'] : 0;
+        $exam_id = isset($_POST['exam_id']) ? (int) $_POST['exam_id'] : 0;
 
-        if ($course_id <= 0) {
-            return ['', 'Select a Tutor LMS course.'];
+        if ($exam_id <= 0) {
+            return ['', 'Select a Tutor LMS exam.'];
         }
 
         // Validate and deduplicate selected dates.
@@ -839,12 +839,12 @@ class MCEMS_Admin_Sessioni {
                     continue;
                 }
 
-                if (self::session_exists($date, $time, $course_id)) {
+                if (self::session_exists($date, $time, $exam_id)) {
                     $skipped++;
                     continue;
                 }
 
-                $sid = self::create_session($date, $time, $capacity, 0, 0, $course_id);
+                $sid = self::create_session($date, $time, $capacity, 0, 0, $exam_id);
 
                 if ($sid) {
                     $created++;
@@ -868,10 +868,10 @@ class MCEMS_Admin_Sessioni {
         $time      = sanitize_text_field(wp_unslash($_POST['special_time'] ?? ''));
         $uid       = (int) ($_POST['special_user_id'] ?? 0);
         $email     = sanitize_email(wp_unslash($_POST['special_user_email'] ?? ''));
-        $course_id = isset($_POST['special_course_id']) ? (int) $_POST['special_course_id'] : 0;
+        $exam_id = isset($_POST['special_exam_id']) ? (int) $_POST['special_exam_id'] : 0;
 
-        if ($course_id <= 0) {
-            return ['', 'Select a Tutor LMS course.'];
+        if ($exam_id <= 0) {
+            return ['', 'Select a Tutor LMS exam.'];
         }
 
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !preg_match('/^\d{2}:\d{2}$/', $time)) {
@@ -902,11 +902,11 @@ class MCEMS_Admin_Sessioni {
             return ['', __('Invalid candidate email.', 'mc-ems')];
         }
 
-        if (self::session_exists($date, $time, $course_id, true)) {
-            return ['', __('A special session already exists with this date/time for this course.', 'mc-ems')];
+        if (self::session_exists($date, $time, $exam_id, true)) {
+            return ['', __('A special session already exists with this date/time for this exam.', 'mc-ems')];
         }
 
-        $sid = self::create_session($date, $time, 1, 1, $uid, $course_id);
+        $sid = self::create_session($date, $time, 1, 1, $uid, $exam_id);
         if (!$sid) {
             return ['', __('Unable to create exam session.', 'mc-ems')];
         }
@@ -1047,11 +1047,11 @@ class MCEMS_Admin_Sessioni {
         return array_values(array_unique($dates));
     }
 
-    private static function session_exists(string $date, string $time, int $course_id, bool $special_only = false): bool {
+    private static function session_exists(string $date, string $time, int $exam_id, bool $special_only = false): bool {
         $meta = [
             ['key' => MCEMS_CPT_Sessioni_Esame::MK_DATE, 'value' => $date],
             ['key' => MCEMS_CPT_Sessioni_Esame::MK_TIME, 'value' => $time],
-            ['key' => MCEMS_CPT_Sessioni_Esame::MK_COURSE_ID, 'value' => $course_id],
+            ['key' => MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, 'value' => $exam_id],
         ];
 
         if ($special_only) {
@@ -1069,7 +1069,7 @@ class MCEMS_Admin_Sessioni {
         return $q->have_posts();
     }
 
-    private static function create_session(string $date, string $time, int $capacity, int $is_special, int $special_user_id, int $course_id): int {
+    private static function create_session(string $date, string $time, int $capacity, int $is_special, int $special_user_id, int $exam_id): int {
         $sid = wp_insert_post([
             'post_type'   => MCEMS_CPT_Sessioni_Esame::CPT,
             'post_status' => 'publish',
@@ -1082,7 +1082,7 @@ class MCEMS_Admin_Sessioni {
 
         update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_DATE, $date);
         update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_TIME, $time);
-        update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_COURSE_ID, $course_id > 0 ? (int) $course_id : 0);
+        update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, $exam_id > 0 ? (int) $exam_id : 0);
         update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_CAPACITY, max(1, $capacity));
         update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, []);
         update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_IS_SPECIAL, $is_special ? 1 : 0);

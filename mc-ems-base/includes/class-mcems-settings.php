@@ -11,8 +11,8 @@ class MCEMS_Settings {
             'tutor_gate_unlock_lead_minutes' => 0,
             'tutor_gate_booking_expiry_value' => 0,
             'tutor_gate_booking_expiry_unit'  => 'hours',
-            'tutor_gate_course_ids' => [],
-            'booking_course_ids'    => [],
+            'tutor_gate_exam_ids' => [],
+            'booking_exam_ids'    => [],
             'anticipo_ore_prenotazione' => 48,
             'consenti_annullamento'     => 1,
             'annullamento_ore'          => 48,
@@ -43,23 +43,23 @@ class MCEMS_Settings {
             'cal_email_on_unassigned_warning'   => 1,
             'cal_email_notify_to'               => get_option('admin_email'),
 
-            'email_subject_booking_confirmation' => 'Exam booking confirmed — {course_title}',
-            'email_body_booking_confirmation'    => "Hello {candidate_name},\n\nYour exam booking has been confirmed.\nCourse: {course_title}\nDate: {session_date}\nTime: {session_time}\nManage exam booking: {manage_booking_url}",
-            'email_subject_booking_cancellation' => 'Exam booking cancelled — {course_title}',
-            'email_body_booking_cancellation'    => "Hello {candidate_name},\n\nYour exam booking has been cancelled.\nCourse: {course_title}\nDate: {session_date}\nTime: {session_time}",
-            'email_subject_admin_booking'        => 'New exam booking — {course_title}',
-            'email_body_admin_booking'           => "A new booking has been created.\n\nCandidate: {candidate_name} <{candidate_email}>\nCourse: {course_title}\nDate: {session_date}\nTime: {session_time}\nManage exam booking: {manage_booking_url}",
-            'email_subject_admin_cancellation'   => 'Exam booking cancelled — {course_title}',
-            'email_body_admin_cancellation'      => "A booking has been cancelled.\n\nCandidate: {candidate_name} <{candidate_email}>\nCourse: {course_title}\nDate: {session_date}\nTime: {session_time}",
+            'email_subject_booking_confirmation' => 'Exam booking confirmed — {exam_title}',
+            'email_body_booking_confirmation'    => "Hello {candidate_name},\n\nYour exam booking has been confirmed.\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nManage exam booking: {manage_booking_url}",
+            'email_subject_booking_cancellation' => 'Exam booking cancelled — {exam_title}',
+            'email_body_booking_cancellation'    => "Hello {candidate_name},\n\nYour exam booking has been cancelled.\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}",
+            'email_subject_admin_booking'        => 'New exam booking — {exam_title}',
+            'email_body_admin_booking'           => "A new booking has been created.\n\nCandidate: {candidate_name} <{candidate_email}>\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nManage exam booking: {manage_booking_url}",
+            'email_subject_admin_cancellation'   => 'Exam booking cancelled — {exam_title}',
+            'email_body_admin_cancellation'      => "A booking has been cancelled.\n\nCandidate: {candidate_name} <{candidate_email}>\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}",
 
             'cal_email_subject'                  => 'Exam session assigned — {session_date} {session_time}',
-            'cal_email_body'                     => "An exam session has been assigned.\n\nCourse: {course_title}\nDate: {session_date}\nTime: {session_time}\nProctor: {proctor_name}\nSession ID: {session_id}",
+            'cal_email_body'                     => "An exam session has been assigned.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nProctor: {proctor_name}\nSession ID: {session_id}",
 
             'cal_email_subject_unassign'         => 'Exam session unassigned — {session_date} {session_time}',
-            'cal_email_body_unassign'            => "An exam session assignment has been removed.\n\nCourse: {course_title}\nDate: {session_date}\nTime: {session_time}\nPrevious proctor: {proctor_name}\nSession ID: {session_id}",
+            'cal_email_body_unassign'            => "An exam session assignment has been removed.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nPrevious proctor: {proctor_name}\nSession ID: {session_id}",
 
             'cal_email_subject_warning'          => 'Unassigned exam session reminder — {session_date} {session_time}',
-            'cal_email_body_warning'             => "The following exam session is scheduled for tomorrow and still has no assigned proctor.\n\nCourse: {course_title}\nDate: {session_date}\nTime: {session_time}\nSession ID: {session_id}",
+            'cal_email_body_warning'             => "The following exam session is scheduled for tomorrow and still has no assigned proctor.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nSession ID: {session_id}",
 
             // Access Control: role-based shortcode visibility (empty array = all roles allowed)
             'shortcode_roles' => [],
@@ -119,15 +119,15 @@ class MCEMS_Settings {
         return is_array($v) ? $v : [];
     }
 
-    public static function get_gate_course_ids(): array {
-        return self::sanitize_course_id_array(self::get_array('tutor_gate_course_ids'));
+    public static function get_gate_exam_ids(): array {
+        return self::sanitize_exam_id_array(self::get_array('tutor_gate_exam_ids'));
     }
 
-    public static function get_booking_course_ids(): array {
-        return self::sanitize_course_id_array(self::get_array('booking_course_ids'));
+    public static function get_booking_exam_ids(): array {
+        return self::sanitize_exam_id_array(self::get_array('booking_exam_ids'));
     }
 
-    private static function sanitize_course_id_array(array $ids): array {
+    private static function sanitize_exam_id_array(array $ids): array {
         $clean = [];
         foreach ($ids as $id) {
             $id = absint($id);
@@ -136,11 +136,11 @@ class MCEMS_Settings {
         return array_values(array_unique($clean));
     }
 
-    private static function sanitize_course_ids_input($raw): array {
+    private static function sanitize_exam_ids_input($raw): array {
         $ids = is_array($raw) ? $raw : [];
-        $clean = self::sanitize_course_id_array($ids);
-        if (class_exists('MCEMS_Tutor') && method_exists('MCEMS_Tutor', 'get_courses')) {
-            $valid = array_map('intval', array_keys(MCEMS_Tutor::get_courses()));
+        $clean = self::sanitize_exam_id_array($ids);
+        if (class_exists('MCEMS_Tutor') && method_exists('MCEMS_Tutor', 'get_exams')) {
+            $valid = array_map('intval', array_keys(MCEMS_Tutor::get_exams()));
             $clean = array_values(array_intersect($clean, $valid));
         }
         return $clean;
@@ -249,13 +249,13 @@ class MCEMS_Settings {
             'desc'=> __('Example: 48 = cancellation allowed only if more than 48 hours remain.', 'mc-ems')
         ]);
 
-        add_settings_section('mcems_section_gate', __('Course access settings', 'mc-ems'), function () {
-            echo '<p class="description">Define how long an exam booking remains valid for course access after the exam session time.</p>';
+        add_settings_section('mcems_section_gate', __('Exam access settings', 'mc-ems'), function () {
+            echo '<p class="description">Define how long an exam booking remains valid for exam access after the exam session time.</p>';
         }, self::OPTION_KEY);
 
-        add_settings_field('tutor_gate_enabled', __('Enable course access gate', 'mc-ems'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_gate', [
+        add_settings_field('tutor_gate_enabled', __('Enable exam access gate', 'mc-ems'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_gate', [
             'key'  => 'tutor_gate_enabled',
-            'desc' => __('If enabled, users can access protected Tutor LMS courses only when they have a valid exam booking for that course.', 'mc-ems'),
+            'desc' => __('If enabled, users can access protected Tutor LMS exams only when they have a valid exam booking for that exam.', 'mc-ems'),
         ]);
 
         add_settings_field('tutor_gate_unlock_lead_minutes', __('Unlock before session (minutes)', 'mc-ems'), [__CLASS__, 'field_number'], self::OPTION_KEY, 'mcems_section_gate', [
@@ -263,7 +263,7 @@ class MCEMS_Settings {
             'min'  => 0,
             'max'  => 1440,
             'step' => 1,
-            'desc' => __('Example: 15 = allow course access 15 minutes before the booked exam time.', 'mc-ems'),
+            'desc' => __('Example: 15 = allow exam access 15 minutes before the booked exam time.', 'mc-ems'),
         ]);
 
         add_settings_field('tutor_gate_booking_expiry_combo', __('Booking validity after session', 'mc-ems'), [__CLASS__, 'field_booking_expiry_combo'], self::OPTION_KEY, 'mcems_section_gate', [
@@ -275,14 +275,14 @@ class MCEMS_Settings {
             'desc'      => '0 = never expires.'
         ]);
 
-        add_settings_field('tutor_gate_course_ids', __('Protected courses', 'mc-ems'), [__CLASS__, 'field_course_multiselect'], self::OPTION_KEY, 'mcems_section_gate', [
-            'key'  => 'tutor_gate_course_ids',
-            'desc' => __('If you select one or more courses, the course access gate will apply only to those courses. If left empty, the gate applies to all Tutor LMS courses.', 'mc-ems'),
+        add_settings_field('tutor_gate_exam_ids', __('Protected exams', 'mc-ems'), [__CLASS__, 'field_exam_multiselect'], self::OPTION_KEY, 'mcems_section_gate', [
+            'key'  => 'tutor_gate_exam_ids',
+            'desc' => __('If you select one or more exams, the exam access gate will apply only to those exams. If left empty, the gate applies to all Tutor LMS exams.', 'mc-ems'),
         ]);
 
-        add_settings_field('booking_course_ids', __('Courses visible in booking dropdown', 'mc-ems'), [__CLASS__, 'field_course_multiselect'], self::OPTION_KEY, 'mcems_section_gate', [
-            'key'  => 'booking_course_ids',
-            'desc' => __('Select which courses appear in the course dropdown during session booking. If left empty, all published Tutor LMS courses will be shown.', 'mc-ems'),
+        add_settings_field('booking_exam_ids', __('Exams visible in booking dropdown', 'mc-ems'), [__CLASS__, 'field_exam_multiselect'], self::OPTION_KEY, 'mcems_section_gate', [
+            'key'  => 'booking_exam_ids',
+            'desc' => __('Select which exams appear in the exam dropdown during session booking. If left empty, all published Tutor LMS exams will be shown.', 'mc-ems'),
         ]);
 
         add_settings_section('mcems_section_email', __('Email settings', 'mc-ems'), function () {
@@ -361,8 +361,8 @@ class MCEMS_Settings {
 
         add_settings_field('email_subject_booking_confirmation', __('Exam booking confirmation subject', 'mc-ems'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_subject_booking_confirmation',
-            'placeholder' => __('Exam booking confirmed — {course_title}', 'mc-ems'),
-            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {course_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems')
+            'placeholder' => __('Exam booking confirmed — {exam_title}', 'mc-ems'),
+            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems')
         ]);
 
         add_settings_field('email_body_booking_confirmation', __('Exam booking confirmation body', 'mc-ems'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
@@ -373,8 +373,8 @@ class MCEMS_Settings {
 
         add_settings_field('email_subject_booking_cancellation', __('Exam booking cancellation subject', 'mc-ems'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_subject_booking_cancellation',
-            'placeholder' => __('Exam booking cancelled — {course_title}', 'mc-ems'),
-            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {course_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems')
+            'placeholder' => __('Exam booking cancelled — {exam_title}', 'mc-ems'),
+            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems')
         ]);
 
         add_settings_field('email_body_booking_cancellation', __('Exam booking cancellation body', 'mc-ems'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
@@ -385,8 +385,8 @@ class MCEMS_Settings {
 
         add_settings_field('email_subject_admin_booking', __('Admin exam booking subject', 'mc-ems'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_subject_admin_booking',
-            'placeholder' => __('New exam booking — {course_title}', 'mc-ems'),
-            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {course_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems')
+            'placeholder' => __('New exam booking — {exam_title}', 'mc-ems'),
+            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems')
         ]);
 
         add_settings_field('email_body_admin_booking', __('Admin exam booking body', 'mc-ems'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
@@ -397,8 +397,8 @@ class MCEMS_Settings {
 
         add_settings_field('email_subject_admin_cancellation', __('Admin cancellation subject', 'mc-ems'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_subject_admin_cancellation',
-            'placeholder' => __('Exam booking cancelled — {course_title}', 'mc-ems'),
-            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {course_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems')
+            'placeholder' => __('Exam booking cancelled — {exam_title}', 'mc-ems'),
+            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems')
         ]);
 
         add_settings_field('email_body_admin_cancellation', __('Admin cancellation body', 'mc-ems'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
@@ -410,37 +410,37 @@ class MCEMS_Settings {
         add_settings_field('cal_email_subject', __('Proctor assignment subject', 'mc-ems'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_subject',
             'placeholder' => __('Exam session assigned — {session_date} {session_time}', 'mc-ems'),
-            'desc' => __('Placeholders: {site_name}, {course_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems')
+            'desc' => __('Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems')
         ]);
 
         add_settings_field('cal_email_body', __('Proctor assignment body', 'mc-ems'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_body',
             'rows' => 8,
-            'desc' => __('Plain-text email body. Placeholders: {site_name}, {course_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems')
+            'desc' => __('Plain-text email body. Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems')
         ]);
 
         add_settings_field('cal_email_subject_unassign', __('Proctor unassignment subject', 'mc-ems'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_subject_unassign',
             'placeholder' => __('Exam session unassigned — {session_date} {session_time}', 'mc-ems'),
-            'desc' => __('Placeholders: {site_name}, {course_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems')
+            'desc' => __('Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems')
         ]);
 
         add_settings_field('cal_email_body_unassign', __('Proctor unassignment body', 'mc-ems'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_body_unassign',
             'rows' => 8,
-            'desc' => __('Plain-text email body. Placeholders: {site_name}, {course_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems')
+            'desc' => __('Plain-text email body. Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems')
         ]);
 
         add_settings_field('cal_email_subject_warning', __('Unassigned session warning subject', 'mc-ems'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_subject_warning',
             'placeholder' => __('Unassigned exam session reminder — {session_date} {session_time}', 'mc-ems'),
-            'desc' => __('Placeholders: {site_name}, {course_title}, {session_date}, {session_time}, {session_id}', 'mc-ems')
+            'desc' => __('Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {session_id}', 'mc-ems')
         ]);
 
         add_settings_field('cal_email_body_warning', __('Unassigned session warning body', 'mc-ems'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_body_warning',
             'rows' => 8,
-            'desc' => __('Plain-text email body. Placeholders: {site_name}, {course_title}, {session_date}, {session_time}, {session_id}', 'mc-ems')
+            'desc' => __('Plain-text email body. Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {session_id}', 'mc-ems')
         ]);
 
         add_settings_section('mcems_section_pages', __('Pages', 'mc-ems'), function () {
@@ -522,12 +522,12 @@ class MCEMS_Settings {
             $out['tutor_gate_booking_expiry_unit'] = in_array($u, ['minutes','hours'], true) ? $u : 'hours';
         }
 
-        if ($tab === 'course_access' || isset($input['tutor_gate_course_ids'])) {
-            $out['tutor_gate_course_ids'] = self::sanitize_course_ids_input($input['tutor_gate_course_ids'] ?? []);
+        if ($tab === 'exam_access' || isset($input['tutor_gate_exam_ids'])) {
+            $out['tutor_gate_exam_ids'] = self::sanitize_exam_ids_input($input['tutor_gate_exam_ids'] ?? []);
         }
 
-        if ($tab === 'course_access' || isset($input['booking_course_ids'])) {
-            $out['booking_course_ids'] = self::sanitize_course_ids_input($input['booking_course_ids'] ?? []);
+        if ($tab === 'exam_access' || isset($input['booking_exam_ids'])) {
+            $out['booking_exam_ids'] = self::sanitize_exam_ids_input($input['booking_exam_ids'] ?? []);
         }
 
         if (isset($input['anticipo_ore_prenotazione'])) $out['anticipo_ore_prenotazione'] = max(0, min(720, (int) $input['anticipo_ore_prenotazione']));
@@ -732,7 +732,7 @@ class MCEMS_Settings {
         }
 
         $tab = isset($_GET['tab']) ? sanitize_key((string) $_GET['tab']) : 'shortcodes';
-        $allowed = ['shortcodes','bookings','course_access','email','pages','access_control'];
+        $allowed = ['shortcodes','bookings','exam_access','email','pages','access_control'];
         if (!in_array($tab, $allowed, true)) $tab = 'shortcodes';
 
         echo '<div class="wrap">';
@@ -742,7 +742,7 @@ class MCEMS_Settings {
             'shortcodes'     => __('Shortcodes', 'mc-ems'),
             'access_control' => __('Access Control', 'mc-ems'),
             'bookings'       => __('Exam booking settings', 'mc-ems'),
-            'course_access'  => __('Course access settings', 'mc-ems'),
+            'exam_access'  => __('Exam access settings', 'mc-ems'),
             'email'          => __('Email settings', 'mc-ems'),
             'pages'          => __('Pages', 'mc-ems'),
         ];
@@ -761,10 +761,10 @@ class MCEMS_Settings {
             echo '<table class="widefat striped" style="margin:0;">';
             echo '<thead><tr><th style="width:260px;">Shortcode</th><th>' . esc_html__('Description', 'mc-ems') . '</th></tr></thead><tbody>';
 
-            echo '<tr><td><code>[mcems_book_exam]</code></td><td>' . esc_html__('Exam booking (select course → calendar → choose exam session).', 'mc-ems') . '</td></tr>';
+            echo '<tr><td><code>[mcems_book_exam]</code></td><td>' . esc_html__('Exam booking (select exam → calendar → choose exam session).', 'mc-ems') . '</td></tr>';
             echo '<tr><td><code>[mcems_manage_booking]</code></td><td>' . esc_html__('Shows the logged-in user exam bookings and allows cancellation.', 'mc-ems') . '</td></tr>';
             echo '<tr><td><code>[mcems_sessions_calendar]</code></td><td>' . esc_html__('Calendar to assign proctors to exam sessions.', 'mc-ems') . '</td></tr>';
-            echo '<tr><td><code>[mcems_bookings_list]</code></td><td>' . esc_html__('Exam bookings list (with date and course filters).', 'mc-ems') . '</td></tr>';
+            echo '<tr><td><code>[mcems_bookings_list]</code></td><td>' . esc_html__('Exam bookings list (with date and exam filters).', 'mc-ems') . '</td></tr>';
 
             echo '</tbody></table>';
             echo '</div>';
@@ -778,7 +778,7 @@ class MCEMS_Settings {
 
         if ($tab === 'bookings') {
             self::render_only_sections(['mcems_section_main']);
-        } elseif ($tab === 'course_access') {
+        } elseif ($tab === 'exam_access') {
             self::render_only_sections(['mcems_section_gate']);
         } elseif ($tab === 'email') {
             self::render_only_sections(['mcems_section_email']);
@@ -793,7 +793,7 @@ class MCEMS_Settings {
         echo '</div>';
     }
 
-    public static function field_course_multiselect(array $args): void {
+    public static function field_exam_multiselect(array $args): void {
         $key  = (string) ($args['key'] ?? '');
         $desc = (string) ($args['desc'] ?? '');
         $opt  = self::get();
@@ -801,22 +801,22 @@ class MCEMS_Settings {
         $sel  = is_array($sel) ? array_map('absint', $sel) : [];
         $sel  = array_values(array_unique(array_filter($sel)));
 
-        $courses = [];
-        if (class_exists('MCEMS_Tutor') && method_exists('MCEMS_Tutor', 'get_courses')) {
-            $courses = MCEMS_Tutor::get_courses();
+        $exams = [];
+        if (class_exists('MCEMS_Tutor') && method_exists('MCEMS_Tutor', 'get_exams')) {
+            $exams = MCEMS_Tutor::get_exams();
         }
 
-        $id_filter    = 'mcems_course_filter_' . $key;
-        $id_list      = 'mcems_course_list_' . $key;
+        $id_filter    = 'mcems_exam_filter_' . $key;
+        $id_list      = 'mcems_exam_list_' . $key;
         $field_name   = self::OPTION_KEY . '[' . $key . '][]';
 
         echo '<div style="max-width:560px">';
 
-        if (!$courses) {
-            echo '<p><em>' . esc_html__('No published Tutor LMS course found.', 'mc-ems') . '</em></p>';
+        if (!$exams) {
+            echo '<p><em>' . esc_html__('No published Tutor LMS exam found.', 'mc-ems') . '</em></p>';
         } else {
             // Search input
-            echo '<input type="text" id="' . esc_attr($id_filter) . '" placeholder="' . esc_attr__('Search course…', 'mc-ems') . '" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #d0d5dd;margin-bottom:8px;box-sizing:border-box;">';
+            echo '<input type="text" id="' . esc_attr($id_filter) . '" placeholder="' . esc_attr__('Search exam…', 'mc-ems') . '" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #d0d5dd;margin-bottom:8px;box-sizing:border-box;">';
 
             // Select-all / Deselect-all links
             echo '<div style="margin-bottom:6px;font-size:13px;">';
@@ -827,7 +827,7 @@ class MCEMS_Settings {
 
             // Checkbox list
             echo '<div id="' . esc_attr($id_list) . '" style="max-height:260px;overflow-y:auto;border:1px solid #d0d5dd;border-radius:10px;padding:8px 12px;background:#fff;">';
-            foreach ($courses as $cid => $title) {
+            foreach ($exams as $cid => $title) {
                 $cid      = (int) $cid;
                 $label    = esc_html($title . ' (#' . $cid . ')');
                 $checked  = in_array($cid, $sel, true) ? ' checked' : '';

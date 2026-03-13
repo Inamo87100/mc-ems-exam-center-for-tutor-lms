@@ -46,7 +46,7 @@
         year: new Date().getFullYear(),
         month: new Date().getMonth() + 1,  // 1-based
         sessions: [],                       // raw data from AJAX
-        filters: { course: '', status: '', proctor: '' }
+        filters: { exam: '', status: '', proctor: '' }
     };
 
     /* ----------------------------------------------------------
@@ -184,7 +184,7 @@
             item.style.cssText = 'border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:10px;';
 
             var title = document.createElement('strong');
-            title.textContent = (s.time || '') + (s.course_title ? ' — ' + s.course_title : '');
+            title.textContent = (s.time || '') + (s.exam_title ? ' — ' + s.exam_title : '');
             item.appendChild(title);
 
             var meta = document.createElement('p');
@@ -253,28 +253,28 @@
        Filters
        ---------------------------------------------------------- */
     function initFilters(onFilter) {
-        var courseSelect  = qs('#mcems-cal-filter-course');
+        var examSelect  = qs('#mcems-cal-filter-exam');
         var statusSelect  = qs('#mcems-cal-filter-status');
         var proctorSelect = qs('#mcems-cal-filter-proctor');
 
         function applyFilter() {
-            state.filters.course  = courseSelect  ? courseSelect.value  : '';
+            state.filters.exam  = examSelect  ? examSelect.value  : '';
             state.filters.status  = statusSelect  ? statusSelect.value  : '';
             state.filters.proctor = proctorSelect ? proctorSelect.value : '';
             onFilter();
         }
 
-        [courseSelect, statusSelect, proctorSelect].forEach(function (el) {
+        [examSelect, statusSelect, proctorSelect].forEach(function (el) {
             if (el) el.addEventListener('change', applyFilter);
         });
 
         var clearBtn = qs('#mcems-cal-filter-clear');
         if (clearBtn) {
             clearBtn.addEventListener('click', function () {
-                if (courseSelect)  courseSelect.selectedIndex  = 0;
+                if (examSelect)  examSelect.selectedIndex  = 0;
                 if (statusSelect)  statusSelect.selectedIndex  = 0;
                 if (proctorSelect) proctorSelect.selectedIndex = 0;
-                state.filters = { course: '', status: '', proctor: '' };
+                state.filters = { exam: '', status: '', proctor: '' };
                 onFilter();
             });
         }
@@ -285,7 +285,7 @@
        ---------------------------------------------------------- */
     function filterSessions(sessions) {
         return sessions.filter(function (s) {
-            if (state.filters.course  && String(s.course_id)  !== state.filters.course)  return false;
+            if (state.filters.exam  && String(s.exam_id)  !== state.filters.exam)  return false;
             if (state.filters.status  && s.status             !== state.filters.status)  return false;
             if (state.filters.proctor && String(s.proctor_id) !== state.filters.proctor) return false;
             return true;

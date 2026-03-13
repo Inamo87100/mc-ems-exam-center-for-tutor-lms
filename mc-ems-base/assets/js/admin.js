@@ -4,7 +4,7 @@
  * Handles:
  *  1. Bulk actions (select-all, confirm, AJAX submit)
  *  2. Admin table sorting
- *  3. Admin filters (date range, course, status)
+ *  3. Admin filters (date range, exam, status)
  *  4. Modals (open, close, form handling)
  *  5. Inline editing of session fields
  *  6. Export CSV

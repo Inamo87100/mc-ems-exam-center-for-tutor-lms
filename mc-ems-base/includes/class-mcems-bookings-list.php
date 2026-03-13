@@ -54,7 +54,7 @@ class MCEMS_Bookings_List_Base {
         return null;
     }
 
-    private static function build_rows(array $filter, int $selected_course): array {
+    private static function build_rows(array $filter, int $selected_exam): array {
         $meta = [];
         if (($filter['type'] ?? '') === 'single' && !empty($filter['date'])) {
             $meta[] = [
@@ -70,10 +70,10 @@ class MCEMS_Bookings_List_Base {
                 'type'    => 'DATE',
             ];
         }
-        if ($selected_course > 0) {
+        if ($selected_exam > 0) {
             $meta[] = [
-                'key'     => MCEMS_CPT_Sessioni_Esame::MK_COURSE_ID,
-                'value'   => $selected_course,
+                'key'     => MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID,
+                'value'   => $selected_exam,
                 'compare' => '=',
             ];
         }
@@ -94,7 +94,7 @@ class MCEMS_Bookings_List_Base {
             $sid = (int) $sid;
             $date      = (string) get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_DATE, true);
             $time      = (string) get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_TIME, true);
-            $course_id = (int) get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_COURSE_ID, true);
+            $exam_id = (int) get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, true);
 
             $occ = get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, true);
             if (!is_array($occ) || empty($occ)) continue;
@@ -121,7 +121,7 @@ class MCEMS_Bookings_List_Base {
                     'email'   => $u->user_email,
                     'data'    => $date,
                     'ora'     => $time,
-                    'corso'   => $course_id,
+                    'corso'   => $exam_id,
                     'special' => $is_special,
                     'proctor' => $proctor_label,
                 ];
@@ -151,7 +151,7 @@ class MCEMS_Bookings_List_Base {
         $selected_date  = isset($_GET['mcems_date']) ? sanitize_text_field($_GET['mcems_date']) : '';
         $date_from      = isset($_GET['mcems_from']) ? sanitize_text_field($_GET['mcems_from']) : '';
         $date_to        = isset($_GET['mcems_to']) ? sanitize_text_field($_GET['mcems_to']) : '';
-        $selected_course = isset($_GET['mcems_course']) ? (int) $_GET['mcems_course'] : 0;
+        $selected_exam = isset($_GET['mcems_exam']) ? (int) $_GET['mcems_exam'] : 0;
         $advanced       = isset($_GET['mcems_adv']) && (string) $_GET['mcems_adv'] === '1';
 
         $filter = self::normalize_date_filter($selected_date, $date_from, $date_to, $advanced);
@@ -161,23 +161,23 @@ class MCEMS_Bookings_List_Base {
             exit;
         }
 
-        $rows = self::build_rows($filter, $selected_course);
+        $rows = self::build_rows($filter, $selected_exam);
 
         $label = ($filter['type'] ?? '') === 'single'
             ? (string) ($filter['date'] ?? '')
             : ((string) ($filter['from'] ?? '') . '_' . (string) ($filter['to'] ?? ''));
         $filename = 'exam_bookings_' . $label;
 
-        if ($selected_course > 0) {
-            $course_title = '';
+        if ($selected_exam > 0) {
+            $exam_title = '';
             if (class_exists('MCEMS_Tutor')) {
-                $course_title = (string) MCEMS_Tutor::course_title($selected_course);
+                $exam_title = (string) MCEMS_Tutor::exam_title($selected_exam);
             }
-            if (!$course_title) {
-                $course_title = (string) get_the_title($selected_course);
+            if (!$exam_title) {
+                $exam_title = (string) get_the_title($selected_exam);
             }
-            $course_slug = sanitize_file_name($course_title ? $course_title : ('course-' . $selected_course));
-            $filename .= '_' . $course_slug;
+            $exam_slug = sanitize_file_name($exam_title ? $exam_title : ('exam-' . $selected_exam));
+            $filename .= '_' . $exam_slug;
         }
 
         $filename .= '.csv';
@@ -193,13 +193,13 @@ class MCEMS_Bookings_List_Base {
         // UTF-8 BOM for Excel
         fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-        fputcsv($out, ['Last name', 'First name', 'Email', 'Session ID', 'Exam session date', 'Exam session time', 'Course', 'Special', 'Proctor'], ';');
+        fputcsv($out, ['Last name', 'First name', 'Email', 'Session ID', 'Exam session date', 'Exam session time', 'Exam', 'Special', 'Proctor'], ';');
 
         foreach ($rows as $r) {
             $data_h = !empty($r['data']) ? date_i18n('d/m/Y', strtotime($r['data'])) : '';
             $corso_t = '';
             if (!empty($r['corso']) && class_exists('MCEMS_Tutor')) {
-                $corso_t = MCEMS_Tutor::course_title((int) $r['corso']);
+                $corso_t = MCEMS_Tutor::exam_title((int) $r['corso']);
             }
             $spec = !empty($r['special']) ? 'Yes' : 'No';
 
@@ -224,13 +224,13 @@ class MCEMS_Bookings_List_Base {
         if (!is_user_logged_in()) return '<p>You must be logged in.</p>';
         if (!self::can_view()) return '<p>Insufficient permissions.</p>';
 
-        $courses = MCEMS_Tutor::get_courses();
-        $course_pt = MCEMS_Tutor::course_post_type();
+        $exams = MCEMS_Tutor::get_exams();
+        $exam_pt = MCEMS_Tutor::exam_post_type();
 
         $selected_date  = isset($_GET['mcems_date']) ? sanitize_text_field($_GET['mcems_date']) : '';
         $date_from      = isset($_GET['mcems_from']) ? sanitize_text_field($_GET['mcems_from']) : '';
         $date_to        = isset($_GET['mcems_to']) ? sanitize_text_field($_GET['mcems_to']) : '';
-        $selected_course = isset($_GET['mcems_course']) ? (int) $_GET['mcems_course'] : 0;
+        $selected_exam = isset($_GET['mcems_exam']) ? (int) $_GET['mcems_exam'] : 0;
         $advanced       = isset($_GET['mcems_adv']) && (string) $_GET['mcems_adv'] === '1';
 
         $filter     = self::normalize_date_filter($selected_date, $date_from, $date_to, $advanced);
@@ -265,7 +265,7 @@ class MCEMS_Bookings_List_Base {
         <div class="mcems-adminwrap">
             <div class="mcems-panel">
                 <h3 class="mcems-title"><?php echo esc_html('Bookings list'); ?></h3>
-                <p class="mcems-desc"><?php echo sprintf(esc_html('Filter by %1$sdate%2$s (single day or date range). You can also filter by course.'), '<strong>', '</strong>'); ?></p>
+                <p class="mcems-desc"><?php echo sprintf(esc_html('Filter by %1$sdate%2$s (single day or date range). You can also filter by exam.'), '<strong>', '</strong>'); ?></p>
 
                 <div class="mcems-search-toggle" style="margin:8px 0 14px 0;">
                     <button type="button" id="mcems_adv_btn" class="mcems-btn" aria-pressed="false">
@@ -289,11 +289,11 @@ class MCEMS_Bookings_List_Base {
                             <input type="date" id="mcems_date" name="mcems_date" value="<?php echo esc_attr($selected_date); ?>">
                         </div>
                         <div class="mcems-field">
-                            <label for="mcems_course"><?php echo esc_html('Course'); ?></label>
-                            <select id="mcems_course" name="mcems_course">
-                                <option value="0"><?php echo esc_html('All courses'); ?></option>
-                                <?php if ($course_pt && $courses): foreach ($courses as $cid => $title): ?>
-                                    <option value="<?php echo (int) $cid; ?>" <?php selected($selected_course, (int) $cid); ?>>
+                            <label for="mcems_exam"><?php echo esc_html('Exam'); ?></label>
+                            <select id="mcems_exam" name="mcems_exam">
+                                <option value="0"><?php echo esc_html('All exams'); ?></option>
+                                <?php if ($exam_pt && $exams): foreach ($exams as $cid => $title): ?>
+                                    <option value="<?php echo (int) $cid; ?>" <?php selected($selected_exam, (int) $cid); ?>>
                                         <?php echo esc_html($title); ?>
                                     </option>
                                 <?php endforeach; endif; ?>
@@ -311,11 +311,11 @@ class MCEMS_Bookings_List_Base {
                             <input type="date" id="mcems_to" name="mcems_to" value="<?php echo esc_attr($date_to); ?>">
                         </div>
                         <div class="mcems-field">
-                            <label for="mcems_course_adv"><?php echo esc_html('Course'); ?></label>
-                            <select id="mcems_course_adv" name="mcems_course">
-                                <option value="0"><?php echo esc_html('All courses'); ?></option>
-                                <?php if ($course_pt && $courses): foreach ($courses as $cid => $title): ?>
-                                    <option value="<?php echo (int) $cid; ?>" <?php selected($selected_course, (int) $cid); ?>>
+                            <label for="mcems_exam_adv"><?php echo esc_html('Exam'); ?></label>
+                            <select id="mcems_exam_adv" name="mcems_exam">
+                                <option value="0"><?php echo esc_html('All exams'); ?></option>
+                                <?php if ($exam_pt && $exams): foreach ($exams as $cid => $title): ?>
+                                    <option value="<?php echo (int) $cid; ?>" <?php selected($selected_exam, (int) $cid); ?>>
                                         <?php echo esc_html($title); ?>
                                     </option>
                                 <?php endforeach; endif; ?>
@@ -325,7 +325,7 @@ class MCEMS_Bookings_List_Base {
 
                     <div class="mcems-actions">
                         <button class="mcems-btn" type="submit"><?php echo esc_html('Filter'); ?></button>
-                        <a class="mcems-link" href="<?php echo esc_url(remove_query_arg(['mcems_date', 'mcems_from', 'mcems_to', 'mcems_course', 'mcems_adv'])); ?>">Reset</a>
+                        <a class="mcems-link" href="<?php echo esc_url(remove_query_arg(['mcems_date', 'mcems_from', 'mcems_to', 'mcems_exam', 'mcems_adv'])); ?>">Reset</a>
                         <?php if ($has_filter): ?>
                             <button class="mcems-btn" type="submit" name="mcems_export" value="csv"><?php echo esc_html('Export CSV'); ?></button>
                         <?php endif; ?>
@@ -372,7 +372,7 @@ class MCEMS_Bookings_List_Base {
                 <?php else: ?>
 
                     <?php
-                    $rows = self::build_rows($filter, $selected_course);
+                    $rows = self::build_rows($filter, $selected_exam);
 
                     $label = '';
                     if (($filter['type'] ?? '') === 'single' && !empty($filter['date'])) {
@@ -383,10 +383,10 @@ class MCEMS_Bookings_List_Base {
                     ?>
                     <div class="mcems-hint">
                         <span class="mcems-pill">📅 <?php echo esc_html('Date:'); ?> <strong><?php echo esc_html($label); ?></strong></span>
-                        <?php if ($selected_course > 0): ?>
-                            <span class="mcems-pill">📘 <?php echo esc_html('Course:'); ?> <strong><?php echo esc_html(MCEMS_Tutor::course_title($selected_course)); ?></strong></span>
+                        <?php if ($selected_exam > 0): ?>
+                            <span class="mcems-pill">📘 <?php echo esc_html('Exam:'); ?> <strong><?php echo esc_html(MCEMS_Tutor::exam_title($selected_exam)); ?></strong></span>
                         <?php else: ?>
-                            <span class="mcems-pill">📘 <?php echo esc_html('Course:'); ?> <strong><?php echo esc_html('All'); ?></strong></span>
+                            <span class="mcems-pill">📘 <?php echo esc_html('Exam:'); ?> <strong><?php echo esc_html('All'); ?></strong></span>
                         <?php endif; ?>
                         <span class="mcems-pill">👥 <?php echo esc_html('Bookings:'); ?> <strong><?php echo (int) count($rows); ?></strong></span>
                     </div>
@@ -401,7 +401,7 @@ class MCEMS_Bookings_List_Base {
                                     <th><?php echo esc_html('Session ID'); ?></th>
                                     <th><?php echo esc_html('Exam session date'); ?></th>
                                     <th><?php echo esc_html('Exam session time'); ?></th>
-                                    <th><?php echo esc_html('Course'); ?></th>
+                                    <th><?php echo esc_html('Exam'); ?></th>
                                     <th>♿</th>
                                     <th><?php echo esc_html('Proctor'); ?></th>
                                 </tr>
@@ -417,7 +417,7 @@ class MCEMS_Bookings_List_Base {
                                     <td><?php echo esc_html($r['session_id']); ?></td>
                                     <td><?php echo esc_html(date_i18n('d/m/Y', strtotime($r['data']))); ?></td>
                                     <td><?php echo esc_html($r['ora']); ?></td>
-                                    <td><?php echo esc_html(MCEMS_Tutor::course_title((int) $r['corso'])); ?></td>
+                                    <td><?php echo esc_html(MCEMS_Tutor::exam_title((int) $r['corso'])); ?></td>
                                     <td><?php echo self::badge_special(!empty($r['special'])); ?></td>
                                     <td><?php echo esc_html($r['proctor']); ?></td>
                                 </tr>

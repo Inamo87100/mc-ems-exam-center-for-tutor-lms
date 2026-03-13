@@ -9,16 +9,16 @@ if (!defined('ABSPATH')) exit;
  * at routing level and renders a locked page (theme-friendly) before anything else.
  *
  * Data source:
- * - user_meta: mcems_active_bookings[course_id]['slot_id']
+ * - user_meta: mcems_active_bookings[exam_id]['slot_id']
  * - session post meta: MCEMS_CPT_Sessioni_Esame::MK_DATE + MK_TIME
  */
 class MCEMS_Tutor_Gate {
 
     const SIDEBAR_SELECTOR      = '.tutor-card.tutor-card-md.tutor-sidebar-card';
-    const DETAILS_TAB_SELECTOR  = '.tutor-course-details-tab.tutor-mt-32';
+    const DETAILS_TAB_SELECTOR  = '.tutor-exam-details-tab.tutor-mt-32';
 
     public static function init(): void {
-        add_action('template_redirect', [__CLASS__, 'maybe_block_course_page'], 0);
+        add_action('template_redirect', [__CLASS__, 'maybe_block_exam_page'], 0);
     }
 
     private static function enabled(): bool {
@@ -73,11 +73,11 @@ class MCEMS_Tutor_Gate {
         return false;
     }
 
-    private static function course_post_types(): array {
-        $pts = ['courses', 'tutor_course'];
+    private static function exam_post_types(): array {
+        $pts = ['exams', 'tutor_exam'];
 
-        if (class_exists('MCEMS_Tutor') && method_exists('MCEMS_Tutor', 'course_post_type')) {
-            $pt = (string) MCEMS_Tutor::course_post_type();
+        if (class_exists('MCEMS_Tutor') && method_exists('MCEMS_Tutor', 'exam_post_type')) {
+            $pt = (string) MCEMS_Tutor::exam_post_type();
             if ($pt && !in_array($pt, $pts, true)) {
                 $pts[] = $pt;
             }
@@ -101,30 +101,30 @@ class MCEMS_Tutor_Gate {
         return 0;
     }
 
-    private static function is_course_page(?int $object_id = null): bool {
+    private static function is_exam_page(?int $object_id = null): bool {
         if (!is_singular()) return false;
 
         $object_id = $object_id ?: self::current_object_id();
         if ($object_id <= 0) return false;
 
         $pt = get_post_type($object_id);
-        return in_array($pt, self::course_post_types(), true);
+        return in_array($pt, self::exam_post_types(), true);
     }
 
-    private static function get_active_slot_id(int $user_id, int $course_id): int {
+    private static function get_active_slot_id(int $user_id, int $exam_id): int {
         $map = get_user_meta($user_id, 'mcems_active_bookings', true);
         $map = is_array($map) ? $map : [];
 
-        $slot_id = (int) ($map[$course_id]['slot_id'] ?? 0);
+        $slot_id = (int) ($map[$exam_id]['slot_id'] ?? 0);
 
         // backward compatibility: legacy single booking
         if ($slot_id <= 0) {
             $legacy = get_user_meta($user_id, 'mcems_active_booking', true);
             if (is_array($legacy)) {
-                $legacy_course_id = (int) ($legacy['course_id'] ?? 0);
+                $legacy_exam_id = (int) ($legacy['exam_id'] ?? 0);
                 $legacy_slot_id   = (int) ($legacy['slot_id'] ?? 0);
 
-                if ($legacy_course_id === $course_id && $legacy_slot_id > 0) {
+                if ($legacy_exam_id === $exam_id && $legacy_slot_id > 0) {
                     $slot_id = $legacy_slot_id;
                 }
             }
@@ -135,7 +135,7 @@ class MCEMS_Tutor_Gate {
             : 'mcems_exam_session';
 
         if ($slot_id > 0 && get_post_type($slot_id) !== $cpt) {
-            unset($map[$course_id]);
+            unset($map[$exam_id]);
             update_user_meta($user_id, 'mcems_active_bookings', $map);
             return 0;
         }
@@ -192,7 +192,7 @@ class MCEMS_Tutor_Gate {
 
         get_header();
 
-        echo '<div class="mcems-locked-course" style="max-width:820px;margin:28px auto;padding:18px;border-radius:16px;border:1px solid #fda29b;background:#fffbfa;box-shadow:0 10px 30px rgba(16,24,40,.08);">';
+        echo '<div class="mcems-locked-exam" style="max-width:820px;margin:28px auto;padding:18px;border-radius:16px;border:1px solid #fda29b;background:#fffbfa;box-shadow:0 10px 30px rgba(16,24,40,.08);">';
         echo '<div style="font-weight:900;color:#b42318;font-size:18px;margin-bottom:8px;">' . esc_html($title) . '</div>';
         echo '<div style="color:#7a271a;font-weight:800;font-size:14px;line-height:1.5;">' . $body_html . '</div>';
         echo '</div>';
@@ -210,9 +210,9 @@ class MCEMS_Tutor_Gate {
             echo '<style>' .
                 self::SIDEBAR_SELECTOR . '{display:none!important}' .
                 self::DETAILS_TAB_SELECTOR . '{display:none!important}' .
-                '.mcems-locked-course{max-width:820px;margin:28px auto;padding:18px;border-radius:16px;border:1px solid #fda29b;background:#fffbfa;box-shadow:0 10px 30px rgba(16,24,40,.08);}' .
-                '.mcems-locked-course__title{font-weight:900;color:#b42318;font-size:18px;margin-bottom:8px;}' .
-                '.mcems-locked-course__body{color:#7a271a;font-weight:800;font-size:14px;line-height:1.5;}' .
+                '.mcems-locked-exam{max-width:820px;margin:28px auto;padding:18px;border-radius:16px;border:1px solid #fda29b;background:#fffbfa;box-shadow:0 10px 30px rgba(16,24,40,.08);}' .
+                '.mcems-locked-exam__title{font-weight:900;color:#b42318;font-size:18px;margin-bottom:8px;}' .
+                '.mcems-locked-exam__body{color:#7a271a;font-weight:800;font-size:14px;line-height:1.5;}' .
                 '</style>' . "\n";
         });
 
@@ -234,9 +234,9 @@ class MCEMS_Tutor_Gate {
                 'var sidebar=document.querySelector(' . wp_json_encode(self::SIDEBAR_SELECTOR) . ');' .
                 'if(!sidebar)return;' .
                 'var box=document.createElement("div");' .
-                'box.className="mcems-locked-course";' .
-                'box.innerHTML=\'<div class="mcems-locked-course__title">\'+' . $title_json . '+\'</div>\'' .
-                '+\'<div class="mcems-locked-course__body">\'+' . $body_json . '+\'</div>\';' .
+                'box.className="mcems-locked-exam";' .
+                'box.innerHTML=\'<div class="mcems-locked-exam__title">\'+' . $title_json . '+\'</div>\'' .
+                '+\'<div class="mcems-locked-exam__body">\'+' . $body_json . '+\'</div>\';' .
                 'sidebar.parentNode.insertBefore(box,sidebar);' .
                 '})();' .
                 '</script>' . "\n";
@@ -253,32 +253,32 @@ class MCEMS_Tutor_Gate {
         return $mb;
     }
 
-    private static function get_gate_course_ids(): array {
-        $gate_courses = [];
+    private static function get_gate_exam_ids(): array {
+        $gate_exams = [];
 
-        if (class_exists('MCEMS_Settings') && method_exists('MCEMS_Settings', 'get_gate_course_ids')) {
-            $gate_courses = (array) MCEMS_Settings::get_gate_course_ids();
+        if (class_exists('MCEMS_Settings') && method_exists('MCEMS_Settings', 'get_gate_exam_ids')) {
+            $gate_exams = (array) MCEMS_Settings::get_gate_exam_ids();
         } else {
             if (class_exists('MCEMS_Settings') && method_exists('MCEMS_Settings', 'get')) {
                 $o = (array) MCEMS_Settings::get();
-                $gate_courses = is_array($o['tutor_gate_course_ids'] ?? null) ? $o['tutor_gate_course_ids'] : [];
+                $gate_exams = is_array($o['tutor_gate_exam_ids'] ?? null) ? $o['tutor_gate_exam_ids'] : [];
             }
         }
 
-        return array_values(array_unique(array_filter(array_map('absint', (array) $gate_courses))));
+        return array_values(array_unique(array_filter(array_map('absint', (array) $gate_exams))));
     }
 
-    public static function maybe_block_course_page(): void {
+    public static function maybe_block_exam_page(): void {
         if (!self::enabled()) return;
         if (is_admin()) return;
 
-        $course_id = self::current_object_id();
-        if ($course_id <= 0) return;
+        $exam_id = self::current_object_id();
+        if ($exam_id <= 0) return;
 
-        if (!self::is_course_page($course_id)) return;
+        if (!self::is_exam_page($exam_id)) return;
 
-        $gate_courses = self::get_gate_course_ids();
-        if (!empty($gate_courses) && !in_array($course_id, $gate_courses, true)) {
+        $gate_exams = self::get_gate_exam_ids();
+        if (!empty($gate_exams) && !in_array($exam_id, $gate_exams, true)) {
             return;
         }
 
@@ -287,7 +287,7 @@ class MCEMS_Tutor_Gate {
         if ($user_id <= 0) {
             self::inject_sidebar_block(
                 __('Restricted access', 'mc-ems'),
-                esc_html__('You must be logged in to access this course.', 'mc-ems')
+                esc_html__('You must be logged in to access this exam.', 'mc-ems')
             );
             return;
         }
@@ -296,20 +296,20 @@ class MCEMS_Tutor_Gate {
             return;
         }
 
-        $slot_id = self::get_active_slot_id($user_id, $course_id);
+        $slot_id = self::get_active_slot_id($user_id, $exam_id);
 
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log(
                 '[MCEMS Tutor Gate] enabled=' . (self::enabled() ? '1' : '0') .
-                ' course_id=' . $course_id .
+                ' exam_id=' . $exam_id .
                 ' user_id=' . $user_id .
                 ' slot_id=' . $slot_id .
-                ' pt=' . get_post_type($course_id)
+                ' pt=' . get_post_type($exam_id)
             );
         }
 
         if ($slot_id <= 0) {
-            $body = esc_html__('To access, you must first create an exam booking for an exam session in this course.', 'mc-ems');
+            $body = esc_html__('To access, you must first create an exam booking for an exam session in this exam.', 'mc-ems');
 
             $mb = self::get_manage_booking_url();
             if ($mb) {
@@ -317,7 +317,7 @@ class MCEMS_Tutor_Gate {
             }
 
             self::inject_sidebar_block(
-                esc_html__('Course access not available', 'mc-ems'),
+                esc_html__('Exam access not available', 'mc-ems'),
                 $body
             );
             return;
@@ -327,7 +327,7 @@ class MCEMS_Tutor_Gate {
 
         if ($session_ts <= 0) {
             self::inject_sidebar_block(
-                __('Course access not available', 'mc-ems'),
+                __('Exam access not available', 'mc-ems'),
                 esc_html__('Your exam booking does not contain a valid date/time. Please contact support.', 'mc-ems')
             );
             return;
@@ -344,12 +344,12 @@ class MCEMS_Tutor_Gate {
                 $map = get_user_meta($user_id, 'mcems_active_bookings', true);
                 $map = is_array($map) ? $map : [];
 
-                if (isset($map[$course_id])) {
-                    unset($map[$course_id]);
+                if (isset($map[$exam_id])) {
+                    unset($map[$exam_id]);
                     update_user_meta($user_id, 'mcems_active_bookings', $map);
                 }
 
-                $body = esc_html__('Your exam booking has expired and is no longer valid to access this course. Please book a new exam session.', 'mc-ems');
+                $body = esc_html__('Your exam booking has expired and is no longer valid to access this exam. Please book a new exam session.', 'mc-ems');
 
                 $mb = self::get_manage_booking_url();
                 if ($mb) {
@@ -357,7 +357,7 @@ class MCEMS_Tutor_Gate {
                 }
 
                 self::inject_sidebar_block(
-                    esc_html__('Course access not available', 'mc-ems'),
+                    esc_html__('Exam access not available', 'mc-ems'),
                     $body
                 );
                 return;
@@ -371,7 +371,7 @@ class MCEMS_Tutor_Gate {
         $unlock_h = wp_date('d/m/Y \a\t H:i', $unlock_ts, wp_timezone());
 
         self::inject_sidebar_block(
-            esc_html__('Course locked', 'mc-ems'),
+            esc_html__('Exam locked', 'mc-ems'),
             sprintf(
                 '%s <strong>%s</strong>.',
                 esc_html__('You can access starting from', 'mc-ems'),
