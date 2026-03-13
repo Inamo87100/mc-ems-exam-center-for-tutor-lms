@@ -74,7 +74,7 @@ class MCEMS_Tutor_Gate {
     }
 
     private static function exam_post_types(): array {
-        $pts = ['exams', 'tutor_exam'];
+        $pts = ['courses', 'tutor_course'];
 
         if (class_exists('MCEMS_Tutor') && method_exists('MCEMS_Tutor', 'exam_post_type')) {
             $pt = (string) MCEMS_Tutor::exam_post_type();
@@ -309,7 +309,7 @@ class MCEMS_Tutor_Gate {
         }
 
         if ($slot_id <= 0) {
-            $body = esc_html__('To access, you must first create an exam booking for an exam session in this exam.', 'mc-ems');
+            $body = esc_html__('To access, you must first create a booking for an exam session.', 'mc-ems');
 
             $mb = self::get_manage_booking_url();
             if ($mb) {

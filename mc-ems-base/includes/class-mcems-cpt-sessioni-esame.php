@@ -184,7 +184,7 @@ class MCEMS_CPT_Sessioni_Esame {
 
         echo '<tr><th><label>Tutor LMS exam</label></th><td>';
 if (!$exam_pt) {
-    echo '<em>Tutor LMS not detected (exam post type not found: <code>exams</code> / <code>tutor_exam</code>).</em>';
+    echo '<em>Tutor LMS not detected (exam post type not found: <code>courses</code> / <code>tutor_course</code>).</em>';
 } else {
     echo '<select name="mcems_exam_id" required ' . $disabled . '><option value="0">— Select exam —</option>';
     foreach ($exams as $cid => $title) {

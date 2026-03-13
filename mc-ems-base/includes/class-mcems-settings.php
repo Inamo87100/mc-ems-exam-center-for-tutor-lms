@@ -315,7 +315,7 @@ class MCEMS_Settings {
 
         add_settings_field('email_send_booking_cancellation', __('Exam booking cancellation email', 'mc-ems'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_send_booking_cancellation',
-            'desc'=> __('Send a confirmation email to the candidate after a exam booking is cancelled.', 'mc-ems')
+            'desc'=> __('Send a confirmation email to the candidate after an exam booking is cancelled.', 'mc-ems')
         ]);
 
         add_settings_field('email_send_admin_booking', __('Admin exam booking notification', 'mc-ems'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
@@ -325,7 +325,7 @@ class MCEMS_Settings {
 
         add_settings_field('email_send_admin_cancellation', __('Admin exam booking cancellation notification', 'mc-ems'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_send_admin_cancellation',
-            'desc'=> __('Notify the configured admin recipients when a exam booking is cancelled.', 'mc-ems')
+            'desc'=> __('Notify the configured admin recipients when an exam booking is cancelled.', 'mc-ems')
         ]);
 
         add_settings_field('cal_allow_reassign', __('Allow proctor reassignment', 'mc-ems'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [

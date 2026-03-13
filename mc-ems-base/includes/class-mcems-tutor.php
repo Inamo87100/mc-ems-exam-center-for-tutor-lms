@@ -26,8 +26,8 @@ class MCEMS_Tutor {
     }
 
     public static function exam_post_type(): string {
-        if (post_type_exists('exams')) return 'exams';
-        if (post_type_exists('tutor_exam')) return 'tutor_exam';
+        if (post_type_exists('courses')) return 'courses';
+        if (post_type_exists('tutor_course')) return 'tutor_course';
         return '';
     }
 
@@ -66,8 +66,8 @@ class MCEMS_Tutor {
         }
 
         // Primary path: Tutor LMS utility helper.
-        if (self::is_tutor_active() && function_exists('tutor_utils') && method_exists(tutor_utils(), 'get_students_data_by_exam_id')) {
-            $students = tutor_utils()->get_students_data_by_exam_id($exam_id);
+        if (self::is_tutor_active() && function_exists('tutor_utils') && method_exists(tutor_utils(), 'get_students_data_by_course_id')) {
+            $students = tutor_utils()->get_students_data_by_course_id($exam_id);
             return is_array($students) ? $students : [];
         }
 
@@ -110,7 +110,7 @@ class MCEMS_Tutor {
     }
 
     /**
-     * Check whether a user has a valid (active) Tutor LMS enrollment for a exam.
+     * Check whether a user has a valid (active) Tutor LMS enrollment for an exam.
      * Admins and instructors are always considered enrolled.
      */
     public static function is_user_enrolled(int $user_id, int $exam_id): bool {

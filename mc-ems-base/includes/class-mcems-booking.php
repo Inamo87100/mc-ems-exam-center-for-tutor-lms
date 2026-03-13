@@ -402,7 +402,7 @@ class MCEMS_Booking {
                             .then(data => {
                                 if (data && data.has_booking) {
                                     let msg = '<p style="text-align:center;">'
-                                        + '<?php echo esc_js(__('You already have an active exam booking for this exam.', 'mc-ems')); ?>'
+                                        + '<?php echo esc_js(__('You already have an active booking for this exam.', 'mc-ems')); ?>'
                                         + '<br>';
                                     if (manageBookingUrl) {
                                         msg += '<?php echo esc_js(__('Go to', 'mc-ems')); ?> <a href="' + manageBookingUrl + '">'
@@ -428,7 +428,7 @@ class MCEMS_Booking {
                         if (!examSelect || !examSelect.value) {
                             if (dateInput) dateInput.value = '';
                             showCalendar(false);
-                            resetSlots('<p style="color:#888;">Select a exam first.</p>');
+                            resetSlots('<p style="color:#888;">Select an exam first.</p>');
                             return false;
                         }
                         showCalendar(true);
@@ -705,7 +705,7 @@ class MCEMS_Booking {
                         renderBookingCalendar();
                     } else {
                         showCalendar(false);
-                        resetSlots('<p style="color:#888;">Select a exam first.</p>');
+                        resetSlots('<p style="color:#888;">Select an exam first.</p>');
                     }
                 });
                 </script>
@@ -878,7 +878,7 @@ class MCEMS_Booking {
         $year      = isset($_GET['year']) ? (int) $_GET['year'] : 0;
         $month     = isset($_GET['month']) ? (int) $_GET['month'] : 0;
 
-        if ($exam_id <= 0) wp_send_json(['error' => 'Select a exam.']);
+        if ($exam_id <= 0) wp_send_json(['error' => 'Select an exam.']);
         if ($year <= 0 || $month < 1 || $month > 12) wp_send_json([]);
 
         $user_id = (int) get_current_user_id();
@@ -947,7 +947,7 @@ class MCEMS_Booking {
         $exam_id = isset($_GET['exam_id']) ? (int) $_GET['exam_id'] : 0;
 
         if (!$data) wp_send_json([]);
-        if ($exam_id <= 0) wp_send_json(['error' => 'Select a exam.']);
+        if ($exam_id <= 0) wp_send_json(['error' => 'Select an exam.']);
 
         $user_id = (int) get_current_user_id();
 
@@ -1020,13 +1020,13 @@ class MCEMS_Booking {
 
         $exam_id = (int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, true);
         if ($exam_id <= 0) {
-            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">Exam session is not associated with a exam.</p>';
+            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">Exam session is not associated with an exam.</p>';
             wp_die();
         }
 
         $active_for_exam = self::get_active_booking_for_exam($user_id, $exam_id);
         if (!empty($active_for_exam['slot_id']) && (int) $active_for_exam['slot_id'] !== $slot_id) {
-            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">You already have an active exam booking for this exam.</p>';
+            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">You already have an active booking for this exam.</p>';
             wp_die();
         }
 
