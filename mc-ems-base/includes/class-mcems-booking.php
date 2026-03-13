@@ -808,9 +808,9 @@ class MCEMS_Booking {
                 $manage_url = MCEMS_Settings::get_manage_booking_page_url();
                 if ($manage_url) {
                     $manage_link = '<a href="' . esc_url($manage_url) . '">' . esc_html__('Manage exam booking', 'mc-ems') . '</a>';
-                    $msg = sprintf(__('You already have an active exam booking for this course. Go to %s to cancel it.', 'mc-ems'), $manage_link);
+                    $msg = '<div style="text-align: center;">' . sprintf(__('You already have an active exam booking for this course.<br>Go to %s to cancel it.', 'mc-ems'), $manage_link) . '</div>';
                 } else {
-                    $msg = __('You already have an active exam booking for this course. Please open the Manage exam booking page to cancel it.', 'mc-ems');
+                    $msg = '<div style="text-align: center;">' . __('You already have an active exam booking for this course.<br>Please open the Manage exam booking page to cancel it.', 'mc-ems') . '</div>';
                 }
                 wp_send_json(['error' => $msg]);
             }
@@ -890,12 +890,12 @@ class MCEMS_Booking {
                 $manage_url = MCEMS_Settings::get_manage_booking_page_url();
                 if ($manage_url) {
                     $manage_link = '<a href="' . esc_url($manage_url) . '">' . esc_html__('Manage exam booking', 'mc-ems') . '</a>';
-                    $msg = sprintf(
-                        __('You already have an active exam booking for this course. Go to %s to cancel it.', 'mc-ems'),
+                    $msg = '<div style="text-align: center;">' . sprintf(
+                        __('You already have an active exam booking for this course.<br>Go to %s to cancel it.', 'mc-ems'),
                         $manage_link
-                    );
+                    ) . '</div>';
                 } else {
-                    $msg = __('You already have an active exam booking for this course. Please open the Manage exam booking page to cancel it.', 'mc-ems');
+                    $msg = '<div style="text-align: center;">' . __('You already have an active exam booking for this course.<br>Please open the Manage exam booking page to cancel it.', 'mc-ems') . '</div>';
                 }
                 wp_send_json(['error' => $msg]);
             }
