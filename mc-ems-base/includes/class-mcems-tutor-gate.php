@@ -14,7 +14,8 @@ if (!defined('ABSPATH')) exit;
  */
 class MCEMS_Tutor_Gate {
 
-    const SIDEBAR_SELECTOR = '.tutor-card.tutor-card-md.tutor-sidebar-card';
+    const SIDEBAR_SELECTOR      = '.tutor-card.tutor-card-md.tutor-sidebar-card';
+    const DETAILS_TAB_SELECTOR  = '.tutor-course-details-tab.tutor-mt-32';
 
     public static function init(): void {
         add_action('template_redirect', [__CLASS__, 'maybe_block_course_page'], 0);
@@ -208,6 +209,7 @@ class MCEMS_Tutor_Gate {
         add_action('wp_head', function() {
             echo '<style>' .
                 self::SIDEBAR_SELECTOR . '{display:none!important}' .
+                self::DETAILS_TAB_SELECTOR . '{display:none!important}' .
                 '.mcems-locked-course{max-width:820px;margin:28px auto;padding:18px;border-radius:16px;border:1px solid #fda29b;background:#fffbfa;box-shadow:0 10px 30px rgba(16,24,40,.08);}' .
                 '.mcems-locked-course__title{font-weight:900;color:#b42318;font-size:18px;margin-bottom:8px;}' .
                 '.mcems-locked-course__body{color:#7a271a;font-weight:800;font-size:14px;line-height:1.5;}' .
