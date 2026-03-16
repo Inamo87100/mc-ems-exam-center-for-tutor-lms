@@ -1,99 +1,99 @@
-# MC-EMS – Exam Session Management for WordPress & Tutor LMS
+# MC-EMS – Exam Session Management for Tutor LMS
 
-MC-EMS è un plugin WordPress avanzato che trasforma Tutor LMS in un vero e proprio sistema di gestione degli esami. Il plugin permette di organizzare sessioni d'esame, gestire le prenotazioni degli studenti e controllare automaticamente l'accesso agli esami in base alla presenza di una prenotazione valida.
+MC-EMS is a complete **exam management** plugin for WordPress and **Tutor LMS**. It lets you create exam sessions, manage **exam bookings** with an interactive booking calendar, assign proctors, export data to CSV, and automatically control exam access — all from your WordPress dashboard.
 
-Grazie a MC-EMS è possibile strutturare esami programmati tramite sessioni calendarizzate, offrire un sistema di prenotazione intuitivo e gestire tutte le prenotazioni da un unico pannello amministrativo.
+Whether you run a **certification** programme, a university, or a large **elearning** platform, MC-EMS integrates directly with Tutor LMS to bring structured **exam scheduling**, **student booking**, and access-gate enforcement into your **learning management system**.
 
-## Ideale per
+## Ideal for
 
-- Enti di certificazione
-- Università e accademie
-- Piattaforme e‑learning basate su Tutor LMS
-- Scuole e centri di formazione professionale
-- Organizzazioni che gestiscono esami programmati
+- Certification bodies
+- Universities and academies
+- Elearning platforms based on Tutor LMS
+- Schools and professional training centres
+- Organisations managing scheduled exams
 
-## Funzionalità principali
+## Features
 
-### Gestione delle Sessioni di Esame
+### Exam Session Management
 
-MC-EMS introduce un Custom Post Type dedicato alle sessioni di esame (mcems_exam_session). Ogni sessione include data, orario, esame associato, capienza e configurazioni operative. Le sessioni sono gestibili direttamente dal pannello WordPress tramite un'interfaccia semplice e intuitiva.
+MC-EMS introduces a dedicated Custom Post Type for **exam sessions** (`mcems_exam_session`). Each session stores date, time, associated exam, capacity, and operational settings. Sessions are fully manageable from the WordPress admin panel through an intuitive interface.
 
-### Prenotazione Esami tramite Calendario
+### Exam Booking Calendar
 
 **Shortcode**: `[mcems_book_exam]`
 
-Gli studenti possono prenotare una sessione di esame tramite un calendario interattivo che mostra tutte le sessioni disponibili filtrate per data.
+Students can book an **exam session** using an interactive **booking calendar** that displays all available sessions filtered by date.
 
-### Gestione della Prenotazione da parte dello Studente
+### Student Booking Management
 
 **Shortcode**: `[mcems_manage_booking]`
 
-Gli studenti possono visualizzare e gestire la propria prenotazione, controllare data e ora dell'esame, vedere i dettagli dell'esame associato e annullare la prenotazione quando consentito.
+Students can view and manage their own booking, check the exam date and time, see the associated course details, and cancel the booking when permitted.
 
-### Gestione Prenotazioni con Ricerca ed Export CSV
+### Bookings List with Search and CSV Export
 
 **Shortcode**: `[mcems_bookings_list]`
 
-- Elenco completo delle prenotazioni
-- Ricerca per data o intervallo di date
-- Filtri per esame, candidato e stato
-- Esportazione delle prenotazioni in CSV
-- Visualizzazione esigenze speciali dei candidati
-- Informazioni sul proctor assegnato
+- Complete list of all bookings
+- Search by date or date range
+- Filters by exam, candidate, and status
+- Export bookings to CSV
+- Display of candidate special needs
+- Assigned proctor information
 
-### Calendario Amministrativo delle Sessioni
+### Administrative Sessions Calendar
 
 **Shortcode**: `[mcems_sessions_calendar]`
 
-Il calendario amministrativo permette di visualizzare tutte le sessioni d'esame, controllare i posti disponibili, assegnare i proctor e monitorare lo stato delle prenotazioni.
+The administrative calendar lets you view all **exam sessions**, check available seats, assign proctors, and monitor booking status.
 
-### Controllo Accesso agli Esami con Tutor LMS
+### Exam Access Control with Tutor LMS
 
-MC-EMS integra un sistema di access gate che blocca automaticamente l'accesso all'esame finché lo studente non possiede una prenotazione valida per una sessione disponibile.
+MC-EMS integrates an **access gate** that automatically blocks exam access until the student holds a valid booking for an available session.
 
-Quando l'accesso è bloccato:
-- L'esame rimane inaccessibile
-- Viene visualizzato il messaggio "Exam locked"
-- Il contenuto dell'esame viene nascosto
-- Lo studente riceve istruzioni per prenotare una sessione
+When access is blocked:
+- The exam remains inaccessible
+- An "Exam locked" message is displayed
+- The exam content is hidden
+- The student receives instructions to book a session
 
-### Sistema di Impostazioni Configurabili
+### Configurable Settings
 
-- Configurazione delle pagine di prenotazione
-- Gestione anticipo minimo per prenotazioni
-- Gestione cancellazione prenotazioni
-- Integrazione con Tutor LMS
-- Personalizzazione dei messaggi del sistema
-- Gestione dei permessi amministrativi
+- Booking page configuration
+- Minimum booking lead-time management
+- Booking cancellation management
+- Tutor LMS integration
+- System message customisation
+- Administrative permissions management
 
-## Versione Base vs Versione Premium
+## Base vs Premium
 
-| Funzionalità | Base | Premium |
+| Feature | Base | Premium |
 |---|---|---|
-| Sessioni di esame | ✓ | ✓ |
-| Prenotazione esami | ✓ | ✓ |
-| Calendario prenotazioni | ✓ | ✓ |
-| Gestione prenotazione utente | ✓ | ✓ |
-| Lista prenotazioni | ✓ | ✓ |
-| Export CSV prenotazioni | ✓ | ✓ |
-| Calendario amministrativo sessioni | ✓ | ✓ |
-| Assegnazione proctor | ✓ | ✓ |
-| Integrazione Tutor LMS | ✓ | ✓ |
-| **Sessioni illimitate** | — | ✓ |
-| **Capienza sessioni** | fino a 5 posti | fino a 500 posti |
-| **Multipli slot per giorno** | — | ✓ |
-| **Supporto prioritario** | — | ✓ |
+| Exam sessions | ✓ | ✓ |
+| Exam booking | ✓ | ✓ |
+| Booking calendar | ✓ | ✓ |
+| Student booking management | ✓ | ✓ |
+| Bookings list | ✓ | ✓ |
+| CSV export | ✓ | ✓ |
+| Administrative sessions calendar | ✓ | ✓ |
+| Proctor assignment | ✓ | ✓ |
+| Tutor LMS integration | ✓ | ✓ |
+| **Unlimited exam sessions** | — | ✓ |
+| **Session capacity** | up to 5 seats | up to 500 seats |
+| **Multiple slots per day** | — | ✓ |
+| **Priority support** | — | ✓ |
 
-## Requisiti
+## Requirements
 
-- WordPress 6.0 o superiore
-- PHP 7.0 o superiore
-- Tutor LMS installato per l'integrazione con gli esami
+- **WordPress**: 6.0 or higher
+- **PHP**: 7.0 or higher
+- **Tutor LMS**: Required for exam integration
 
-## Installazione
+## Installation
 
-1. Scarica il plugin dal WordPress Repository
-2. Attiva il plugin dalla sezione Plugin di WordPress
-3. Configura le impostazioni nella sezione MC‑EMS
-4. Crea le sessioni di esame
-5. Inserisci gli shortcode nelle pagine del sito
+1. Download the plugin from the WordPress Repository
+2. Activate the plugin in the WordPress Plugins section
+3. Configure the settings in the MC‑EMS section
+4. Create the exam sessions
+5. Insert the shortcodes in the desired pages

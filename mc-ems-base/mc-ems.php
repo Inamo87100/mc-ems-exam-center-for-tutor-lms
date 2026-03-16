@@ -1,13 +1,15 @@
 <?php
 /*
-Plugin Name: MC-EMS – Exam Management System
-Description: Exam session management (CPT), candidate exam bookings, exam bookings list and proctor assignment calendar.
+Plugin Name: MC-EMS – Exam Session Management for Tutor LMS
+Plugin URI: https://github.com/Inamo87100/mc-ems-base
+Description: Complete exam management system for Tutor LMS. Create exam sessions, manage exam bookings with a booking calendar, assign proctors, export CSV, and control exam access automatically. Perfect for certification bodies, universities, and elearning platforms.
 Version: 2.4.2-base
 Author: MC Tools
 Author URI: https://github.com/Inamo87100
 License: GPL-2.0-or-later
 Text Domain: mc-ems
 Domain Path: /languages
+Tags: tutor-lms, exam-management, exam-booking, elearning, certification, learning-management
 Requires at least: 6.0
 Requires PHP: 7.0
 */
