@@ -33,9 +33,152 @@ class MCEMS_CPT_Sessioni_Esame {
         add_action('save_post', [__CLASS__, 'save_metabox'], 10, 2);
         add_action('admin_notices', [__CLASS__, 'admin_notices']);
         add_action('admin_head', [__CLASS__, 'lock_past_session_ui']);
+        add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_metabox_scripts']);
+        add_action('rest_api_init', [__CLASS__, 'register_rest_routes']);
 
         add_filter('manage_' . self::CPT . '_posts_columns', [__CLASS__, 'columns']);
         add_action('manage_' . self::CPT . '_posts_custom_column', [__CLASS__, 'column_render'], 10, 2);
+    }
+
+    public static function enqueue_metabox_scripts($hook): void {
+        if ($hook !== 'post.php' && $hook !== 'post-new.php') return;
+        $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+        if (!$screen || $screen->post_type !== self::CPT) return;
+
+        wp_enqueue_script(
+            'mcems-metabox-user-search',
+            MCEMS_PLUGIN_URL . 'assets/js/metabox-user-search.js',
+            [],
+            MCEMS_VERSION,
+            true
+        );
+
+        wp_localize_script('mcems-metabox-user-search', 'MCEMS_USER_SEARCH', [
+            'restUrl' => esc_url_raw(rest_url('mcems/v1/')),
+            'nonce'   => wp_create_nonce('wp_rest'),
+            'i18n'    => [
+                'noResults' => __('No users found.', 'mc-ems'),
+            ],
+        ]);
+    }
+
+    public static function register_rest_routes(): void {
+        register_rest_route('mcems/v1', '/search-proctors', [
+            'methods'             => \WP_REST_Server::READABLE,
+            'callback'            => [__CLASS__, 'rest_search_proctors'],
+            'permission_callback' => function () {
+                return current_user_can('manage_options');
+            },
+            'args' => [
+                'q' => [
+                    'required'          => true,
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+            ],
+        ]);
+
+        register_rest_route('mcems/v1', '/search-candidates', [
+            'methods'             => \WP_REST_Server::READABLE,
+            'callback'            => [__CLASS__, 'rest_search_candidates'],
+            'permission_callback' => function () {
+                return current_user_can('manage_options');
+            },
+            'args' => [
+                'q' => [
+                    'required'          => true,
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+            ],
+        ]);
+    }
+
+    public static function rest_search_proctors(\WP_REST_Request $request): \WP_REST_Response {
+        $q = trim((string) $request->get_param('q'));
+        if (strlen($q) < 2) {
+            return rest_ensure_response([]);
+        }
+
+        $safe_q = self::escape_like($q);
+
+        $by_name = new \WP_User_Query([
+            'role'           => 'tutor_instructor',
+            'search'         => '*' . $safe_q . '*',
+            'search_columns' => ['display_name'],
+            'number'         => 20,
+            'fields'         => ['ID', 'display_name', 'user_email'],
+        ]);
+
+        $by_email = new \WP_User_Query([
+            'role'           => 'tutor_instructor',
+            'search'         => '*' . $safe_q . '*',
+            'search_columns' => ['user_email'],
+            'number'         => 20,
+            'fields'         => ['ID', 'display_name', 'user_email'],
+        ]);
+
+        $merged = self::merge_user_results($by_name->get_results(), $by_email->get_results());
+        return rest_ensure_response($merged);
+    }
+
+    public static function rest_search_candidates(\WP_REST_Request $request): \WP_REST_Response {
+        $q = trim((string) $request->get_param('q'));
+        if (strlen($q) < 2) {
+            return rest_ensure_response([]);
+        }
+
+        $safe_q = self::escape_like($q);
+
+        $by_name = new \WP_User_Query([
+            'search'         => '*' . $safe_q . '*',
+            'search_columns' => ['display_name'],
+            'number'         => 20,
+            'fields'         => ['ID', 'display_name', 'user_email'],
+        ]);
+
+        $by_email = new \WP_User_Query([
+            'search'         => '*' . $safe_q . '*',
+            'search_columns' => ['user_email'],
+            'number'         => 20,
+            'fields'         => ['ID', 'display_name', 'user_email'],
+        ]);
+
+        $merged = self::merge_user_results($by_name->get_results(), $by_email->get_results());
+        return rest_ensure_response($merged);
+    }
+
+    /**
+     * Escape LIKE wildcard characters in a user-supplied search string so that
+     * '%' and '_' in the input are treated as literals, not SQL wildcards.
+     *
+     * @param string $q
+     * @return string
+     */
+    private static function escape_like(string $q): string {
+        global $wpdb;
+        return $wpdb->esc_like($q);
+    }
+
+    /**
+     * Merge two user result arrays, deduplicate by ID, and format for JSON output.
+     *
+     * @param array $a
+     * @param array $b
+     * @return array
+     */
+    private static function merge_user_results(array $a, array $b): array {
+        $seen = [];
+        $out  = [];
+        foreach (array_merge($a, $b) as $u) {
+            $id = (int) $u->ID;
+            if (isset($seen[$id])) continue;
+            $seen[$id] = true;
+            $out[] = [
+                'id'    => $id,
+                'name'  => (string) $u->display_name,
+                'email' => (string) $u->user_email,
+            ];
+        }
+        return $out;
     }
 
     /**
@@ -168,7 +311,10 @@ class MCEMS_CPT_Sessioni_Esame {
         $spec_uid = (int) get_post_meta($post->ID, self::MK_SPECIAL_USER_ID, true);
         if (!$spec_uid) $spec_uid = (int) get_post_meta($post->ID, self::L_MK_SPECIAL_USER_ID, true);
 
-        $users = get_users(['fields' => ['ID', 'display_name', 'user_email'], 'number' => 500]);
+        // Resolve display info for pre-selected users.
+        $proctor_user   = $proctor   ? get_user_by('id', $proctor)   : null;
+        $candidate_user = $spec_uid  ? get_user_by('id', $spec_uid)  : null;
+
         $exams = MCEMS_Tutor::get_exams();
         $exam_pt = MCEMS_Tutor::exam_post_type();
         $exam_id = (int) get_post_meta($post->ID, self::MK_EXAM_ID, true);
@@ -234,17 +380,32 @@ echo '</td></tr>';
         echo '</td></tr>';
 
         echo '<tr><th><label>Proctor</label></th><td>';
-        echo '<select name="mcems_proctor_user_id" ' . $disabled . '><option value="0">— None —</option>';
-        foreach ($users as $u) {
+        echo '<div class="mcems-user-search-wrap">';
+        printf('<input type="hidden" name="mcems_proctor_user_id" id="mcems_proctor_user_id" value="%d" />', $proctor);
+        if (!$is_past) {
             printf(
-                '<option value="%d" %s>%s (%s)</option>',
-                (int)$u->ID,
-                selected($proctor, (int)$u->ID, false),
-                esc_html($u->display_name),
-                esc_html($u->user_email)
+                '<input type="text" id="mcems_proctor_search" placeholder="%s" autocomplete="off" />',
+                esc_attr__('Search by name or email…', 'mc-ems')
+            );
+            echo '<div id="mcems_proctor_results" class="mcems-user-search-results"></div>';
+        }
+        echo '<div id="mcems_proctor_selected" class="mcems-user-selected">';
+        if ($proctor_user) {
+            printf(
+                '<span class="mcems-user-selected-name">%s</span> <span class="mcems-user-selected-email">(%s)</span>',
+                esc_html($proctor_user->display_name),
+                esc_html($proctor_user->user_email)
             );
         }
-        echo '</select>';
+        echo '</div>';
+        if (!$is_past) {
+            printf(
+                '<button type="button" id="mcems_proctor_clear" class="mcems-user-search-clear" style="%s">%s</button>',
+                $proctor ? '' : 'display:none',
+                esc_html__('Clear', 'mc-ems')
+            );
+        }
+        echo '</div>';
         echo '</td></tr>';
 
         echo '<tr><th><label>Special requirements</label></th><td>';
@@ -255,17 +416,32 @@ echo '</td></tr>';
         echo '</td></tr>';
 
         echo '<tr><th><label>Associated candidate (only ♿)</label></th><td>';
-        echo '<select name="mcems_special_user_id" ' . $disabled . '><option value="0">— None —</option>';
-        foreach ($users as $u) {
+        echo '<div class="mcems-user-search-wrap">';
+        printf('<input type="hidden" name="mcems_special_user_id" id="mcems_special_user_id" value="%d" />', $spec_uid);
+        if (!$is_past) {
             printf(
-                '<option value="%d" %s>%s (%s)</option>',
-                (int)$u->ID,
-                selected($spec_uid, (int)$u->ID, false),
-                esc_html($u->display_name),
-                esc_html($u->user_email)
+                '<input type="text" id="mcems_candidate_search" placeholder="%s" autocomplete="off" />',
+                esc_attr__('Search by name or email…', 'mc-ems')
+            );
+            echo '<div id="mcems_candidate_results" class="mcems-user-search-results"></div>';
+        }
+        echo '<div id="mcems_candidate_selected" class="mcems-user-selected">';
+        if ($candidate_user) {
+            printf(
+                '<span class="mcems-user-selected-name">%s</span> <span class="mcems-user-selected-email">(%s)</span>',
+                esc_html($candidate_user->display_name),
+                esc_html($candidate_user->user_email)
             );
         }
-        echo '</select>';
+        echo '</div>';
+        if (!$is_past) {
+            printf(
+                '<button type="button" id="mcems_candidate_clear" class="mcems-user-search-clear" style="%s">%s</button>',
+                $spec_uid ? '' : 'display:none',
+                esc_html__('Clear', 'mc-ems')
+            );
+        }
+        echo '</div>';
         echo '<p class="description">If set, the session ♿ can be booked only by this user.</p>';
         echo '</td></tr>';
 
