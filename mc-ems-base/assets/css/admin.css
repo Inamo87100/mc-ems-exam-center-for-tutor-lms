@@ -543,3 +543,110 @@
     padding-top: 12px;
     border-top: 1px solid #e0e0e0;
 }
+
+/* =============================================================
+   9. User Search Widget (metabox proctor & candidate search)
+   ============================================================= */
+.mcems-user-search-wrap {
+    position: relative;
+    display: inline-block;
+    max-width: 360px;
+    width: 100%;
+}
+
+.mcems-user-search-wrap input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.mcems-user-search-wrap input[type="text"]:focus {
+    outline: 2px solid #2271b1;
+    outline-offset: 1px;
+    border-color: #2271b1;
+}
+
+.mcems-user-search-results {
+    display: none;
+    position: absolute;
+    z-index: 9999;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 220px;
+    overflow-y: auto;
+    width: 100%;
+    left: 0;
+    top: calc(100% + 2px);
+}
+
+.mcems-user-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    border-bottom: 1px solid #f0f0f1;
+    line-height: 1.4;
+}
+
+.mcems-user-item:last-child {
+    border-bottom: none;
+}
+
+.mcems-user-item:hover,
+.mcems-user-item.focused {
+    background: #e8f0fe;
+}
+
+.mcems-user-item-empty {
+    cursor: default;
+    color: #787c82;
+    font-style: italic;
+}
+
+.mcems-user-item-empty:hover {
+    background: none;
+}
+
+.mcems-user-item-email {
+    font-size: 11px;
+    color: #787c82;
+    display: block;
+}
+
+.mcems-user-selected {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #3c434a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.mcems-user-selected-name {
+    font-weight: 600;
+}
+
+.mcems-user-selected-email {
+    color: #787c82;
+}
+
+.mcems-user-search-clear {
+    background: none;
+    border: 1px solid #c62d2d;
+    border-radius: 3px;
+    color: #c62d2d;
+    cursor: pointer;
+    font-size: 11px;
+    padding: 1px 6px;
+    line-height: 1.4;
+    display: none;
+}
+
+.mcems-user-search-clear:hover {
+    background: #fee2e2;
+}
