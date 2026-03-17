@@ -28,7 +28,7 @@ htmlcov/
 
 # Translations
 *.mo
-*.pot
+# Allow .pot translation templates in languages/ directory
 
 # Django stuff:
 *.log

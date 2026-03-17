@@ -1,0 +1,17 @@
+# Translation Template for MC-EMS
+# Copyright (C) 2025 Mamba Coding
+# This file is distributed under the same license as the MC-EMS package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: MC-EMS - Exam Session Management for Tutor LMS\n"
+"Report-Msgid-Bugs-To: https://github.com/Inamo87100/mc-ems-base\n"
+"POT-Creation-Date: 2025-03-17\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Text Domain: mc-ems\n"
+"Domain Path: /languages\n"
