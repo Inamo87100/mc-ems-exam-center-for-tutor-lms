@@ -1,4 +1,4 @@
-# Translation Template for MC-EMS
+# Translation of MC-EMS - Exam Session Management for Tutor LMS
 # Copyright (C) 2025 Mamba Coding
 # This file is distributed under the same license as the MC-EMS package.
 #
@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MC-EMS - Exam Session Management for Tutor LMS\n"
 "Report-Msgid-Bugs-To: https://github.com/Inamo87100/mc-ems-base\n"
-"POT-Creation-Date: 2025-03-17\n"
+"POT-Creation-Date: 2026-03-17 14:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,3 +15,911 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Text Domain: mc-ems\n"
 "Domain Path: /languages\n"
+
+#: includes/class-ems-session-id-column.php:31 includes/class-ems-session-id-column.php:35
+msgid "Session ID"
+msgstr ""
+
+#: includes/class-ems-session-id-column.php:80
+msgid "Session ID…"
+msgstr ""
+
+#: includes/class-mcems-admin-banner.php:127
+msgid "Powered by Mamba Coding"
+msgstr ""
+
+#: includes/class-mcems-admin-banner.php:128
+msgid "Upgrade to MC-EMS Premium and unlock the full exam workflow"
+msgstr ""
+
+#: includes/class-mcems-admin-banner.php:131
+msgid "Discover more tools, updates and WordPress solutions on Mamba Coding."
+msgstr ""
+
+#: includes/class-mcems-admin-banner.php:132
+msgid "Sell smarter, automate more, and manage exam sessions like a pro. Get premium booking tools, advanced workflows, and extra features designed to help you save time and grow faster."
+msgstr ""
+
+#: includes/class-mcems-admin-banner.php:135
+msgid "Visit Mamba Coding"
+msgstr ""
+
+#: includes/class-mcems-admin-banner.php:136
+msgid "Buy MC-EMS Premium now"
+msgstr ""
+
+#: includes/class-mcems-admin-banner.php:167
+msgid "Dismiss"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:91
+msgid "Please select an action."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:92
+msgid "Please select at least one item."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:93
+msgid "Apply action to {count} item(s)?"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:94
+msgid "An error occurred."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:95
+msgid "Network error. Please try again."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:96
+msgid "Exporting…"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:97
+msgid "Export CSV"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:105 includes/class-mcems-admin-sessioni.php:106
+msgid "Create sessions"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:152
+msgid "Exam Sessions Management"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:163
+msgid "Generate new sessions"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:172
+msgid "Base license – session limits"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:174
+msgid "Active future sessions: %d / %d — you can still create %d more session(s)."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:180
+msgid "Base license: max 1 session per day, max %d active sessions, and max %d seats per session. Upgrade to Premium to remove these limits."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:193
+msgid "Generation type"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:197
+msgid "Create an exam session for a candidate with special requirements"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:206 includes/class-mcems-admin-sessioni.php:293
+msgid "Tutor LMS exam"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:209
+msgid "Tutor LMS not detected (exam post type not found)."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:211 includes/class-mcems-admin-sessioni.php:298 includes/class-mcems-settings.php:838
+msgid "No published Tutor LMS exam found."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:214 includes/class-mcems-admin-sessioni.php:301
+msgid "— Select exam —"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:224
+msgid "Select dates"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:252
+msgid "Exam session time"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:260
+msgid "Base license: only one time per day allowed."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:263
+msgid "Exam session times (one per line)"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:277
+msgid "Seats per exam session"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:281
+msgid "Base license: max %d seats per session."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:296
+msgid "Tutor LMS not detected."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:311 includes/class-mcems-cpt-sessioni-esame.php:586
+msgid "Date"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:325
+msgid "Time (single)"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:338 includes/class-mcems-cpt-sessioni-esame.php:588
+msgid "Seats"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:343
+msgid "Candidate"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:351 includes/class-mcems-cpt-sessioni-esame.php:395 includes/class-mcems-cpt-sessioni-esame.php:431
+msgid "Search by name or email…"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:358
+msgid "Start typing a name or email address, then click the user to select."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:366
+msgid "Generate Sessions"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:464 includes/class-mcems-admin-sessioni.php:827
+msgid "Select at least one date from the calendar."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:707
+msgid "January"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:707
+msgid "February"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:707
+msgid "March"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:708
+msgid "April"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:708
+msgid "May"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:708
+msgid "June"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:709
+msgid "July"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:709
+msgid "August"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:709
+msgid "September"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:710
+msgid "October"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:710
+msgid "November"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:710
+msgid "December"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:713
+msgid "Mo"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:713
+msgid "Tu"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:713
+msgid "We"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:714
+msgid "Th"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:714
+msgid "Fr"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:714
+msgid "Sa"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:714
+msgid "Su"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:842
+msgid "Enter at least one valid time (HH:MM), one per line."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:854
+msgid "Base license limit reached: you already have %d active (future) sessions (maximum %d). Delete or wait for existing sessions to pass before creating new ones."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:922
+msgid "Unable to create sessions for: %s"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:925
+msgid "Creation completed: %d sessions created, %d skipped."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:940 includes/class-mcems-admin-sessioni.php:953
+msgid "Invalid date/time."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:950 includes/class-mcems-cpt-sessioni-esame.php:546
+msgid "Past sessions cannot be created. Please choose a future date and time."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:964
+msgid "Invalid candidate selection."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:968
+msgid "A special session already exists with this date/time for this exam."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:973
+msgid "Unable to create exam session."
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:1000
+msgid "Special exam session created and exam booked for candidate (#"
+msgstr ""
+
+#: includes/class-mcems-admin-sessioni.php:1035
+msgid "Update completed: %d sessions updated."
+msgstr ""
+
+#: includes/class-mcems-booking.php:63
+msgid "Error loading sessions."
+msgstr ""
+
+#: includes/class-mcems-booking.php:64
+msgid "Exam booking failed."
+msgstr ""
+
+#: includes/class-mcems-booking.php:65
+msgid "Exam booking confirmed!"
+msgstr ""
+
+#: includes/class-mcems-booking.php:66
+msgid "Exam booking cancelled."
+msgstr ""
+
+#: includes/class-mcems-booking.php:67
+msgid "Cancellation failed."
+msgstr ""
+
+#: includes/class-mcems-booking.php:405
+msgid "You already have an active booking for this exam."
+msgstr ""
+
+#: includes/class-mcems-booking.php:408
+msgid "Go to"
+msgstr ""
+
+#: includes/class-mcems-booking.php:409 includes/class-mcems-tutor-gate.php:322 includes/class-mcems-tutor-gate.php:362
+msgid "Manage exam booking"
+msgstr ""
+
+#: includes/class-mcems-booking.php:410
+msgid "to cancel it."
+msgstr ""
+
+#: includes/class-mcems-booking.php:412
+msgid "Please open the Manage exam booking page to cancel it."
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:50
+msgid "Loading…"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:51
+msgid "Error loading calendar data."
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:52
+msgid "Available"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:53
+msgid "Limited"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:54
+msgid "Full"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:55
+msgid "Past"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:56
+msgid "Sessions"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:57
+msgid "Capacity"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:58 includes/class-mcems-cpt-sessioni-esame.php:589
+msgid "Booked"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:59
+msgid "Proctor"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:60
+msgid "Candidates"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:61
+msgid "Mon"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:62
+msgid "Tue"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:63
+msgid "Wed"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:64
+msgid "Thu"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:65
+msgid "Fri"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:66
+msgid "Sat"
+msgstr ""
+
+#: includes/class-mcems-calendar-sessioni.php:67
+msgid "Sun"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:67
+msgid "No users found."
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:258
+msgid "Exam session"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:260
+msgid "Sessions list"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:261
+msgid "Add session"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:262
+msgid "Add new session"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:263
+msgid "Edit session"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:264
+msgid "New session"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:265
+msgid "View session"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:266
+msgid "Search sessions"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:267
+msgid "No sessions found"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:268
+msgid "No sessions in trash"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:286
+msgid "Session details (MC-EMS)"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:331 includes/class-mcems-cpt-sessioni-esame.php:550
+msgid "Past exam sessions are read-only and cannot be modified from the backend."
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:412 includes/class-mcems-cpt-sessioni-esame.php:448
+msgid "Clear"
+msgstr ""
+
+#: includes/class-mcems-cpt-sessioni-esame.php:583 includes/class-mcems-cpt-sessioni-esame.php:584
+msgid "Session"
+msgstr ""
+
+#: includes/class-mcems-settings.php:218 includes/class-mcems-settings.php:219
+msgid "Settings"
+msgstr ""
+
+#: includes/class-mcems-settings.php:230
+msgid "Bookings"
+msgstr ""
+
+#: includes/class-mcems-settings.php:234
+msgid "Booking allowed up to (hours)"
+msgstr ""
+
+#: includes/class-mcems-settings.php:242
+msgid "Allow booking cancellation"
+msgstr ""
+
+#: includes/class-mcems-settings.php:247
+msgid "Cancellation allowed up to (hours)"
+msgstr ""
+
+#: includes/class-mcems-settings.php:252
+msgid "Example: 48 = cancellation allowed only if more than 48 hours remain."
+msgstr ""
+
+#: includes/class-mcems-settings.php:255 includes/class-mcems-settings.php:767
+msgid "Exam access settings"
+msgstr ""
+
+#: includes/class-mcems-settings.php:259
+msgid "Enable exam access gate"
+msgstr ""
+
+#: includes/class-mcems-settings.php:261
+msgid "If enabled, users can access protected Tutor LMS exams only when they have a valid exam booking for that exam."
+msgstr ""
+
+#: includes/class-mcems-settings.php:264
+msgid "Unlock before session (minutes)"
+msgstr ""
+
+#: includes/class-mcems-settings.php:269
+msgid "Example: 15 = allow exam access 15 minutes before the booked exam time."
+msgstr ""
+
+#: includes/class-mcems-settings.php:272
+msgid "Booking validity after session"
+msgstr ""
+
+#: includes/class-mcems-settings.php:281
+msgid "Protected exams"
+msgstr ""
+
+#: includes/class-mcems-settings.php:283
+msgid "If you select one or more exams, the exam access gate will apply only to those exams. If left empty, the gate applies to all Tutor LMS exams."
+msgstr ""
+
+#: includes/class-mcems-settings.php:286
+msgid "Exams visible in booking dropdown"
+msgstr ""
+
+#: includes/class-mcems-settings.php:288
+msgid "Select which exams appear in the exam dropdown during session booking. If left empty, all published Tutor LMS exams will be shown."
+msgstr ""
+
+#: includes/class-mcems-settings.php:291 includes/class-mcems-settings.php:768
+msgid "Email settings"
+msgstr ""
+
+#: includes/class-mcems-settings.php:295
+msgid "Sender name"
+msgstr ""
+
+#: includes/class-mcems-settings.php:297
+msgid "Example: MC-EMS Notifications"
+msgstr ""
+
+#: includes/class-mcems-settings.php:298
+msgid "Name shown as the email sender."
+msgstr ""
+
+#: includes/class-mcems-settings.php:301
+msgid "Sender email"
+msgstr ""
+
+#: includes/class-mcems-settings.php:304
+msgid "notifications@example.com"
+msgstr ""
+
+#: includes/class-mcems-settings.php:305
+msgid "Email address used in the From header."
+msgstr ""
+
+#: includes/class-mcems-settings.php:308
+msgid "Admin recipients"
+msgstr ""
+
+#: includes/class-mcems-settings.php:310 includes/class-mcems-settings.php:361
+msgid "admin@example.com, exams@example.com"
+msgstr ""
+
+#: includes/class-mcems-settings.php:311
+msgid "Comma-separated list of recipients for admin notifications."
+msgstr ""
+
+#: includes/class-mcems-settings.php:314
+msgid "Exam booking confirmation email"
+msgstr ""
+
+#: includes/class-mcems-settings.php:316
+msgid "Send a confirmation email to the candidate after a booking is created."
+msgstr ""
+
+#: includes/class-mcems-settings.php:319
+msgid "Exam booking cancellation email"
+msgstr ""
+
+#: includes/class-mcems-settings.php:321
+msgid "Send a confirmation email to the candidate after an exam booking is cancelled."
+msgstr ""
+
+#: includes/class-mcems-settings.php:324
+msgid "Admin exam booking notification"
+msgstr ""
+
+#: includes/class-mcems-settings.php:326
+msgid "Notify the configured admin recipients when an exam booking is created."
+msgstr ""
+
+#: includes/class-mcems-settings.php:329
+msgid "Admin exam booking cancellation notification"
+msgstr ""
+
+#: includes/class-mcems-settings.php:331
+msgid "Notify the configured admin recipients when an exam booking is cancelled."
+msgstr ""
+
+#: includes/class-mcems-settings.php:334
+msgid "Allow proctor reassignment"
+msgstr ""
+
+#: includes/class-mcems-settings.php:336
+msgid "Allow replacing the currently assigned proctor from the calendar."
+msgstr ""
+
+#: includes/class-mcems-settings.php:339
+msgid "Allow proctor unassignment"
+msgstr ""
+
+#: includes/class-mcems-settings.php:341
+msgid "Allow removing the current proctor assignment from the calendar."
+msgstr ""
+
+#: includes/class-mcems-settings.php:344
+msgid "Proctor assignment email"
+msgstr ""
+
+#: includes/class-mcems-settings.php:346
+msgid "Send an email when a proctor is assigned to an exam session."
+msgstr ""
+
+#: includes/class-mcems-settings.php:349
+msgid "Proctor unassignment email"
+msgstr ""
+
+#: includes/class-mcems-settings.php:351
+msgid "Send an email when a proctor assignment is removed from an exam session."
+msgstr ""
+
+#: includes/class-mcems-settings.php:354
+msgid "24-hour unassigned session warning"
+msgstr ""
+
+#: includes/class-mcems-settings.php:356
+msgid "Send a daily warning email for tomorrow's sessions that still have no assigned proctor."
+msgstr ""
+
+#: includes/class-mcems-settings.php:359
+msgid "Calendar email recipients"
+msgstr ""
+
+#: includes/class-mcems-settings.php:362
+msgid "Comma-separated list of recipients for calendar assignment, unassignment and warning emails."
+msgstr ""
+
+#: includes/class-mcems-settings.php:365
+msgid "Exam booking confirmation subject"
+msgstr ""
+
+#: includes/class-mcems-settings.php:367
+msgid "Exam booking confirmed — {exam_title}"
+msgstr ""
+
+#: includes/class-mcems-settings.php:368 includes/class-mcems-settings.php:380 includes/class-mcems-settings.php:392 includes/class-mcems-settings.php:404
+msgid "Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}"
+msgstr ""
+
+#: includes/class-mcems-settings.php:371
+msgid "Exam booking confirmation body"
+msgstr ""
+
+#: includes/class-mcems-settings.php:374 includes/class-mcems-settings.php:386 includes/class-mcems-settings.php:398 includes/class-mcems-settings.php:410
+msgid "Plain-text email body. Same placeholders as above."
+msgstr ""
+
+#: includes/class-mcems-settings.php:377
+msgid "Exam booking cancellation subject"
+msgstr ""
+
+#: includes/class-mcems-settings.php:379 includes/class-mcems-settings.php:403
+msgid "Exam booking cancelled — {exam_title}"
+msgstr ""
+
+#: includes/class-mcems-settings.php:383
+msgid "Exam booking cancellation body"
+msgstr ""
+
+#: includes/class-mcems-settings.php:389
+msgid "Admin exam booking subject"
+msgstr ""
+
+#: includes/class-mcems-settings.php:391
+msgid "New exam booking — {exam_title}"
+msgstr ""
+
+#: includes/class-mcems-settings.php:395
+msgid "Admin exam booking body"
+msgstr ""
+
+#: includes/class-mcems-settings.php:401
+msgid "Admin cancellation subject"
+msgstr ""
+
+#: includes/class-mcems-settings.php:407
+msgid "Admin cancellation body"
+msgstr ""
+
+#: includes/class-mcems-settings.php:413
+msgid "Proctor assignment subject"
+msgstr ""
+
+#: includes/class-mcems-settings.php:415
+msgid "Exam session assigned — {session_date} {session_time}"
+msgstr ""
+
+#: includes/class-mcems-settings.php:416 includes/class-mcems-settings.php:428
+msgid "Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}"
+msgstr ""
+
+#: includes/class-mcems-settings.php:419
+msgid "Proctor assignment body"
+msgstr ""
+
+#: includes/class-mcems-settings.php:422 includes/class-mcems-settings.php:434
+msgid "Plain-text email body. Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}"
+msgstr ""
+
+#: includes/class-mcems-settings.php:425
+msgid "Proctor unassignment subject"
+msgstr ""
+
+#: includes/class-mcems-settings.php:427
+msgid "Exam session unassigned — {session_date} {session_time}"
+msgstr ""
+
+#: includes/class-mcems-settings.php:431
+msgid "Proctor unassignment body"
+msgstr ""
+
+#: includes/class-mcems-settings.php:437
+msgid "Unassigned session warning subject"
+msgstr ""
+
+#: includes/class-mcems-settings.php:439
+msgid "Unassigned exam session reminder — {session_date} {session_time}"
+msgstr ""
+
+#: includes/class-mcems-settings.php:440
+msgid "Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {session_id}"
+msgstr ""
+
+#: includes/class-mcems-settings.php:443
+msgid "Unassigned session warning body"
+msgstr ""
+
+#: includes/class-mcems-settings.php:446
+msgid "Plain-text email body. Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {session_id}"
+msgstr ""
+
+#: includes/class-mcems-settings.php:449 includes/class-mcems-settings.php:769
+msgid "Pages"
+msgstr ""
+
+#: includes/class-mcems-settings.php:453
+msgid "Exam booking page (calendar)"
+msgstr ""
+
+#: includes/class-mcems-settings.php:455
+msgid "Choose the page where you placed the [mcems_book_exam] shortcode. The plugin will use this to generate dynamic links to the exam booking calendar."
+msgstr ""
+
+#: includes/class-mcems-settings.php:458
+msgid "Manage exam booking page"
+msgstr ""
+
+#: includes/class-mcems-settings.php:460
+msgid "Choose the page where you placed the [mcems_manage_booking] shortcode. The plugin will use this to generate dynamic links to the “Manage exam booking” page."
+msgstr ""
+
+#: includes/class-mcems-settings.php:463
+msgid "Access Control"
+msgstr ""
+
+#: includes/class-mcems-settings.php:464
+msgid "Select which WordPress roles can view each shortcode. By default all roles are allowed (no restrictions)."
+msgstr ""
+
+#: includes/class-mcems-settings.php:467
+msgid "Shortcode visibility by role"
+msgstr ""
+
+#: includes/class-mcems-settings.php:469
+msgid "Proctor Roles"
+msgstr ""
+
+#: includes/class-mcems-settings.php:470
+msgid "Select which WordPress roles can be searched and assigned as Proctors. If no roles are selected, all roles with sufficient permissions can be assigned."
+msgstr ""
+
+#: includes/class-mcems-settings.php:473
+msgid "Allowed proctor roles"
+msgstr ""
+
+#: includes/class-mcems-settings.php:679
+msgid "Exam Booking"
+msgstr ""
+
+#: includes/class-mcems-settings.php:680
+msgid "Manage Booking"
+msgstr ""
+
+#: includes/class-mcems-settings.php:681
+msgid "Sessions Calendar"
+msgstr ""
+
+#: includes/class-mcems-settings.php:682
+msgid "Bookings List"
+msgstr ""
+
+#: includes/class-mcems-settings.php:753
+msgid "Insufficient permissions."
+msgstr ""
+
+#: includes/class-mcems-settings.php:761
+msgid "MC-EMS Settings"
+msgstr ""
+
+#: includes/class-mcems-settings.php:764
+msgid "Shortcodes"
+msgstr ""
+
+#: includes/class-mcems-settings.php:765
+msgid "Role Settings"
+msgstr ""
+
+#: includes/class-mcems-settings.php:766
+msgid "Exam booking settings"
+msgstr ""
+
+#: includes/class-mcems-settings.php:782
+msgid "Available shortcodes"
+msgstr ""
+
+#: includes/class-mcems-settings.php:784
+msgid "Description"
+msgstr ""
+
+#: includes/class-mcems-settings.php:786
+msgid "Exam booking (select exam → calendar → choose exam session)."
+msgstr ""
+
+#: includes/class-mcems-settings.php:787
+msgid "Shows the logged-in user exam bookings and allows cancellation."
+msgstr ""
+
+#: includes/class-mcems-settings.php:788
+msgid "Calendar to assign proctors to exam sessions."
+msgstr ""
+
+#: includes/class-mcems-settings.php:789
+msgid "Exam bookings list (with date and exam filters)."
+msgstr ""
+
+#: includes/class-mcems-settings.php:841
+msgid "Search exam…"
+msgstr ""
+
+#: includes/class-mcems-settings.php:845
+msgid "Select all"
+msgstr ""
+
+#: includes/class-mcems-settings.php:847
+msgid "Deselect all"
+msgstr ""
+
+#: includes/class-mcems-settings.php:1060
+msgid "Check the roles that are allowed to see this shortcode. If none are checked, all roles can see it."
+msgstr ""
+
+#: includes/class-mcems-settings.php:1100
+msgid "Uncheck all roles to allow any role to be assigned as Proctors."
+msgstr ""
+
+#: includes/class-mcems-tutor-gate.php:295
+msgid "Restricted access"
+msgstr ""
+
+#: includes/class-mcems-tutor-gate.php:296
+msgid "You must be logged in to access this exam."
+msgstr ""
+
+#: includes/class-mcems-tutor-gate.php:318
+msgid "To access, you must first create a booking for an exam session."
+msgstr ""
+
+#: includes/class-mcems-tutor-gate.php:326 includes/class-mcems-tutor-gate.php:336 includes/class-mcems-tutor-gate.php:366
+msgid "Exam access not available"
+msgstr ""
+
+#: includes/class-mcems-tutor-gate.php:337
+msgid "Your exam booking does not contain a valid date/time. Please contact support."
+msgstr ""
+
+#: includes/class-mcems-tutor-gate.php:358
+msgid "Your exam booking has expired and is no longer valid to access this exam. Please book a new exam session."
+msgstr ""
+
+#: includes/class-mcems-tutor-gate.php:380
+msgid "Exam locked"
+msgstr ""
+
+#: includes/class-mcems-tutor-gate.php:383
+msgid "You can access starting from"
+msgstr ""
