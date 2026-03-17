@@ -139,7 +139,7 @@ class MCEMS_Bookings_List_Base {
     }
 
     public static function maybe_export_csv(): void {
-        if (!isset($_GET['mcems_export']) || sanitize_text_field($_GET['mcems_export']) !== 'csv') {
+        if (!isset($_GET['mcems_export']) || sanitize_text_field(wp_unslash($_GET['mcems_export'])) !== 'csv') {
             return;
         }
 
@@ -148,11 +148,16 @@ class MCEMS_Bookings_List_Base {
             exit;
         }
 
-        $selected_date  = isset($_GET['mcems_date']) ? sanitize_text_field($_GET['mcems_date']) : '';
-        $date_from      = isset($_GET['mcems_from']) ? sanitize_text_field($_GET['mcems_from']) : '';
-        $date_to        = isset($_GET['mcems_to']) ? sanitize_text_field($_GET['mcems_to']) : '';
-        $selected_exam = isset($_GET['mcems_exam']) ? (int) $_GET['mcems_exam'] : 0;
-        $advanced       = isset($_GET['mcems_adv']) && (string) $_GET['mcems_adv'] === '1';
+        if (!isset($_GET['mcems_export_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['mcems_export_nonce'])), 'mcems_export_csv')) {
+            status_header(403);
+            exit;
+        }
+
+        $selected_date  = isset($_GET['mcems_date']) ? sanitize_text_field(wp_unslash($_GET['mcems_date'])) : '';
+        $date_from      = isset($_GET['mcems_from']) ? sanitize_text_field(wp_unslash($_GET['mcems_from'])) : '';
+        $date_to        = isset($_GET['mcems_to']) ? sanitize_text_field(wp_unslash($_GET['mcems_to'])) : '';
+        $selected_exam = isset($_GET['mcems_exam']) ? (int) wp_unslash($_GET['mcems_exam']) : 0;
+        $advanced       = isset($_GET['mcems_adv']) && sanitize_text_field(wp_unslash($_GET['mcems_adv'])) === '1';
 
         $filter = self::normalize_date_filter($selected_date, $date_from, $date_to, $advanced);
         if (!$filter) {
@@ -190,10 +195,10 @@ class MCEMS_Bookings_List_Base {
         header('X-Content-Type-Options: nosniff');
 
         // UTF-8 BOM for Excel
-        echo chr(0xEF) . chr(0xBB) . chr(0xBF);
+        echo chr(0xEF) . chr(0xBB) . chr(0xBF); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
         $header_row = ['Last name', 'First name', 'Email', 'Session ID', 'Exam session date', 'Exam session time', 'Exam', 'Special', 'Proctor'];
-        echo self::format_csv_row($header_row);
+        echo self::format_csv_row($header_row); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
         foreach ($rows as $r) {
             $data_h = !empty($r['data']) ? date_i18n('d/m/Y', strtotime($r['data'])) : '';
@@ -203,6 +208,7 @@ class MCEMS_Bookings_List_Base {
             }
             $spec = !empty($r['special']) ? 'Yes' : 'No';
 
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV output, not HTML
             echo self::format_csv_row([
                 $r['cognome'] ?? '',
                 $r['nome']    ?? '',
@@ -237,11 +243,11 @@ class MCEMS_Bookings_List_Base {
         $exams = MCEMS_Tutor::get_exams();
         $exam_pt = MCEMS_Tutor::exam_post_type();
 
-        $selected_date  = isset($_GET['mcems_date']) ? sanitize_text_field($_GET['mcems_date']) : '';
-        $date_from      = isset($_GET['mcems_from']) ? sanitize_text_field($_GET['mcems_from']) : '';
-        $date_to        = isset($_GET['mcems_to']) ? sanitize_text_field($_GET['mcems_to']) : '';
-        $selected_exam = isset($_GET['mcems_exam']) ? (int) $_GET['mcems_exam'] : 0;
-        $advanced       = isset($_GET['mcems_adv']) && (string) $_GET['mcems_adv'] === '1';
+        $selected_date  = isset($_GET['mcems_date']) ? sanitize_text_field(wp_unslash($_GET['mcems_date'])) : '';
+        $date_from      = isset($_GET['mcems_from']) ? sanitize_text_field(wp_unslash($_GET['mcems_from'])) : '';
+        $date_to        = isset($_GET['mcems_to']) ? sanitize_text_field(wp_unslash($_GET['mcems_to'])) : '';
+        $selected_exam = isset($_GET['mcems_exam']) ? (int) wp_unslash($_GET['mcems_exam']) : 0;
+        $advanced       = isset($_GET['mcems_adv']) && sanitize_text_field(wp_unslash($_GET['mcems_adv'])) === '1';
 
         $filter     = self::normalize_date_filter($selected_date, $date_from, $date_to, $advanced);
         $has_filter = (bool) $filter;
@@ -287,9 +293,10 @@ class MCEMS_Bookings_List_Base {
                     <input type="hidden" name="post_type" value="<?php echo esc_attr(MCEMS_CPT_Sessioni_Esame::CPT); ?>">
                     <?php
                     if (isset($_GET['page'])) {
-                        echo '<input type="hidden" name="page" value="' . esc_attr(sanitize_text_field($_GET['page'])) . '">';
+                        echo '<input type="hidden" name="page" value="' . esc_attr(sanitize_text_field(wp_unslash($_GET['page']))) . '">';
                     }
                     ?>
+                    <input type="hidden" name="mcems_export_nonce" value="<?php echo esc_attr(wp_create_nonce('mcems_export_csv')); ?>">
 
                     <input type="hidden" id="mcems_adv" name="mcems_adv" value="<?php echo esc_attr($advanced ? '1' : '0'); ?>">
 

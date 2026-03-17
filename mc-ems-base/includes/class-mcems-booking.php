@@ -331,6 +331,7 @@ class MCEMS_Booking {
 
                 <script>
                 document.addEventListener("DOMContentLoaded", function () {
+                    const mcemsNonce = '<?php echo esc_js(wp_create_nonce('mcems_booking')); ?>';
                     const examSelect = document.getElementById('mcems_exam_select');
                     const dateInput = document.getElementById('data_esame');
                     const slotContainer = document.getElementById('slot-container');
@@ -395,7 +396,8 @@ class MCEMS_Booking {
                         }
 
                         const url = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>?action=mcems_check_active_booking&exam_id='
-                            + encodeURIComponent(examId);
+                            + encodeURIComponent(examId)
+                            + '&nonce=' + encodeURIComponent(mcemsNonce);
 
                         fetch(url)
                             .then(r => r.json())
@@ -457,7 +459,8 @@ class MCEMS_Booking {
                         const url = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>?action=mcems_get_booking_calendar&year='
                             + encodeURIComponent(year)
                             + '&month=' + encodeURIComponent(month + 1)
-                            + '&exam_id=' + encodeURIComponent(examSelect ? examSelect.value : '');
+                            + '&exam_id=' + encodeURIComponent(examSelect ? examSelect.value : '')
+                            + '&nonce=' + encodeURIComponent(mcemsNonce);
 
                         return fetch(url)
                             .then(r => r.json())
@@ -477,7 +480,8 @@ class MCEMS_Booking {
 
                         const url = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>?action=get_slot_per_data&data='
                             + encodeURIComponent(dateValue)
-                            + '&exam_id=' + encodeURIComponent(examSelect ? examSelect.value : '');
+                            + '&exam_id=' + encodeURIComponent(examSelect ? examSelect.value : '')
+                            + '&nonce=' + encodeURIComponent(mcemsNonce);
 
                         fetch(url)
                             .then(response => response.json())
@@ -862,8 +866,14 @@ class MCEMS_Booking {
        ========================= */
 
     public static function ajax_check_active_booking(): void {
+        $nonce = isset($_GET['nonce']) ? sanitize_text_field(wp_unslash($_GET['nonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'mcems_booking')) {
+            wp_send_json(['has_booking' => false]);
+            return;
+        }
+
         $user_id   = (int) get_current_user_id();
-        $exam_id = isset($_GET['exam_id']) ? (int) $_GET['exam_id'] : 0;
+        $exam_id = isset($_GET['exam_id']) ? (int) wp_unslash($_GET['exam_id']) : 0;
 
         if (!$user_id || $exam_id <= 0) {
             wp_send_json(['has_booking' => false]);
@@ -874,9 +884,15 @@ class MCEMS_Booking {
     }
 
     public static function ajax_get_booking_calendar(): void {
-        $exam_id = isset($_GET['exam_id']) ? (int) $_GET['exam_id'] : 0;
-        $year      = isset($_GET['year']) ? (int) $_GET['year'] : 0;
-        $month     = isset($_GET['month']) ? (int) $_GET['month'] : 0;
+        $nonce = isset($_GET['nonce']) ? sanitize_text_field(wp_unslash($_GET['nonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'mcems_booking')) {
+            wp_send_json([]);
+            return;
+        }
+
+        $exam_id = isset($_GET['exam_id']) ? (int) wp_unslash($_GET['exam_id']) : 0;
+        $year      = isset($_GET['year']) ? (int) wp_unslash($_GET['year']) : 0;
+        $month     = isset($_GET['month']) ? (int) wp_unslash($_GET['month']) : 0;
 
         if ($exam_id <= 0) wp_send_json(['error' => 'Select an exam.']);
         if ($year <= 0 || $month < 1 || $month > 12) wp_send_json([]);
@@ -943,8 +959,14 @@ class MCEMS_Booking {
     }
 
     public static function ajax_get_slots_by_date(): void {
+        $nonce = isset($_GET['nonce']) ? sanitize_text_field(wp_unslash($_GET['nonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'mcems_booking')) {
+            wp_send_json([]);
+            return;
+        }
+
         $data      = isset($_GET['data']) ? sanitize_text_field(wp_unslash($_GET['data'])) : '';
-        $exam_id = isset($_GET['exam_id']) ? (int) $_GET['exam_id'] : 0;
+        $exam_id = isset($_GET['exam_id']) ? (int) wp_unslash($_GET['exam_id']) : 0;
 
         if (!$data) wp_send_json([]);
         if ($exam_id <= 0) wp_send_json(['error' => 'Select an exam.']);
@@ -1117,7 +1139,7 @@ class MCEMS_Booking {
         $user_id = (int) get_current_user_id();
         if (!$user_id) wp_send_json_error('You must be logged in.');
 
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mcems_cancel')) {
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'mcems_cancel')) {
             wp_send_json_error('Invalid nonce.');
         }
 

@@ -124,12 +124,13 @@ class MCEMS_Admin_Sessioni {
         $notice = '';
         $error  = '';
 
-        $posted = ($_SERVER['REQUEST_METHOD'] === 'POST');
+        $request_method = isset($_SERVER['REQUEST_METHOD']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'])) : '';
+        $posted = ($request_method === 'POST');
         if ($posted && empty($_POST['mcems_action'])) {
             $error = 'Form submission detected but missing action (mcems_action). Check whether security/cache plugins are altering POST requests.';
         }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mcems_action'])) {
+        if ($request_method === 'POST' && isset($_POST['mcems_action'])) {
             $action = sanitize_text_field(wp_unslash($_POST['mcems_action']));
 
             if ($action === 'generate' && check_admin_referer('mcems_generate', 'mcems_generate_nonce')) {
@@ -171,13 +172,15 @@ class MCEMS_Admin_Sessioni {
                 <div style="margin-bottom:16px;padding:12px 16px;border-radius:10px;border:1px solid #fed7aa;background:#fff7ed;">
                     <strong>📋 <?php echo esc_html__('Base license – session limits', 'mc-ems-base'); ?></strong><br>
                     <?php echo esc_html(sprintf(
-                        __('Active future sessions: %d / %d — you can still create %d more session(s).', 'mc-ems-base'),
+                        /* translators: 1: number of active future sessions, 2: maximum allowed sessions, 3: remaining sessions you can create */
+                        __('Active future sessions: %1$d / %2$d — you can still create %3$d more session(s).', 'mc-ems-base'),
                         (int) $future_count,
                         (int) self::BASE_MAX_ACTIVE_SESSIONS,
                         (int) $remaining
                     )); ?>
                     <br><small style="color:#92400e;"><?php echo esc_html(sprintf(
-                        __('Base license: max 1 session per day, max %d active sessions, and max %d seats per session. Upgrade to Premium to remove these limits.', 'mc-ems-base'),
+                        /* translators: 1: maximum active sessions allowed, 2: maximum seats per session */
+                        __('Base license: max 1 session per day, max %1$d active sessions, and max %2$d seats per session. Upgrade to Premium to remove these limits.', 'mc-ems-base'),
                         (int) self::BASE_MAX_ACTIVE_SESSIONS,
                         (int) self::BASE_MAX_CAPACITY
                     )); ?></small>
@@ -278,7 +281,11 @@ class MCEMS_Admin_Sessioni {
                                 <td>
                                     <?php if (!$is_premium): ?>
                                         <input type="number" id="mcems_capacity" name="capacity" min="1" max="<?php echo (int) self::BASE_MAX_CAPACITY; ?>">
-                                        <p class="description"><?php echo esc_html(sprintf(__('Base license: max %d seats per session.', 'mc-ems-base'), self::BASE_MAX_CAPACITY)); ?></p>
+                                        <p class="description"><?php echo esc_html(sprintf(
+                            /* translators: %d: maximum number of seats per session */
+                            __('Base license: max %d seats per session.', 'mc-ems-base'),
+                            self::BASE_MAX_CAPACITY
+                        )); ?></p>
                                     <?php else: ?>
                                         <input type="number" id="mcems_capacity" name="capacity" min="1" max="500">
                                     <?php endif; ?>
@@ -802,12 +809,13 @@ class MCEMS_Admin_Sessioni {
     }
 
     private static function handle_generate_standard(): array {
+        check_admin_referer('mcems_generate', 'mcems_generate_nonce');
         $selected_dates_raw = isset($_POST['selected_dates']) && is_array($_POST['selected_dates'])
             ? array_map('sanitize_text_field', wp_unslash($_POST['selected_dates']))
             : [];
-        $times_raw = (string) wp_unslash($_POST['times'] ?? '');
-        $capacity  = max(1, (int) ($_POST['capacity'] ?? 1));
-        $exam_id = isset($_POST['exam_id']) ? (int) $_POST['exam_id'] : 0;
+        $times_raw = sanitize_textarea_field(wp_unslash($_POST['times'] ?? ''));
+        $capacity  = max(1, (int) wp_unslash($_POST['capacity'] ?? 1));
+        $exam_id = isset($_POST['exam_id']) ? (int) wp_unslash($_POST['exam_id']) : 0;
 
         if ($exam_id <= 0) {
             return ['', 'Select a Tutor LMS exam.'];
@@ -851,7 +859,8 @@ class MCEMS_Admin_Sessioni {
             $future_count = self::count_future_sessions();
             if ($future_count >= self::BASE_MAX_ACTIVE_SESSIONS) {
                 return ['', sprintf(
-                    __('Base license limit reached: you already have %d active (future) sessions (maximum %d). Delete or wait for existing sessions to pass before creating new ones.', 'mc-ems-base'),
+                    /* translators: 1: number of current active sessions, 2: maximum allowed active sessions */
+                    __('Base license limit reached: you already have %1$d active (future) sessions (maximum %2$d). Delete or wait for existing sessions to pass before creating new ones.', 'mc-ems-base'),
                     (int) $future_count,
                     (int) self::BASE_MAX_ACTIVE_SESSIONS
                 )];
@@ -919,18 +928,28 @@ class MCEMS_Admin_Sessioni {
         }
 
         if (!$created && $insert_errors) {
-            return ['', sprintf(__('Unable to create sessions for: %s', 'mc-ems-base'), implode(', ', array_slice($insert_errors, 0, 5)))];
+            return ['', sprintf(
+                /* translators: %s: comma-separated list of date/time combinations that could not be created */
+                __('Unable to create sessions for: %s', 'mc-ems-base'),
+                implode(', ', array_slice($insert_errors, 0, 5))
+            )];
         }
 
-        return [sprintf(__('Creation completed: %d sessions created, %d skipped.', 'mc-ems-base'), $created, $skipped), ''];
+        return [sprintf(
+            /* translators: 1: number of sessions successfully created, 2: number of sessions skipped */
+            __('Creation completed: %1$d sessions created, %2$d skipped.', 'mc-ems-base'),
+            $created,
+            $skipped
+        ), ''];
     }
 
     private static function handle_generate_special(): array {
+        check_admin_referer('mcems_generate', 'mcems_generate_nonce');
         $date      = sanitize_text_field(wp_unslash($_POST['special_date'] ?? ''));
         $time      = sanitize_text_field(wp_unslash($_POST['special_time'] ?? ''));
-        $uid       = (int) ($_POST['special_user_id'] ?? 0);
+        $uid       = (int) wp_unslash($_POST['special_user_id'] ?? 0);
         $email     = sanitize_email(wp_unslash($_POST['special_user_email'] ?? ''));
-        $exam_id = isset($_POST['special_exam_id']) ? (int) $_POST['special_exam_id'] : 0;
+        $exam_id = isset($_POST['special_exam_id']) ? (int) wp_unslash($_POST['special_exam_id']) : 0;
 
         if ($exam_id <= 0) {
             return ['', 'Select a Tutor LMS exam.'];
@@ -997,11 +1016,16 @@ class MCEMS_Admin_Sessioni {
 
         update_user_meta($uid, MCEMS_Booking::UM_HISTORY, $storico);
 
-        return [__('Special exam session created and exam booked for candidate (#', 'mc-ems-base') . $sid . ').', ''];
+        return [sprintf(
+            /* translators: %d: ID of the newly created special exam session */
+            __('Special exam session created and exam booked for candidate (session ID: #%d).', 'mc-ems-base'),
+            (int) $sid
+        ), ''];
     }
 
     private static function handle_update_capacity(): array {
-        $new_cap     = max(1, (int) ($_POST['new_capacity'] ?? 1));
+        check_admin_referer('mcems_update_capacity', 'mcems_update_capacity_nonce');
+        $new_cap     = max(1, (int) wp_unslash($_POST['new_capacity'] ?? 1));
         $only_future = !empty($_POST['only_future']);
 
         $ids = get_posts([
@@ -1032,7 +1056,11 @@ class MCEMS_Admin_Sessioni {
             $updated++;
         }
 
-        return [sprintf(__('Update completed: %d sessions updated.', 'mc-ems-base'), $updated), ''];
+        return [sprintf(
+            /* translators: %d: number of sessions successfully updated */
+            __('Update completed: %d sessions updated.', 'mc-ems-base'),
+            $updated
+        ), ''];
     }
 
     /**

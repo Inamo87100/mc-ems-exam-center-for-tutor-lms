@@ -220,11 +220,11 @@ class MCEMS_Tutor_Gate {
     private static function inject_sidebar_block(string $title, string $body_html): void {
         add_action('wp_head', function() {
             echo '<style>' .
-                self::SIDEBAR_SELECTOR . '{display:none!important}' .
-                self::DETAILS_TAB_SELECTOR . '{display:none!important}' .
-                self::CURRICULUM_SELECTOR . '{display:none!important}' .
-                self::LESSON_SELECTOR . '{display:none!important}' .
-                self::QUIZ_SELECTOR . '{display:none!important}' .
+                esc_html(self::SIDEBAR_SELECTOR) . '{display:none!important}' .
+                esc_html(self::DETAILS_TAB_SELECTOR) . '{display:none!important}' .
+                esc_html(self::CURRICULUM_SELECTOR) . '{display:none!important}' .
+                esc_html(self::LESSON_SELECTOR) . '{display:none!important}' .
+                esc_html(self::QUIZ_SELECTOR) . '{display:none!important}' .
                 '.mcems-locked-exam{max-width:820px;margin:28px auto;padding:18px;border-radius:16px;border:1px solid #fda29b;background:#fffbfa;box-shadow:0 10px 30px rgba(16,24,40,.08);}' .
                 '.mcems-locked-exam__title{font-weight:900;color:#b42318;font-size:18px;margin-bottom:8px;}' .
                 '.mcems-locked-exam__body{color:#7a271a;font-weight:800;font-size:14px;line-height:1.5;}' .
@@ -240,18 +240,18 @@ class MCEMS_Tutor_Gate {
             ],
         ];
 
-        $title_json = wp_json_encode(esc_html($title));
-        $body_json  = wp_json_encode(wp_kses($body_html, $allowed_html));
+        $safe_title = wp_json_encode(esc_html($title));
+        $safe_body  = wp_json_encode(wp_kses($body_html, $allowed_html));
 
-        add_action('wp_footer', function() use ($title_json, $body_json) {
+        add_action('wp_footer', function() use ($safe_title, $safe_body) {
             echo '<script>' .
                 '(function(){' .
                 'var sidebar=document.querySelector(' . wp_json_encode(self::SIDEBAR_SELECTOR) . ');' .
                 'if(!sidebar)return;' .
                 'var box=document.createElement("div");' .
                 'box.className="mcems-locked-exam";' .
-                'box.innerHTML=\'<div class="mcems-locked-exam__title">\'+' . $title_json . '+\'</div>\'' .
-                '+\'<div class="mcems-locked-exam__body">\'+' . $body_json . '+\'</div>\';' .
+                'box.innerHTML=\'<div class="mcems-locked-exam__title">\'+' . $safe_title . '+\'</div>\'' .
+                '+\'<div class="mcems-locked-exam__body">\'+' . $safe_body . '+\'</div>\';' .
                 'sidebar.parentNode.insertBefore(box,sidebar);' .
                 '})();' .
                 '</script>' . "\n";
@@ -312,16 +312,6 @@ class MCEMS_Tutor_Gate {
         }
 
         $slot_id = self::get_active_slot_id($user_id, $exam_id);
-
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log(
-                '[MCEMS Tutor Gate] enabled=' . (self::enabled() ? '1' : '0') .
-                ' exam_id=' . $exam_id .
-                ' user_id=' . $user_id .
-                ' slot_id=' . $slot_id .
-                ' pt=' . get_post_type($exam_id)
-            );
-        }
 
         if ($slot_id <= 0) {
             $body = esc_html__('To access, you must first create a booking for an exam session.', 'mc-ems-base');

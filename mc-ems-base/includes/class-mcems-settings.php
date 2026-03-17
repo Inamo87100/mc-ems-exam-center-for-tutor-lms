@@ -512,7 +512,7 @@ class MCEMS_Settings {
 
     public static function sanitize($input): array {
         $out = self::get();
-        $tab = isset($_POST['mcems_current_tab']) ? sanitize_key((string) $_POST['mcems_current_tab']) : '';
+        $tab = isset($_POST['mcems_current_tab']) ? sanitize_key(wp_unslash($_POST['mcems_current_tab'])) : '';
 
         if (array_key_exists('tutor_gate_enabled', $input)) {
             $out['tutor_gate_enabled'] = !empty($input['tutor_gate_enabled']) ? 1 : 0;
@@ -753,7 +753,7 @@ class MCEMS_Settings {
             wp_die(esc_html__('Insufficient permissions.', 'mc-ems-base'), 403);
         }
 
-        $tab = isset($_GET['tab']) ? sanitize_key((string) $_GET['tab']) : 'shortcodes';
+        $tab = isset($_GET['tab']) ? sanitize_key(wp_unslash($_GET['tab'])) : 'shortcodes';
         $allowed = ['shortcodes','bookings','exam_access','email','pages','role_settings'];
         if (!in_array($tab, $allowed, true)) $tab = 'shortcodes';
 
@@ -771,9 +771,8 @@ class MCEMS_Settings {
 
         echo '<h2 class="nav-tab-wrapper" style="margin-top:12px;">';
         foreach ($tabs as $key => $label) {
-            $url = esc_url(add_query_arg(['page' => 'mcems-settings-cpt', 'tab' => $key], admin_url('edit.php?post_type=' . MCEMS_CPT_Sessioni_Esame::CPT)));
             $cls = ($tab === $key) ? 'nav-tab nav-tab-active' : 'nav-tab';
-            echo '<a class="' . esc_attr($cls) . '" href="' . $url . '">' . esc_html($label) . '</a>';
+            echo '<a class="' . esc_attr($cls) . '" href="' . esc_url(add_query_arg(['page' => 'mcems-settings-cpt', 'tab' => $key], admin_url('edit.php?post_type=' . MCEMS_CPT_Sessioni_Esame::CPT))) . '">' . esc_html($label) . '</a>';
         }
         echo '</h2>';
 
@@ -852,10 +851,15 @@ class MCEMS_Settings {
             foreach ($exams as $cid => $title) {
                 $cid      = (int) $cid;
                 $label    = esc_html($title . ' (#' . $cid . ')');
-                $checked  = in_array($cid, $sel, true) ? ' checked' : '';
-                $cb_id    = esc_attr('mcems_cb_' . $key . '_' . $cid);
-                echo '<label for="' . $cb_id . '" style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f2f4f7;cursor:pointer;" data-label="' . strtolower(esc_attr($title)) . '">';
-                echo '<input type="checkbox" id="' . $cb_id . '" name="' . esc_attr($field_name) . '" value="' . $cid . '"' . $checked . ' style="width:16px;height:16px;flex-shrink:0;">';
+                $cb_id    = 'mcems_cb_' . $key . '_' . $cid;
+                echo '<label for="' . esc_attr($cb_id) . '" style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f2f4f7;cursor:pointer;" data-label="' . esc_attr(strtolower($title)) . '">';
+                printf(
+                    '<input type="checkbox" id="%s" name="%s" value="%d"%s style="width:16px;height:16px;flex-shrink:0;">',
+                    esc_attr($cb_id),
+                    esc_attr($field_name),
+                    $cid,
+                    checked(in_array($cid, $sel, true), true, false)
+                );
                 echo '<span>' . $label . '</span>';
                 echo '</label>';
             }
@@ -961,10 +965,10 @@ class MCEMS_Settings {
             '<input type="number" name="%s[%s]" value="%d" min="%d" max="%d" step="%d" />',
             esc_attr(self::OPTION_KEY),
             esc_attr($key),
-            $val,
-            $min,
-            $max,
-            $step
+            (int) $val,
+            (int) $min,
+            (int) $max,
+            (int) $step
         );
         if ($desc) echo '<p class="description">'.esc_html($desc).'</p>';
     }
@@ -1018,7 +1022,7 @@ class MCEMS_Settings {
             '<textarea name="%s[%s]" rows="%d" class="large-text" placeholder="%s">%s</textarea>',
             esc_attr(self::OPTION_KEY),
             esc_attr($key),
-            $rows,
+            (int) $rows,
             esc_attr($placeholder),
             esc_textarea($val)
         );
@@ -1063,9 +1067,14 @@ class MCEMS_Settings {
             foreach ($all_roles as $role_slug => $role_info) {
                 $role_name = translate_user_role($role_info['name']);
                 $is_checked = $all_checked || in_array($role_slug, $checked_roles, true);
-                $field_name = esc_attr(self::OPTION_KEY) . '[shortcode_roles][' . esc_attr($sc_tag) . '][]';
+                $field_name = self::OPTION_KEY . '[shortcode_roles][' . $sc_tag . '][]';
                 echo '<label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">';
-                echo '<input type="checkbox" name="' . $field_name . '" value="' . esc_attr($role_slug) . '"' . ($is_checked ? ' checked' : '') . ' />';
+                printf(
+                    '<input type="checkbox" name="%s" value="%s"%s />',
+                    esc_attr($field_name),
+                    esc_attr($role_slug),
+                    checked($is_checked, true, false)
+                );
                 echo esc_html($role_name);
                 echo '</label>';
             }
@@ -1088,10 +1097,15 @@ class MCEMS_Settings {
         foreach ($all_roles as $role_slug => $role_info) {
             $role_name  = translate_user_role($role_info['name']);
             $is_checked = $all_checked || in_array($role_slug, $saved, true);
-            $field_name = esc_attr(self::OPTION_KEY) . '[proctor_roles][]';
+            $field_name = self::OPTION_KEY . '[proctor_roles][]';
 
             echo '<label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">';
-            echo '<input type="checkbox" name="' . $field_name . '" value="' . esc_attr($role_slug) . '"' . ($is_checked ? ' checked' : '') . ' />';
+            printf(
+                '<input type="checkbox" name="%s" value="%s"%s />',
+                esc_attr($field_name),
+                esc_attr($role_slug),
+                checked($is_checked, true, false)
+            );
             echo esc_html($role_name);
             echo '</label>';
         }

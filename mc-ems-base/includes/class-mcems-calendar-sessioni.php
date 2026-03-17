@@ -364,7 +364,7 @@ class MCEMS_Calendar_Sessioni {
                             foreach ($mesi as $num=>$nome) {
                                 printf(
                                     '<option value="%d"%s>%s</option>',
-                                    $num,
+                                    (int) $num,
                                     selected($curM, $num, false),
                                     esc_html($nome)
                                 );
@@ -378,7 +378,7 @@ class MCEMS_Calendar_Sessioni {
                             <?php
                             $curY = (int) wp_date('Y');
                             for ($y=$curY-2; $y<=$curY+2; $y++) {
-                                printf('<option value="%d"%s>%d</option>', $y, selected($curY,$y,false), $y);
+                                printf('<option value="%d"%s>%d</option>', (int) $y, selected($curY,$y,false), (int) $y);
                             }
                             ?>
                         </select>

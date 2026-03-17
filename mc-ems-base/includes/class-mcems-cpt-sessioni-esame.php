@@ -339,7 +339,7 @@ class MCEMS_CPT_Sessioni_Esame {
 if (!$exam_pt) {
     echo '<em>Tutor LMS not detected (exam post type not found: <code>courses</code> / <code>tutor_course</code>).</em>';
 } else {
-    echo '<select name="mcems_exam_id" required ' . $disabled . '><option value="0">— Select exam —</option>';
+    echo '<select name="mcems_exam_id" required ' . esc_attr($disabled) . '><option value="0">— Select exam —</option>';
     foreach ($exams as $cid => $title) {
         printf('<option value="%d" %s>%s</option>',
             (int)$cid,
@@ -370,8 +370,8 @@ echo '</td></tr>';
         $is_premium = defined('EMS_PREMIUM_VERSION');
         $cap_max = $is_premium ? 500 : MCEMS_Admin_Sessioni::BASE_MAX_CAPACITY;
         printf('<input type="number" min="1" max="%d" name="mcems_capacity" value="%d" %s %s />',
-            $cap_max,
-            (int)$capacity,
+            (int) $cap_max,
+            (int) $capacity,
             ($is_spec ? 'readonly' : ''),
             esc_attr($disabled)
         );
@@ -388,7 +388,7 @@ echo '</td></tr>';
 
         echo '<tr><th><label>Proctor</label></th><td>';
         echo '<div class="mcems-user-search-wrap">';
-        printf('<input type="hidden" name="mcems_proctor_user_id" id="mcems_proctor_user_id" value="%d" />', $proctor);
+        printf('<input type="hidden" name="mcems_proctor_user_id" id="mcems_proctor_user_id" value="%d" />', (int) $proctor);
         if (!$is_past) {
             printf(
                 '<input type="text" id="mcems_proctor_search" placeholder="%s" autocomplete="off" />',
@@ -424,7 +424,7 @@ echo '</td></tr>';
 
         echo '<tr><th><label>Associated candidate (only ♿)</label></th><td>';
         echo '<div class="mcems-user-search-wrap">';
-        printf('<input type="hidden" name="mcems_special_user_id" id="mcems_special_user_id" value="%d" />', $spec_uid);
+        printf('<input type="hidden" name="mcems_special_user_id" id="mcems_special_user_id" value="%d" />', (int) $spec_uid);
         if (!$is_past) {
             printf(
                 '<input type="text" id="mcems_candidate_search" placeholder="%s" autocomplete="off" />',
@@ -458,7 +458,7 @@ echo '</td></tr>';
     public static function save_metabox($post_id, $post) {
         if ($post->post_type !== self::CPT) return;
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-        if (!isset($_POST['mcems_session_nonce']) || !wp_verify_nonce($_POST['mcems_session_nonce'], 'mcems_session_save')) return;
+        if (!isset($_POST['mcems_session_nonce']) || !wp_verify_nonce(wp_unslash($_POST['mcems_session_nonce']), 'mcems_session_save')) return; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
         if (!current_user_can('edit_post', $post_id)) return;
 
         $existing_date = (string) get_post_meta($post_id, self::MK_DATE, true);
@@ -468,8 +468,8 @@ echo '</td></tr>';
             return;
         }
 
-        $date = isset($_POST['mcems_date']) ? sanitize_text_field($_POST['mcems_date']) : '';
-        $time = isset($_POST['mcems_time']) ? sanitize_text_field($_POST['mcems_time']) : '';
+        $date = isset($_POST['mcems_date']) ? sanitize_text_field(wp_unslash($_POST['mcems_date'])) : '';
+        $time = isset($_POST['mcems_time']) ? sanitize_text_field(wp_unslash($_POST['mcems_time'])) : '';
 
         // Block past sessions (date + time).
         if ($date && $time && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && preg_match('/^\d{2}:\d{2}$/', $time)) {
@@ -493,13 +493,13 @@ echo '</td></tr>';
             }
         }
 
-        $proctor  = isset($_POST['mcems_proctor_user_id']) ? (int) $_POST['mcems_proctor_user_id'] : 0;
+        $proctor  = isset($_POST['mcems_proctor_user_id']) ? (int) wp_unslash($_POST['mcems_proctor_user_id']) : 0;
         $is_spec  = !empty($_POST['mcems_is_special']) ? 1 : 0;
-        $spec_uid = isset($_POST['mcems_special_user_id']) ? (int) $_POST['mcems_special_user_id'] : 0;
+        $spec_uid = isset($_POST['mcems_special_user_id']) ? (int) wp_unslash($_POST['mcems_special_user_id']) : 0;
 
-        $exam_id = isset($_POST['mcems_exam_id']) ? (int) $_POST['mcems_exam_id'] : 0;
+        $exam_id = isset($_POST['mcems_exam_id']) ? (int) wp_unslash($_POST['mcems_exam_id']) : 0;
 
-        $capacity = isset($_POST['mcems_capacity']) ? (int) $_POST['mcems_capacity'] : 10;
+        $capacity = isset($_POST['mcems_capacity']) ? (int) wp_unslash($_POST['mcems_capacity']) : 10;
         if ($capacity < 1) $capacity = 1;
 
         // Base license: cap capacity to the allowed maximum.

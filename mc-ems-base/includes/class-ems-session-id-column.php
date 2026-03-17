@@ -72,11 +72,11 @@ class EMS_Session_ID_Column {
         }
 
         $value = isset($_GET['ems_session_id_filter'])
-            ? absint($_GET['ems_session_id_filter'])
+            ? absint(wp_unslash($_GET['ems_session_id_filter'])) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             : 0;
 
         echo '<input type="number" name="ems_session_id_filter" id="ems_session_id_filter"'
-            . ' value="' . ($value > 0 ? absint($value) : '') . '"'
+            . ' value="' . ($value > 0 ? (int) $value : '') . '"'
             . ' placeholder="' . esc_attr__('Session ID…', 'mc-ems-base') . '"'
             . ' style="width:110px;" min="1">';
     }
@@ -95,7 +95,7 @@ class EMS_Session_ID_Column {
             return;
         }
 
-        $raw = isset($_GET['ems_session_id_filter']) ? absint($_GET['ems_session_id_filter']) : 0;
+        $raw = isset($_GET['ems_session_id_filter']) ? absint(wp_unslash($_GET['ems_session_id_filter'])) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         if ($raw <= 0) {
             return;
         }

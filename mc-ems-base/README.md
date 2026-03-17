@@ -3,7 +3,7 @@
 **Contributors:** Mamba Coding  
 **Tags:** exam, booking, tutor lms, exam management, sessions  
 **Requires at least:** 5.0  
-**Tested up to:** 6.7  
+**Tested up to:** 6.9  
 **Stable tag:** 2.5.0  
 **Requires PHP:** 7.2  
 **License:** GPL-2.0-or-later  

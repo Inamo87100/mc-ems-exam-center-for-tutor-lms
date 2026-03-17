@@ -37,8 +37,8 @@ class MCEMS_Upgrader {
             ['%s']
         );
 
-        if ($result === false) {
-            error_log('MC-EMS: CPT slug migration failed – ' . $wpdb->last_error);
+        if ($result === false && defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MC-EMS: CPT slug migration failed – ' . $wpdb->last_error); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
         }
     }
 
