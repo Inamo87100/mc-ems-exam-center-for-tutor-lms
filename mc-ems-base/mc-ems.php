@@ -10,7 +10,7 @@
  * License URI:       https://www.gnu.org/licenses/gpl-2.0-or-later.html
  * Text Domain:       mc-ems
  * Domain Path:       /languages
- * Requires WordPress: 5.0
+ * Requires at least:  5.0
  * Requires PHP:      7.2
  */
 if (!defined('ABSPATH')) exit;
