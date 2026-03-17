@@ -64,7 +64,7 @@ class MCEMS_CPT_Sessioni_Esame {
             'restUrl' => esc_url_raw(rest_url('mcems/v1/')),
             'nonce'   => wp_create_nonce('wp_rest'),
             'i18n'    => [
-                'noResults' => __('No users found.', 'mc-ems'),
+                'noResults' => __('No users found.', 'mc-ems-base'),
             ],
         ]);
     }
@@ -255,17 +255,17 @@ class MCEMS_CPT_Sessioni_Esame {
     public static function register_cpt() {
         $labels = [
             'name'               => 'Exam Management System',
-            'singular_name'      => __('Exam session', 'mc-ems'),
+            'singular_name'      => __('Exam session', 'mc-ems-base'),
             'menu_name'          => 'Exam Management System',
-            'all_items'          => __('Sessions list', 'mc-ems'),
-            'add_new'            => __('Add session', 'mc-ems'),
-            'add_new_item'       => __('Add new session', 'mc-ems'),
-            'edit_item'          => __('Edit session', 'mc-ems'),
-            'new_item'           => __('New session', 'mc-ems'),
-            'view_item'          => __('View session', 'mc-ems'),
-            'search_items'       => __('Search sessions', 'mc-ems'),
-            'not_found'          => __('No sessions found', 'mc-ems'),
-            'not_found_in_trash' => __('No sessions in trash', 'mc-ems'),
+            'all_items'          => __('Sessions list', 'mc-ems-base'),
+            'add_new'            => __('Add session', 'mc-ems-base'),
+            'add_new_item'       => __('Add new session', 'mc-ems-base'),
+            'edit_item'          => __('Edit session', 'mc-ems-base'),
+            'new_item'           => __('New session', 'mc-ems-base'),
+            'view_item'          => __('View session', 'mc-ems-base'),
+            'search_items'       => __('Search sessions', 'mc-ems-base'),
+            'not_found'          => __('No sessions found', 'mc-ems-base'),
+            'not_found_in_trash' => __('No sessions in trash', 'mc-ems-base'),
         ];
 
         register_post_type(self::CPT, [
@@ -283,7 +283,7 @@ class MCEMS_CPT_Sessioni_Esame {
     public static function add_metaboxes() {
         add_meta_box(
             'mcems_session_details',
-            __('Session details (MC-EMS)', 'mc-ems'),
+            __('Session details (MC-EMS)', 'mc-ems-base'),
             [__CLASS__, 'metabox_html'],
             self::CPT,
             'normal',
@@ -328,7 +328,7 @@ class MCEMS_CPT_Sessioni_Esame {
         $is_past = self::is_past_session($date, $time);
 
         if ($is_past) {
-            echo '<div class="notice notice-warning inline"><p>' . esc_html__('Past exam sessions are read-only and cannot be modified from the backend.', 'mc-ems') . '</p></div>';
+            echo '<div class="notice notice-warning inline"><p>' . esc_html__('Past exam sessions are read-only and cannot be modified from the backend.', 'mc-ems-base') . '</p></div>';
         }
 
         $disabled = $is_past ? 'disabled' : '';
@@ -392,7 +392,7 @@ echo '</td></tr>';
         if (!$is_past) {
             printf(
                 '<input type="text" id="mcems_proctor_search" placeholder="%s" autocomplete="off" />',
-                esc_attr__('Search by name or email…', 'mc-ems')
+                esc_attr__('Search by name or email…', 'mc-ems-base')
             );
             echo '<div id="mcems_proctor_results" class="mcems-user-search-results"></div>';
         }
@@ -409,7 +409,7 @@ echo '</td></tr>';
             printf(
                 '<button type="button" id="mcems_proctor_clear" class="mcems-user-search-clear" style="%s">%s</button>',
                 $proctor ? '' : 'display:none',
-                esc_html__('Clear', 'mc-ems')
+                esc_html__('Clear', 'mc-ems-base')
             );
         }
         echo '</div>';
@@ -428,7 +428,7 @@ echo '</td></tr>';
         if (!$is_past) {
             printf(
                 '<input type="text" id="mcems_candidate_search" placeholder="%s" autocomplete="off" />',
-                esc_attr__('Search by name or email…', 'mc-ems')
+                esc_attr__('Search by name or email…', 'mc-ems-base')
             );
             echo '<div id="mcems_candidate_results" class="mcems-user-search-results"></div>';
         }
@@ -445,7 +445,7 @@ echo '</td></tr>';
             printf(
                 '<button type="button" id="mcems_candidate_clear" class="mcems-user-search-clear" style="%s">%s</button>',
                 $spec_uid ? '' : 'display:none',
-                esc_html__('Clear', 'mc-ems')
+                esc_html__('Clear', 'mc-ems-base')
             );
         }
         echo '</div>';
@@ -543,11 +543,11 @@ echo '</td></tr>';
     public static function admin_notices(): void {
         if (get_transient('mcems_past_session_notice')) {
             delete_transient('mcems_past_session_notice');
-            echo '<div class="notice notice-error"><p>' . esc_html__('Past sessions cannot be created. Please choose a future date and time.', 'mc-ems') . '</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('Past sessions cannot be created. Please choose a future date and time.', 'mc-ems-base') . '</p></div>';
         }
         if (get_transient('mcems_past_session_readonly_notice')) {
             delete_transient('mcems_past_session_readonly_notice');
-            echo '<div class="notice notice-warning"><p>' . esc_html__('Past exam sessions are read-only and cannot be modified from the backend.', 'mc-ems') . '</p></div>';
+            echo '<div class="notice notice-warning"><p>' . esc_html__('Past exam sessions are read-only and cannot be modified from the backend.', 'mc-ems-base') . '</p></div>';
         }
     }
 
@@ -580,13 +580,13 @@ echo '</td></tr>';
     public static function columns($cols) {
         $new = [];
         $new['cb'] = $cols['cb'] ?? '';
-        $new['title'] = __('Session', 'mc-ems');
-        // Subito dopo __('Session', 'mc-ems')
+        $new['title'] = __('Session', 'mc-ems-base');
+        // Subito dopo __('Session', 'mc-ems-base')
         $new['mcems_exam'] = 'Exam';
-        $new['mcems_date'] = __('Date', 'mc-ems');
+        $new['mcems_date'] = __('Date', 'mc-ems-base');
         $new['mcems_time'] = 'Time';
-        $new['mcems_cap']  = __('Seats', 'mc-ems');
-        $new['mcems_book'] = __('Booked', 'mc-ems');
+        $new['mcems_cap']  = __('Seats', 'mc-ems-base');
+        $new['mcems_book'] = __('Booked', 'mc-ems-base');
         // Niente colonna data di pubblicazione
         return $new;
     }

@@ -124,16 +124,16 @@ class MCEMS_Admin_Banner {
         $target     = 'https://mambacoding.com/';
 
         $headline = $is_premium
-            ? __('Powered by Mamba Coding', 'mc-ems')
-            : __('Upgrade to MC-EMS Premium and unlock the full exam workflow', 'mc-ems');
+            ? __('Powered by Mamba Coding', 'mc-ems-base')
+            : __('Upgrade to MC-EMS Premium and unlock the full exam workflow', 'mc-ems-base');
 
         $text = $is_premium
-            ? __('Discover more tools, updates and WordPress solutions on Mamba Coding.', 'mc-ems')
-            : __('Sell smarter, automate more, and manage exam sessions like a pro. Get premium booking tools, advanced workflows, and extra features designed to help you save time and grow faster.', 'mc-ems');
+            ? __('Discover more tools, updates and WordPress solutions on Mamba Coding.', 'mc-ems-base')
+            : __('Sell smarter, automate more, and manage exam sessions like a pro. Get premium booking tools, advanced workflows, and extra features designed to help you save time and grow faster.', 'mc-ems-base');
 
         $button = $is_premium
-            ? __('Visit Mamba Coding', 'mc-ems')
-            : __('Buy MC-EMS Premium now', 'mc-ems');
+            ? __('Visit Mamba Coding', 'mc-ems-base')
+            : __('Buy MC-EMS Premium now', 'mc-ems-base');
 
         ?>
         <style>
@@ -164,7 +164,7 @@ class MCEMS_Admin_Banner {
                 <div>
                     <a href="<?php echo esc_url($target); ?>" target="_blank" rel="noopener noreferrer" class="mcems-banner-btn"><?php echo esc_html($button); ?></a>
                 </div>
-                <button type="button" class="mcems-banner-dismiss" aria-label="<?php esc_attr_e('Dismiss', 'mc-ems'); ?>"
+                <button type="button" class="mcems-banner-dismiss" aria-label="<?php esc_attr_e('Dismiss', 'mc-ems-base'); ?>"
                     data-banner="<?php echo esc_attr($banner_id); ?>"
                     data-nonce="<?php echo esc_attr($nonce); ?>">&#x2715;</button>
             </div>

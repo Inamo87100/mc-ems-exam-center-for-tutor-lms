@@ -8,7 +8,7 @@
  * Author URI:        https://mambacoding.com/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0-or-later.html
- * Text Domain:       mc-ems
+ * Text Domain:       mc-ems-base
  * Domain Path:       /languages
  * Requires at least:  5.0
  * Requires PHP:      7.2

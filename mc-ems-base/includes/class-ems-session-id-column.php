@@ -28,11 +28,11 @@ class EMS_Session_ID_Column {
         foreach ($columns as $key => $label) {
             $new[$key] = $label;
             if ($key === 'title') {
-                $new['ems_session_id'] = __('Session ID', 'mc-ems');
+                $new['ems_session_id'] = __('Session ID', 'mc-ems-base');
             }
         }
         if (!isset($new['ems_session_id'])) {
-            $new['ems_session_id'] = __('Session ID', 'mc-ems');
+            $new['ems_session_id'] = __('Session ID', 'mc-ems-base');
         }
         return $new;
     }
@@ -56,7 +56,7 @@ class EMS_Session_ID_Column {
      */
     public static function render($column, $post_id): void {
         if ($column === 'ems_session_id') {
-            echo (int) $post_id;
+            echo absint($post_id);
         }
     }
 
@@ -76,8 +76,8 @@ class EMS_Session_ID_Column {
             : 0;
 
         echo '<input type="number" name="ems_session_id_filter" id="ems_session_id_filter"'
-            . ' value="' . ($value > 0 ? $value : '') . '"'
-            . ' placeholder="' . esc_attr__('Session ID…', 'mc-ems') . '"'
+            . ' value="' . ($value > 0 ? absint($value) : '') . '"'
+            . ' placeholder="' . esc_attr__('Session ID…', 'mc-ems-base') . '"'
             . ' style="width:110px;" min="1">';
     }
 

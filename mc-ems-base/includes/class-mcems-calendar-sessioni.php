@@ -47,24 +47,24 @@ class MCEMS_Calendar_Sessioni {
             'nonce'   => wp_create_nonce(self::NONCE_ACTION),
             'locale'  => get_locale(),
             'i18n'    => [
-                'loading'    => __('Loading…', 'mc-ems'),
-                'loadError'  => __('Error loading calendar data.', 'mc-ems'),
-                'available'  => __('Available', 'mc-ems'),
-                'limited'    => __('Limited', 'mc-ems'),
-                'full'       => __('Full', 'mc-ems'),
-                'past'       => __('Past', 'mc-ems'),
-                'sessions'   => __('Sessions', 'mc-ems'),
-                'capacity'   => __('Capacity', 'mc-ems'),
-                'booked'     => __('Booked', 'mc-ems'),
-                'proctor'    => __('Proctor', 'mc-ems'),
-                'candidates' => __('Candidates', 'mc-ems'),
-                'mon'        => __('Mon', 'mc-ems'),
-                'tue'        => __('Tue', 'mc-ems'),
-                'wed'        => __('Wed', 'mc-ems'),
-                'thu'        => __('Thu', 'mc-ems'),
-                'fri'        => __('Fri', 'mc-ems'),
-                'sat'        => __('Sat', 'mc-ems'),
-                'sun'        => __('Sun', 'mc-ems'),
+                'loading'    => __('Loading…', 'mc-ems-base'),
+                'loadError'  => __('Error loading calendar data.', 'mc-ems-base'),
+                'available'  => __('Available', 'mc-ems-base'),
+                'limited'    => __('Limited', 'mc-ems-base'),
+                'full'       => __('Full', 'mc-ems-base'),
+                'past'       => __('Past', 'mc-ems-base'),
+                'sessions'   => __('Sessions', 'mc-ems-base'),
+                'capacity'   => __('Capacity', 'mc-ems-base'),
+                'booked'     => __('Booked', 'mc-ems-base'),
+                'proctor'    => __('Proctor', 'mc-ems-base'),
+                'candidates' => __('Candidates', 'mc-ems-base'),
+                'mon'        => __('Mon', 'mc-ems-base'),
+                'tue'        => __('Tue', 'mc-ems-base'),
+                'wed'        => __('Wed', 'mc-ems-base'),
+                'thu'        => __('Thu', 'mc-ems-base'),
+                'fri'        => __('Fri', 'mc-ems-base'),
+                'sat'        => __('Sat', 'mc-ems-base'),
+                'sun'        => __('Sun', 'mc-ems-base'),
             ],
         ]);
     }
@@ -939,7 +939,7 @@ class MCEMS_Calendar_Sessioni {
 
         if ($year > 0 && $month >= 1 && $month <= 12) {
             $start = sprintf('%04d-%02d-01', $year, $month);
-            $end   = date('Y-m-t', strtotime($start));
+            $end   = gmdate('Y-m-t', strtotime($start));
             $args['meta_query'] = [[
                 'key'     => self::meta_keys('date')[0],
                 'value'   => [$start, $end],
@@ -1049,7 +1049,7 @@ class MCEMS_Calendar_Sessioni {
         $month = isset($_GET['month']) ? max(1, min(12, intval($_GET['month']))) : (int) wp_date('n');
 
         $start = sprintf('%04d-%02d-01', $year, $month);
-        $end   = date('Y-m-t', strtotime($start));
+        $end   = gmdate('Y-m-t', strtotime($start));
 
         $posts = get_posts([
             'post_type'      => self::cpt(),

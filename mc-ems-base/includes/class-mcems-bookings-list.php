@@ -189,11 +189,11 @@ class MCEMS_Bookings_List_Base {
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('X-Content-Type-Options: nosniff');
 
-        $out = fopen('php://output', 'w');
         // UTF-8 BOM for Excel
-        fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
+        echo chr(0xEF) . chr(0xBB) . chr(0xBF);
 
-        fputcsv($out, ['Last name', 'First name', 'Email', 'Session ID', 'Exam session date', 'Exam session time', 'Exam', 'Special', 'Proctor'], ';');
+        $header_row = ['Last name', 'First name', 'Email', 'Session ID', 'Exam session date', 'Exam session time', 'Exam', 'Special', 'Proctor'];
+        echo self::format_csv_row($header_row);
 
         foreach ($rows as $r) {
             $data_h = !empty($r['data']) ? date_i18n('d/m/Y', strtotime($r['data'])) : '';
@@ -203,7 +203,7 @@ class MCEMS_Bookings_List_Base {
             }
             $spec = !empty($r['special']) ? 'Yes' : 'No';
 
-            fputcsv($out, [
+            echo self::format_csv_row([
                 $r['cognome'] ?? '',
                 $r['nome']    ?? '',
                 $r['email']   ?? '',
@@ -213,11 +213,21 @@ class MCEMS_Bookings_List_Base {
                 $corso_t,
                 $spec,
                 $r['proctor'] ?? '',
-            ], ';');
+            ]);
         }
 
-        fclose($out);
         exit;
+    }
+
+    private static function format_csv_row(array $fields, string $delimiter = ';'): string {
+        $escaped = array_map(function($field) {
+            $field = (string) $field;
+            if (preg_match('/[\";\n]/', $field)) {
+                return '"' . str_replace('"', '""', $field) . '"';
+            }
+            return $field;
+        }, $fields);
+        return implode($delimiter, $escaped) . "\n";
     }
 
     public static function shortcode(): string {
@@ -281,7 +291,7 @@ class MCEMS_Bookings_List_Base {
                     }
                     ?>
 
-                    <input type="hidden" id="mcems_adv" name="mcems_adv" value="<?php echo $advanced ? '1' : '0'; ?>">
+                    <input type="hidden" id="mcems_adv" name="mcems_adv" value="<?php echo esc_attr($advanced ? '1' : '0'); ?>">
 
                     <div class="mcems-basic-filters" style="display:flex; gap:12px; flex-wrap:wrap;">
                         <div class="mcems-field">
@@ -418,7 +428,7 @@ class MCEMS_Bookings_List_Base {
                                     <td><?php echo esc_html(date_i18n('d/m/Y', strtotime($r['data']))); ?></td>
                                     <td><?php echo esc_html($r['ora']); ?></td>
                                     <td><?php echo esc_html(MCEMS_Tutor::exam_title((int) $r['corso'])); ?></td>
-                                    <td><?php echo self::badge_special(!empty($r['special'])); ?></td>
+                                    <td><?php echo wp_kses_post(self::badge_special(!empty($r['special']))); ?></td>
                                     <td><?php echo esc_html($r['proctor']); ?></td>
                                 </tr>
                             <?php endforeach; endif; ?>

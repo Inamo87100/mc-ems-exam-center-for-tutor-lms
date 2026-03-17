@@ -60,11 +60,11 @@ class MCEMS_Booking {
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce'   => wp_create_nonce('mcems_booking'),
             'i18n'    => [
-                'errorLoadSessions' => __('Error loading sessions.', 'mc-ems'),
-                'bookingFailed'     => __('Exam booking failed.', 'mc-ems'),
-                'bookingConfirmed'  => __('Exam booking confirmed!', 'mc-ems'),
-                'bookingCancelled'  => __('Exam booking cancelled.', 'mc-ems'),
-                'cancellationFailed' => __('Cancellation failed.', 'mc-ems'),
+                'errorLoadSessions' => __('Error loading sessions.', 'mc-ems-base'),
+                'bookingFailed'     => __('Exam booking failed.', 'mc-ems-base'),
+                'bookingConfirmed'  => __('Exam booking confirmed!', 'mc-ems-base'),
+                'bookingCancelled'  => __('Exam booking cancelled.', 'mc-ems-base'),
+                'cancellationFailed' => __('Cancellation failed.', 'mc-ems-base'),
             ],
         ]);
     }
@@ -93,7 +93,7 @@ class MCEMS_Booking {
         $dt = trim($date . ' ' . $time);
         $ts = strtotime($dt);
         if (!$ts) return '';
-        return date('Ymd\THis', $ts);
+        return gmdate('Ymd\THis', $ts);
     }
 
     private static function mcems_get_google_calendar_url(int $slot_id, int $exam_id = 0): string {
@@ -119,7 +119,7 @@ class MCEMS_Booking {
 
         // Default event duration: 1 hour
         $end_ts = strtotime(trim($date . ' ' . ($time ?: '00:00:00') . ' +1 hour'));
-        $end = $end_ts ? date('Ymd\THis', $end_ts) : '';
+        $end = $end_ts ? gmdate('Ymd\THis', $end_ts) : '';
 
         $details = [];
         $details[] = 'Exam booking details';
@@ -402,14 +402,14 @@ class MCEMS_Booking {
                             .then(data => {
                                 if (data && data.has_booking) {
                                     let msg = '<p style="text-align:center;">'
-                                        + '<?php echo esc_js(__('You already have an active booking for this exam.', 'mc-ems')); ?>'
+                                        + '<?php echo esc_js(__('You already have an active booking for this exam.', 'mc-ems-base')); ?>'
                                         + '<br>';
                                     if (manageBookingUrl) {
-                                        msg += '<?php echo esc_js(__('Go to', 'mc-ems')); ?> <a href="' + manageBookingUrl + '">'
-                                            + '<?php echo esc_js(__('Manage exam booking', 'mc-ems')); ?>'
-                                            + '</a> <?php echo esc_js(__('to cancel it.', 'mc-ems')); ?>';
+                                        msg += '<?php echo esc_js(__('Go to', 'mc-ems-base')); ?> <a href="' + manageBookingUrl + '">'
+                                            + '<?php echo esc_js(__('Manage exam booking', 'mc-ems-base')); ?>'
+                                            + '</a> <?php echo esc_js(__('to cancel it.', 'mc-ems-base')); ?>';
                                     } else {
-                                        msg += '<?php echo esc_js(__('Please open the Manage exam booking page to cancel it.', 'mc-ems')); ?>';
+                                        msg += '<?php echo esc_js(__('Please open the Manage exam booking page to cancel it.', 'mc-ems-base')); ?>';
                                     }
                                     msg += '</p>';
                                     showBookingMessage(msg);
@@ -884,7 +884,7 @@ class MCEMS_Booking {
         $user_id = (int) get_current_user_id();
 
         $start = sprintf('%04d-%02d-01', $year, $month);
-        $end   = date('Y-m-t', strtotime($start));
+        $end   = gmdate('Y-m-t', strtotime($start));
 
         $slots = get_posts([
             'post_type'      => MCEMS_CPT_Sessioni_Esame::CPT,
@@ -943,7 +943,7 @@ class MCEMS_Booking {
     }
 
     public static function ajax_get_slots_by_date(): void {
-        $data      = isset($_GET['data']) ? sanitize_text_field($_GET['data']) : '';
+        $data      = isset($_GET['data']) ? sanitize_text_field(wp_unslash($_GET['data'])) : '';
         $exam_id = isset($_GET['exam_id']) ? (int) $_GET['exam_id'] : 0;
 
         if (!$data) wp_send_json([]);
@@ -1008,8 +1008,12 @@ class MCEMS_Booking {
     public static function ajax_confirm_booking(): void {
         $user_id = (int) get_current_user_id();
         if (!$user_id) {
-            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">You must be logged in to book.</p>';
-            wp_die();
+            wp_send_json_error(['message' => esc_html__('You must be logged in to book.', 'mc-ems-base')], 403);
+        }
+
+        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'mcems_booking')) {
+            wp_send_json_error(['message' => esc_html__('Invalid nonce.', 'mc-ems-base')], 400);
         }
 
         $slot_id = isset($_POST['slot_id']) ? (int) $_POST['slot_id'] : 0;

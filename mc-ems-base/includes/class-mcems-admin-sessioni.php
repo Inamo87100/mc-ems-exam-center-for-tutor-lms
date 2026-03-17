@@ -88,13 +88,13 @@ class MCEMS_Admin_Sessioni {
             'nonce'       => wp_create_nonce('mcems_admin'),
             'exportNonce' => wp_create_nonce('mcems_export_csv'),
             'i18n'        => [
-                'selectAction' => __('Please select an action.', 'mc-ems'),
-                'selectItems'  => __('Please select at least one item.', 'mc-ems'),
-                'confirmBulk'  => __('Apply action to {count} item(s)?', 'mc-ems'),
-                'error'        => __('An error occurred.', 'mc-ems'),
-                'networkError' => __('Network error. Please try again.', 'mc-ems'),
-                'exporting'    => __('Exporting…', 'mc-ems'),
-                'exportCsv'    => __('Export CSV', 'mc-ems'),
+                'selectAction' => __('Please select an action.', 'mc-ems-base'),
+                'selectItems'  => __('Please select at least one item.', 'mc-ems-base'),
+                'confirmBulk'  => __('Apply action to {count} item(s)?', 'mc-ems-base'),
+                'error'        => __('An error occurred.', 'mc-ems-base'),
+                'networkError' => __('Network error. Please try again.', 'mc-ems-base'),
+                'exporting'    => __('Exporting…', 'mc-ems-base'),
+                'exportCsv'    => __('Export CSV', 'mc-ems-base'),
             ],
         ]);
     }
@@ -102,8 +102,8 @@ class MCEMS_Admin_Sessioni {
     public static function menu(): void {
         add_submenu_page(
             'edit.php?post_type=' . MCEMS_CPT_Sessioni_Esame::CPT,
-            __('Create sessions', 'mc-ems'),
-            __('Create sessions', 'mc-ems'),
+            __('Create sessions', 'mc-ems-base'),
+            __('Create sessions', 'mc-ems-base'),
             'manage_options',
             'mcems-manage-sessions',
             [__CLASS__, 'render']
@@ -115,8 +115,8 @@ class MCEMS_Admin_Sessioni {
             wp_die('Insufficient permissions', 403);
         }
 
-        $today = date('Y-m-d');
-        $week  = date('Y-m-d', strtotime('+7 days'));
+        $today = gmdate('Y-m-d');
+        $week  = gmdate('Y-m-d', strtotime('+7 days'));
 
         $exams   = MCEMS_Tutor::get_exams();
         $exam_pt = MCEMS_Tutor::exam_post_type();
@@ -149,7 +149,7 @@ class MCEMS_Admin_Sessioni {
 
         ?>
         <div class="wrap">
-            <h1><?php echo esc_html__('Exam Sessions Management', 'mc-ems'); ?></h1>
+            <h1><?php echo esc_html__('Exam Sessions Management', 'mc-ems-base'); ?></h1>
 
             <?php if ($notice): ?>
                 <div class="notice notice-success"><p><?php echo esc_html($notice); ?></p></div>
@@ -160,7 +160,7 @@ class MCEMS_Admin_Sessioni {
             <?php endif; ?>
 
             <div class="card" style="max-width: 1100px;">
-                <h2><?php echo esc_html__('Generate new sessions', 'mc-ems'); ?></h2>
+                <h2><?php echo esc_html__('Generate new sessions', 'mc-ems-base'); ?></h2>
 
                 <?php
                 $is_premium = defined('EMS_PREMIUM_VERSION');
@@ -169,15 +169,15 @@ class MCEMS_Admin_Sessioni {
                     $remaining    = max(0, self::BASE_MAX_ACTIVE_SESSIONS - $future_count);
                 ?>
                 <div style="margin-bottom:16px;padding:12px 16px;border-radius:10px;border:1px solid #fed7aa;background:#fff7ed;">
-                    <strong>📋 <?php echo esc_html__('Base license – session limits', 'mc-ems'); ?></strong><br>
+                    <strong>📋 <?php echo esc_html__('Base license – session limits', 'mc-ems-base'); ?></strong><br>
                     <?php echo esc_html(sprintf(
-                        __('Active future sessions: %d / %d — you can still create %d more session(s).', 'mc-ems'),
+                        __('Active future sessions: %d / %d — you can still create %d more session(s).', 'mc-ems-base'),
                         (int) $future_count,
                         (int) self::BASE_MAX_ACTIVE_SESSIONS,
                         (int) $remaining
                     )); ?>
                     <br><small style="color:#92400e;"><?php echo esc_html(sprintf(
-                        __('Base license: max 1 session per day, max %d active sessions, and max %d seats per session. Upgrade to Premium to remove these limits.', 'mc-ems'),
+                        __('Base license: max 1 session per day, max %d active sessions, and max %d seats per session. Upgrade to Premium to remove these limits.', 'mc-ems-base'),
                         (int) self::BASE_MAX_ACTIVE_SESSIONS,
                         (int) self::BASE_MAX_CAPACITY
                     )); ?></small>
@@ -190,11 +190,11 @@ class MCEMS_Admin_Sessioni {
 
                     <table class="form-table">
                         <tr>
-                            <th><?php echo esc_html__('Generation type', 'mc-ems'); ?></th>
+                            <th><?php echo esc_html__('Generation type', 'mc-ems-base'); ?></th>
                             <td>
                                 <label style="display:flex;align-items:center;gap:10px;font-weight:700;">
                                     <input type="checkbox" name="mcems_generate_special" id="mcems_generate_special" value="1">
-                                    ♿ <?php echo esc_html__('Create an exam session for a candidate with special requirements', 'mc-ems'); ?>
+                                    ♿ <?php echo esc_html__('Create an exam session for a candidate with special requirements', 'mc-ems-base'); ?>
                                 </label>
                             </td>
                         </tr>
@@ -203,15 +203,15 @@ class MCEMS_Admin_Sessioni {
                     <div id="mcems_gen_standard">
                         <table class="form-table">
                             <tr>
-                                <th><label for="mcems_exam_id"><?php echo esc_html__('Tutor LMS exam', 'mc-ems'); ?></label></th>
+                                <th><label for="mcems_exam_id"><?php echo esc_html__('Tutor LMS exam', 'mc-ems-base'); ?></label></th>
                                 <td>
                                     <?php if (!$exam_pt): ?>
-                                        <em><?php echo esc_html__('Tutor LMS not detected (exam post type not found).', 'mc-ems'); ?></em>
+                                        <em><?php echo esc_html__('Tutor LMS not detected (exam post type not found).', 'mc-ems-base'); ?></em>
                                     <?php elseif (!$exams): ?>
-                                        <em><?php echo esc_html__('No published Tutor LMS exam found.', 'mc-ems'); ?></em>
+                                        <em><?php echo esc_html__('No published Tutor LMS exam found.', 'mc-ems-base'); ?></em>
                                     <?php else: ?>
                                         <select id="mcems_exam_id" name="exam_id">
-                                            <option value=""><?php echo esc_html__('— Select exam —', 'mc-ems'); ?></option>
+                                            <option value=""><?php echo esc_html__('— Select exam —', 'mc-ems-base'); ?></option>
                                             <?php foreach ($exams as $cid => $title): ?>
                                                 <option value="<?php echo (int) $cid; ?>"><?php echo esc_html($title); ?></option>
                                             <?php endforeach; ?>
@@ -221,7 +221,7 @@ class MCEMS_Admin_Sessioni {
                             </tr>
 
                             <tr>
-                                <th><?php echo esc_html__('Select dates', 'mc-ems'); ?></th>
+                                <th><?php echo esc_html__('Select dates', 'mc-ems-base'); ?></th>
                                 <td>
                                     <div id="mcems-date-picker-wrap">
                                         <style>
@@ -249,7 +249,7 @@ class MCEMS_Admin_Sessioni {
 
                             <tr>
                                 <?php if (!$is_premium): ?>
-                                    <th><label for="mcems_times"><?php echo esc_html__('Exam session time', 'mc-ems'); ?></label></th>
+                                    <th><label for="mcems_times"><?php echo esc_html__('Exam session time', 'mc-ems-base'); ?></label></th>
                                     <td>
                                         <input
                                             type="time"
@@ -257,10 +257,10 @@ class MCEMS_Admin_Sessioni {
                                             name="times"
                                             required
                                         >
-                                        <p class="description"><?php echo esc_html__('Base license: only one time per day allowed.', 'mc-ems'); ?></p>
+                                        <p class="description"><?php echo esc_html__('Base license: only one time per day allowed.', 'mc-ems-base'); ?></p>
                                     </td>
                                 <?php else: ?>
-                                    <th><label for="mcems_times"><?php echo esc_html__('Exam session times (one per line)', 'mc-ems'); ?></label></th>
+                                    <th><label for="mcems_times"><?php echo esc_html__('Exam session times (one per line)', 'mc-ems-base'); ?></label></th>
                                     <td>
                                         <textarea
                                             id="mcems_times"
@@ -274,11 +274,11 @@ class MCEMS_Admin_Sessioni {
                             </tr>
 
                             <tr>
-                                <th><label for="mcems_capacity"><?php echo esc_html__('Seats per exam session', 'mc-ems'); ?></label></th>
+                                <th><label for="mcems_capacity"><?php echo esc_html__('Seats per exam session', 'mc-ems-base'); ?></label></th>
                                 <td>
                                     <?php if (!$is_premium): ?>
                                         <input type="number" id="mcems_capacity" name="capacity" min="1" max="<?php echo (int) self::BASE_MAX_CAPACITY; ?>">
-                                        <p class="description"><?php echo esc_html(sprintf(__('Base license: max %d seats per session.', 'mc-ems'), self::BASE_MAX_CAPACITY)); ?></p>
+                                        <p class="description"><?php echo esc_html(sprintf(__('Base license: max %d seats per session.', 'mc-ems-base'), self::BASE_MAX_CAPACITY)); ?></p>
                                     <?php else: ?>
                                         <input type="number" id="mcems_capacity" name="capacity" min="1" max="500">
                                     <?php endif; ?>
@@ -290,15 +290,15 @@ class MCEMS_Admin_Sessioni {
                     <div id="mcems_gen_special" style="display:none;">
                         <table class="form-table">
                             <tr>
-                                <th><label for="mcems_special_exam_id"><?php echo esc_html__('Tutor LMS exam', 'mc-ems'); ?></label></th>
+                                <th><label for="mcems_special_exam_id"><?php echo esc_html__('Tutor LMS exam', 'mc-ems-base'); ?></label></th>
                                 <td>
                                     <?php if (!$exam_pt): ?>
-                                        <em><?php echo esc_html__('Tutor LMS not detected.', 'mc-ems'); ?></em>
+                                        <em><?php echo esc_html__('Tutor LMS not detected.', 'mc-ems-base'); ?></em>
                                     <?php elseif (!$exams): ?>
-                                        <em><?php echo esc_html__('No published Tutor LMS exam found.', 'mc-ems'); ?></em>
+                                        <em><?php echo esc_html__('No published Tutor LMS exam found.', 'mc-ems-base'); ?></em>
                                     <?php else: ?>
                                         <select id="mcems_special_exam_id" name="special_exam_id" disabled>
-                                            <option value=""><?php echo esc_html__('— Select exam —', 'mc-ems'); ?></option>
+                                            <option value=""><?php echo esc_html__('— Select exam —', 'mc-ems-base'); ?></option>
                                             <?php foreach ($exams as $cid => $title): ?>
                                                 <option value="<?php echo (int) $cid; ?>"><?php echo esc_html($title); ?></option>
                                             <?php endforeach; ?>
@@ -308,7 +308,7 @@ class MCEMS_Admin_Sessioni {
                             </tr>
 
                             <tr>
-                                <th><label for="mcems_special_date"><?php echo esc_html__('Date', 'mc-ems'); ?></label></th>
+                                <th><label for="mcems_special_date"><?php echo esc_html__('Date', 'mc-ems-base'); ?></label></th>
                                 <td>
                                     <input
                                         type="date"
@@ -322,7 +322,7 @@ class MCEMS_Admin_Sessioni {
                             </tr>
 
                             <tr>
-                                <th><label for="mcems_special_time"><?php echo esc_html__('Time (single)', 'mc-ems'); ?></label></th>
+                                <th><label for="mcems_special_time"><?php echo esc_html__('Time (single)', 'mc-ems-base'); ?></label></th>
                                 <td>
                                     <input
                                         type="time"
@@ -335,12 +335,12 @@ class MCEMS_Admin_Sessioni {
                             </tr>
 
                             <tr>
-                                <th><?php echo esc_html__('Seats', 'mc-ems'); ?></th>
+                                <th><?php echo esc_html__('Seats', 'mc-ems-base'); ?></th>
                                 <td><input type="number" value="1" readonly></td>
                             </tr>
 
                             <tr>
-                                <th><?php echo esc_html__('Candidate', 'mc-ems'); ?></th>
+                                <th><?php echo esc_html__('Candidate', 'mc-ems-base'); ?></th>
                                 <td>
                                     <div class="mcems-user-search-wrap">
                                         <input
@@ -348,14 +348,14 @@ class MCEMS_Admin_Sessioni {
                                             id="mcems_special_user_email"
                                             name="special_user_email"
                                             value=""
-                                            placeholder="<?php echo esc_attr__('Search by name or email…', 'mc-ems'); ?>"
+                                            placeholder="<?php echo esc_attr__('Search by name or email…', 'mc-ems-base'); ?>"
                                             autocomplete="off"
                                             disabled
                                         >
                                         <input type="hidden" id="mcems_special_user_id" name="special_user_id" value="">
                                         <div id="mcems_user_suggest" class="mcems-user-search-results"></div>
                                     </div>
-                                    <p class="description" style="margin-top:8px;"><?php echo esc_html__('Start typing a name or email address, then click the user to select.', 'mc-ems'); ?></p>
+                                    <p class="description" style="margin-top:8px;"><?php echo esc_html__('Start typing a name or email address, then click the user to select.', 'mc-ems-base'); ?></p>
                                 </td>
                             </tr>
                         </table>
@@ -363,7 +363,7 @@ class MCEMS_Admin_Sessioni {
 
                     <p class="submit">
                         <button type="submit" class="button button-primary" name="mcems_submit_generate" value="1">
-                            <?php echo esc_html__('Generate Sessions', 'mc-ems'); ?>
+                            <?php echo esc_html__('Generate Sessions', 'mc-ems-base'); ?>
                         </button>
                     </p>
                 </form>
@@ -461,7 +461,7 @@ class MCEMS_Admin_Sessioni {
                     const calContainer = document.getElementById('mcems-selected-dates');
                     if (calContainer && calContainer.querySelectorAll('input[name="selected_dates[]"]').length === 0) {
                         e.preventDefault();
-                        alert('<?php echo esc_js(__('Select at least one date from the calendar.', 'mc-ems')); ?>');
+                        alert('<?php echo esc_js(__('Select at least one date from the calendar.', 'mc-ems-base')); ?>');
                         return;
                     }
 
@@ -704,14 +704,14 @@ class MCEMS_Admin_Sessioni {
             currentMonth = td.getMonth(); // 0-indexed
 
             var monthNames = <?php echo wp_json_encode([
-                __('January','mc-ems'),__('February','mc-ems'),__('March','mc-ems'),
-                __('April','mc-ems'),__('May','mc-ems'),__('June','mc-ems'),
-                __('July','mc-ems'),__('August','mc-ems'),__('September','mc-ems'),
-                __('October','mc-ems'),__('November','mc-ems'),__('December','mc-ems'),
+                __('January','mc-ems-base'),__('February','mc-ems-base'),__('March','mc-ems-base'),
+                __('April','mc-ems-base'),__('May','mc-ems-base'),__('June','mc-ems-base'),
+                __('July','mc-ems-base'),__('August','mc-ems-base'),__('September','mc-ems-base'),
+                __('October','mc-ems-base'),__('November','mc-ems-base'),__('December','mc-ems-base'),
             ]); ?>;
             var dayNames = <?php echo wp_json_encode([
-                __('Mo','mc-ems'),__('Tu','mc-ems'),__('We','mc-ems'),
-                __('Th','mc-ems'),__('Fr','mc-ems'),__('Sa','mc-ems'),__('Su','mc-ems'),
+                __('Mo','mc-ems-base'),__('Tu','mc-ems-base'),__('We','mc-ems-base'),
+                __('Th','mc-ems-base'),__('Fr','mc-ems-base'),__('Sa','mc-ems-base'),__('Su','mc-ems-base'),
             ]); ?>;
 
             function updateHidden(){
@@ -824,7 +824,7 @@ class MCEMS_Admin_Sessioni {
         sort($selected_dates);
 
         if (!$selected_dates) {
-            return ['', __('Select at least one date from the calendar.', 'mc-ems')];
+            return ['', __('Select at least one date from the calendar.', 'mc-ems-base')];
         }
 
         $times = [];
@@ -839,7 +839,7 @@ class MCEMS_Admin_Sessioni {
         sort($times);
 
         if (!$times) {
-            return ['', __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems')];
+            return ['', __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-base')];
         }
 
         // Base license limits: max 1 time per day, max BASE_MAX_ACTIVE_SESSIONS future sessions, max BASE_MAX_CAPACITY seats.
@@ -851,7 +851,7 @@ class MCEMS_Admin_Sessioni {
             $future_count = self::count_future_sessions();
             if ($future_count >= self::BASE_MAX_ACTIVE_SESSIONS) {
                 return ['', sprintf(
-                    __('Base license limit reached: you already have %d active (future) sessions (maximum %d). Delete or wait for existing sessions to pass before creating new ones.', 'mc-ems'),
+                    __('Base license limit reached: you already have %d active (future) sessions (maximum %d). Delete or wait for existing sessions to pass before creating new ones.', 'mc-ems-base'),
                     (int) $future_count,
                     (int) self::BASE_MAX_ACTIVE_SESSIONS
                 )];
@@ -919,10 +919,10 @@ class MCEMS_Admin_Sessioni {
         }
 
         if (!$created && $insert_errors) {
-            return ['', sprintf(__('Unable to create sessions for: %s', 'mc-ems'), implode(', ', array_slice($insert_errors, 0, 5)))];
+            return ['', sprintf(__('Unable to create sessions for: %s', 'mc-ems-base'), implode(', ', array_slice($insert_errors, 0, 5)))];
         }
 
-        return [sprintf(__('Creation completed: %d sessions created, %d skipped.', 'mc-ems'), $created, $skipped), ''];
+        return [sprintf(__('Creation completed: %d sessions created, %d skipped.', 'mc-ems-base'), $created, $skipped), ''];
     }
 
     private static function handle_generate_special(): array {
@@ -937,7 +937,7 @@ class MCEMS_Admin_Sessioni {
         }
 
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !preg_match('/^\d{2}:\d{2}$/', $time)) {
-            return ['', __('Invalid date/time.', 'mc-ems')];
+            return ['', __('Invalid date/time.', 'mc-ems-base')];
         }
 
         $tz = wp_timezone();
@@ -947,10 +947,10 @@ class MCEMS_Admin_Sessioni {
             $now = new \DateTimeImmutable('now', $tz);
 
             if ($session_dt < $now) {
-                return ['', __('Past sessions cannot be created. Please choose a future date and time.', 'mc-ems')];
+                return ['', __('Past sessions cannot be created. Please choose a future date and time.', 'mc-ems-base')];
             }
         } catch (\Throwable $e) {
-            return ['', __('Invalid date/time.', 'mc-ems')];
+            return ['', __('Invalid date/time.', 'mc-ems-base')];
         }
 
         if ($uid <= 0 && $email) {
@@ -961,16 +961,16 @@ class MCEMS_Admin_Sessioni {
         }
 
         if ($uid <= 0 || !get_user_by('id', $uid)) {
-            return ['', __('Invalid candidate selection.', 'mc-ems')];
+            return ['', __('Invalid candidate selection.', 'mc-ems-base')];
         }
 
         if (self::session_exists($date, $time, $exam_id, true)) {
-            return ['', __('A special session already exists with this date/time for this exam.', 'mc-ems')];
+            return ['', __('A special session already exists with this date/time for this exam.', 'mc-ems-base')];
         }
 
         $sid = self::create_session($date, $time, 1, 1, $uid, $exam_id);
         if (!$sid) {
-            return ['', __('Unable to create exam session.', 'mc-ems')];
+            return ['', __('Unable to create exam session.', 'mc-ems-base')];
         }
 
         update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, [$uid]);
@@ -997,7 +997,7 @@ class MCEMS_Admin_Sessioni {
 
         update_user_meta($uid, MCEMS_Booking::UM_HISTORY, $storico);
 
-        return [__('Special exam session created and exam booked for candidate (#', 'mc-ems') . $sid . ').', ''];
+        return [__('Special exam session created and exam booked for candidate (#', 'mc-ems-base') . $sid . ').', ''];
     }
 
     private static function handle_update_capacity(): array {
@@ -1012,7 +1012,7 @@ class MCEMS_Admin_Sessioni {
         ]);
 
         $updated = 0;
-        $today = date('Y-m-d');
+        $today = gmdate('Y-m-d');
 
         foreach ($ids as $sid) {
             $sid = (int) $sid;
@@ -1032,7 +1032,7 @@ class MCEMS_Admin_Sessioni {
             $updated++;
         }
 
-        return [sprintf(__('Update completed: %d sessions updated.', 'mc-ems'), $updated), ''];
+        return [sprintf(__('Update completed: %d sessions updated.', 'mc-ems-base'), $updated), ''];
     }
 
     /**
