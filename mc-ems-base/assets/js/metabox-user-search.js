@@ -1,14 +1,19 @@
 /**
  * MC-EMS Base – Metabox User Search
  *
- * Provides searchable user selection fields for:
- *  - Proctor (tutor_instructor role only, search by name or email)
- *  - Associated Candidate (all users, search by name or email)
+ * Provides searchable user-selection fields for:
+ *  - Proctor        (tutor_instructor role only, search by name or email)
+ *  - Associated Candidate ♿ (all users, search by name or email)
+ *
+ * Both fields use the same REST endpoints that run two WP_User_Query calls
+ * (one for display_name, one for user_email), merge and deduplicate results,
+ * and return up to 20 matches as JSON: [{id, name, email}, ...].
  *
  * Depends on: MCEMS_USER_SEARCH (localised via wp_localize_script)
- *   - MCEMS_USER_SEARCH.restUrl
- *   - MCEMS_USER_SEARCH.nonce
- *   - MCEMS_USER_SEARCH.i18n.*
+ *   - MCEMS_USER_SEARCH.restUrl  – base REST URL, e.g. /wp-json/mcems/v1/
+ *   - MCEMS_USER_SEARCH.nonce    – WP REST nonce (X-WP-Nonce header)
+ *   - MCEMS_USER_SEARCH.i18n.*   – translatable strings
+ *     - i18n.noResults           – shown when no users match the query
  */
 /* global MCEMS_USER_SEARCH */
 (function () {
@@ -25,9 +30,10 @@
     }
 
     /**
-     * Perform a GET request to a REST endpoint.
-     * @param {string} url
-     * @returns {Promise<any>}
+     * Perform a GET request to a REST endpoint with WP REST authentication.
+     *
+     * @param {string} url – Full URL including query string.
+     * @returns {Promise<any>} Resolves with parsed JSON response.
      */
     function restGet(url) {
         return fetch(url, {
@@ -39,14 +45,20 @@
     /**
      * Initialise a user-search widget.
      *
-     * @param {Object} cfg
-     * @param {string} cfg.inputId      – text search input element ID
-     * @param {string} cfg.hiddenId     – hidden input storing the selected user ID
-     * @param {string} cfg.resultsId    – container for dropdown results
-     * @param {string} cfg.selectedId   – container showing the selected user
-     * @param {string} cfg.clearId      – button that clears the selection
-     * @param {string} cfg.endpoint     – REST API URL (without query string)
-     * @param {boolean} cfg.disabled    – whether the field is read-only
+     * The widget debounces keyboard input (300 ms), fires a REST request with
+     * the search query, and shows a styled dropdown of matching users.
+     * Both name/surname and email are searched; results are deduplicated.
+     * Keyboard navigation (↑ ↓ Enter Escape) is fully supported.
+     *
+     * @param {Object}  cfg
+     * @param {string}  cfg.inputId   – ID of the visible text search input.
+     * @param {string}  cfg.hiddenId  – ID of the hidden input storing the selected user ID.
+     * @param {string}  cfg.resultsId – ID of the element used as the dropdown container.
+     * @param {string}  cfg.selectedId – ID of the element that displays the selected user.
+     * @param {string}  cfg.clearId   – ID of the button that clears the current selection.
+     * @param {string}  cfg.endpoint  – REST API URL without query string
+     *                                  (e.g. restUrl + 'search-proctors').
+     * @param {boolean} cfg.disabled  – When true, the widget is rendered read-only.
      */
     function initSearch(cfg) {
         var input    = document.getElementById(cfg.inputId);
