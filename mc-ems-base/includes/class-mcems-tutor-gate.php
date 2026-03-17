@@ -240,18 +240,15 @@ class MCEMS_Tutor_Gate {
             ],
         ];
 
-        $safe_title = wp_json_encode(esc_html($title));
-        $safe_body  = wp_json_encode(wp_kses($body_html, $allowed_html));
-
-        add_action('wp_footer', function() use ($safe_title, $safe_body) {
+        add_action('wp_footer', function() use ($title, $body_html, $allowed_html) {
             echo '<script>' .
                 '(function(){' .
                 'var sidebar=document.querySelector(' . wp_json_encode(self::SIDEBAR_SELECTOR) . ');' .
                 'if(!sidebar)return;' .
                 'var box=document.createElement("div");' .
                 'box.className="mcems-locked-exam";' .
-                'box.innerHTML=\'<div class="mcems-locked-exam__title">\'+' . $safe_title . '+\'</div>\'' .
-                '+\'<div class="mcems-locked-exam__body">\'+' . $safe_body . '+\'</div>\';' .
+                'box.innerHTML=\'<div class="mcems-locked-exam__title">\'+' . wp_json_encode(esc_html($title)) . '+\'</div>\'' .
+                '+\'<div class="mcems-locked-exam__body">\'+' . wp_json_encode(wp_kses($body_html, $allowed_html)) . '+\'</div>\';' .
                 'sidebar.parentNode.insertBefore(box,sidebar);' .
                 '})();' .
                 '</script>' . "\n";

@@ -814,8 +814,8 @@ class MCEMS_Admin_Sessioni {
             ? array_map('sanitize_text_field', wp_unslash($_POST['selected_dates']))
             : [];
         $times_raw = sanitize_textarea_field(wp_unslash($_POST['times'] ?? ''));
-        $capacity  = max(1, (int) wp_unslash($_POST['capacity'] ?? 1));
-        $exam_id = isset($_POST['exam_id']) ? (int) wp_unslash($_POST['exam_id']) : 0;
+        $capacity  = max(1, absint(wp_unslash($_POST['capacity'] ?? 1)));
+        $exam_id = isset($_POST['exam_id']) ? absint(wp_unslash($_POST['exam_id'])) : 0;
 
         if ($exam_id <= 0) {
             return ['', 'Select a Tutor LMS exam.'];

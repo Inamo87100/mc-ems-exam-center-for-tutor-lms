@@ -850,17 +850,17 @@ class MCEMS_Settings {
             echo '<div id="' . esc_attr($id_list) . '" style="max-height:260px;overflow-y:auto;border:1px solid #d0d5dd;border-radius:10px;padding:8px 12px;background:#fff;">';
             foreach ($exams as $cid => $title) {
                 $cid      = (int) $cid;
-                $label    = esc_html($title . ' (#' . $cid . ')');
+                $label    = $title . ' (#' . $cid . ')';
                 $cb_id    = 'mcems_cb_' . $key . '_' . $cid;
                 echo '<label for="' . esc_attr($cb_id) . '" style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f2f4f7;cursor:pointer;" data-label="' . esc_attr(strtolower($title)) . '">';
                 printf(
                     '<input type="checkbox" id="%s" name="%s" value="%d"%s style="width:16px;height:16px;flex-shrink:0;">',
                     esc_attr($cb_id),
                     esc_attr($field_name),
-                    $cid,
+                    absint($cid),
                     checked(in_array($cid, $sel, true), true, false)
                 );
-                echo '<span>' . $label . '</span>';
+                echo '<span>' . esc_html($label) . '</span>';
                 echo '</label>';
             }
             echo '</div>';
@@ -902,9 +902,9 @@ class MCEMS_Settings {
         echo '<div style="max-width:520px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">';
 
         wp_dropdown_pages([
-            'name'              => $name,
-            'id'                => $select_id,
-            'selected'          => $val,
+            'name'              => esc_attr($name),
+            'id'                => esc_attr($select_id),
+            'selected'          => absint($val),
             'show_option_none'  => '— Select page —',
             'option_none_value' => '0',
             'post_status'       => ['publish','private','draft'],

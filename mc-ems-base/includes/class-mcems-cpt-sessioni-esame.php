@@ -493,13 +493,13 @@ echo '</td></tr>';
             }
         }
 
-        $proctor  = isset($_POST['mcems_proctor_user_id']) ? (int) wp_unslash($_POST['mcems_proctor_user_id']) : 0;
+        $proctor  = isset($_POST['mcems_proctor_user_id']) ? absint(wp_unslash($_POST['mcems_proctor_user_id'])) : 0;
         $is_spec  = !empty($_POST['mcems_is_special']) ? 1 : 0;
-        $spec_uid = isset($_POST['mcems_special_user_id']) ? (int) wp_unslash($_POST['mcems_special_user_id']) : 0;
+        $spec_uid = isset($_POST['mcems_special_user_id']) ? absint(wp_unslash($_POST['mcems_special_user_id'])) : 0;
 
-        $exam_id = isset($_POST['mcems_exam_id']) ? (int) wp_unslash($_POST['mcems_exam_id']) : 0;
+        $exam_id = isset($_POST['mcems_exam_id']) ? absint(wp_unslash($_POST['mcems_exam_id'])) : 0;
 
-        $capacity = isset($_POST['mcems_capacity']) ? (int) wp_unslash($_POST['mcems_capacity']) : 10;
+        $capacity = isset($_POST['mcems_capacity']) ? absint(wp_unslash($_POST['mcems_capacity'])) : 10;
         if ($capacity < 1) $capacity = 1;
 
         // Base license: cap capacity to the allowed maximum.
