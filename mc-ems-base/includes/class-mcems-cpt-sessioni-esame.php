@@ -45,6 +45,13 @@ class MCEMS_CPT_Sessioni_Esame {
         $screen = function_exists('get_current_screen') ? get_current_screen() : null;
         if (!$screen || $screen->post_type !== self::CPT) return;
 
+        wp_enqueue_style(
+            'mcems-admin-style',
+            MCEMS_PLUGIN_URL . 'assets/css/admin.css',
+            [],
+            MCEMS_VERSION
+        );
+
         wp_enqueue_script(
             'mcems-metabox-user-search',
             MCEMS_PLUGIN_URL . 'assets/js/metabox-user-search.js',

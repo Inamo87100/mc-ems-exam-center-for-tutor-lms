@@ -12,6 +12,60 @@ class MCEMS_Admin_Sessioni {
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'menu']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
+        add_action('wp_ajax_mcems_user_search', [__CLASS__, 'ajax_user_search']);
+    }
+
+    /**
+     * AJAX handler: search users by display name or email.
+     *
+     * Expects POST params: nonce, q (search query, min 2 chars).
+     * Returns JSON: [{id, name, email}, ...] (max 20 results, deduplicated).
+     */
+    public static function ajax_user_search(): void {
+        check_ajax_referer('mcems_user_search', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+            return;
+        }
+
+        $q = isset($_POST['q']) ? sanitize_text_field(wp_unslash($_POST['q'])) : '';
+        if (strlen($q) < 2) {
+            wp_send_json_success([]);
+            return;
+        }
+
+        global $wpdb;
+        $safe_q = $wpdb->esc_like($q);
+
+        $by_name = new \WP_User_Query([
+            'search'         => '*' . $safe_q . '*',
+            'search_columns' => ['display_name'],
+            'number'         => 20,
+            'fields'         => ['ID', 'display_name', 'user_email'],
+        ]);
+
+        $by_email = new \WP_User_Query([
+            'search'         => '*' . $safe_q . '*',
+            'search_columns' => ['user_email'],
+            'number'         => 20,
+            'fields'         => ['ID', 'display_name', 'user_email'],
+        ]);
+
+        $seen = [];
+        $out  = [];
+        foreach (array_merge($by_name->get_results(), $by_email->get_results()) as $u) {
+            $id = (int) $u->ID;
+            if (isset($seen[$id])) continue;
+            $seen[$id] = true;
+            $out[] = [
+                'id'    => $id,
+                'name'  => (string) $u->display_name,
+                'email' => (string) $u->user_email,
+            ];
+        }
+
+        wp_send_json_success($out);
     }
 
     public static function enqueue_assets(string $hook): void {
@@ -286,23 +340,22 @@ class MCEMS_Admin_Sessioni {
                             </tr>
 
                             <tr>
-                                <th><?php echo esc_html__('Candidate (email)', 'mc-ems'); ?></th>
+                                <th><?php echo esc_html__('Candidate', 'mc-ems'); ?></th>
                                 <td>
-                                    <div style="max-width:520px; position:relative;">
+                                    <div class="mcems-user-search-wrap">
                                         <input
-                                            type="email"
+                                            type="text"
                                             id="mcems_special_user_email"
                                             name="special_user_email"
                                             value=""
-                                            placeholder="Type an email to search…"
+                                            placeholder="<?php echo esc_attr__('Search by name or email…', 'mc-ems'); ?>"
                                             autocomplete="off"
-                                            style="width:100%;"
                                             disabled
                                         >
                                         <input type="hidden" id="mcems_special_user_id" name="special_user_id" value="">
-                                        <div id="mcems_user_suggest" style="display:none; position:absolute; left:0; right:0; top:100%; z-index:9999; background:#fff; border:1px solid #c3c4c7; border-top:none; max-height:240px; overflow:auto;"></div>
+                                        <div id="mcems_user_suggest" class="mcems-user-search-results"></div>
                                     </div>
-                                    <p class="description" style="margin-top:8px;"><?php echo esc_html__('Start typing an email address, then click the user to select.', 'mc-ems'); ?></p>
+                                    <p class="description" style="margin-top:8px;"><?php echo esc_html__('Start typing a name or email address, then click the user to select.', 'mc-ems'); ?></p>
                                 </td>
                             </tr>
                         </table>
@@ -449,6 +502,7 @@ class MCEMS_Admin_Sessioni {
                     const sDate = document.getElementById('mcems_special_date');
                     const sTime = document.getElementById('mcems_special_time');
                     const sUser = document.getElementById('mcems_special_user_email');
+                    const sUserId = document.getElementById('mcems_special_user_id');
 
                     if (sDate && !sDate.value) {
                         e.preventDefault();
@@ -464,10 +518,10 @@ class MCEMS_Admin_Sessioni {
                         return;
                     }
 
-                    if (sUser && !sUser.value.trim()) {
+                    if (!sUserId || !sUserId.value) {
                         e.preventDefault();
-                        alert('Select the candidate email for the special session.');
-                        sUser.focus();
+                        alert('Select the candidate for the special session.');
+                        if (sUser) sUser.focus();
                         return;
                     }
                 }
@@ -490,6 +544,14 @@ class MCEMS_Admin_Sessioni {
                 box.style.display = 'none';
             }
 
+            function escHtml(str){
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+
             function render(items){
                 if (!items || !items.length) {
                     clearSuggest();
@@ -503,13 +565,13 @@ class MCEMS_Admin_Sessioni {
                     row.style.padding = '8px 10px';
                     row.style.cursor = 'pointer';
                     row.style.borderTop = '1px solid #f0f0f1';
-                    row.innerHTML = '<strong>' + (u.email || '') + '</strong>' + (u.name ? '<div style="font-size:12px; opacity:.85;">' + u.name + '</div>' : '');
+                    row.innerHTML = '<strong>' + escHtml(u.name || u.email || '') + '</strong>' + (u.email ? '<div style="font-size:12px; opacity:.85;">' + escHtml(u.email) + '</div>' : '');
 
                     row.addEventListener('mouseenter', function(){ row.style.background = '#f6f7f7'; });
                     row.addEventListener('mouseleave', function(){ row.style.background = '#fff'; });
 
                     row.addEventListener('click', function(){
-                        input.value = u.email || '';
+                        input.value = (u.name || '') + (u.email ? ' (' + u.email + ')' : '');
                         hidden.value = u.id || '';
                         clearSuggest();
                     });
@@ -899,7 +961,7 @@ class MCEMS_Admin_Sessioni {
         }
 
         if ($uid <= 0 || !get_user_by('id', $uid)) {
-            return ['', __('Invalid candidate email.', 'mc-ems')];
+            return ['', __('Invalid candidate selection.', 'mc-ems')];
         }
 
         if (self::session_exists($date, $time, $exam_id, true)) {
