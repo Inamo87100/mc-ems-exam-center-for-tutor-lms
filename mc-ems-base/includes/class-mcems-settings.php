@@ -63,6 +63,9 @@ class MCEMS_Settings {
 
             // Access Control: role-based shortcode visibility (empty array = all roles allowed)
             'shortcode_roles' => [],
+
+            // Role Settings: allowed proctor roles (empty array = all roles allowed)
+            'proctor_roles' => [],
         ];
     }
 
@@ -462,6 +465,12 @@ class MCEMS_Settings {
         }, self::OPTION_KEY);
 
         add_settings_field('shortcode_roles', __('Shortcode visibility by role', 'mc-ems'), [__CLASS__, 'field_shortcode_roles'], self::OPTION_KEY, 'mcems_section_access_control', []);
+
+        add_settings_section('mcems_section_proctor_roles', __('Proctor Roles', 'mc-ems'), function () {
+            echo '<p class="description">' . esc_html__('Select which WordPress roles can be searched and assigned as Proctors. If no roles are selected, all roles with sufficient permissions can be assigned.', 'mc-ems') . '</p>';
+        }, self::OPTION_KEY);
+
+        add_settings_field('proctor_roles', __('Allowed proctor roles', 'mc-ems'), [__CLASS__, 'field_proctor_roles'], self::OPTION_KEY, 'mcems_section_proctor_roles', []);
     }
 
     /**
@@ -625,7 +634,7 @@ class MCEMS_Settings {
             if (isset($input[$k])) $out[$k] = sanitize_textarea_field($input[$k]);
         }
 
-        if ($tab === 'access_control' || isset($input['shortcode_roles'])) {
+        if ($tab === 'role_settings' || isset($input['shortcode_roles'])) {
             $raw_roles = isset($input['shortcode_roles']) && is_array($input['shortcode_roles']) ? $input['shortcode_roles'] : [];
             $valid_shortcodes = array_keys(self::get_access_control_shortcodes());
             $all_roles        = array_keys(wp_roles()->roles);
@@ -643,6 +652,19 @@ class MCEMS_Settings {
                 $cleaned[$sc] = $checked;
             }
             $out['shortcode_roles'] = $cleaned;
+        }
+
+        if ($tab === 'role_settings' || isset($input['proctor_roles'])) {
+            $raw_roles = isset($input['proctor_roles']) && is_array($input['proctor_roles']) ? $input['proctor_roles'] : [];
+            $all_roles = array_keys(wp_roles()->roles);
+            $cleaned   = [];
+            foreach ($raw_roles as $role) {
+                $role = sanitize_key((string) $role);
+                if (in_array($role, $all_roles, true)) {
+                    $cleaned[] = $role;
+                }
+            }
+            $out['proctor_roles'] = $cleaned;
         }
 
         return $out;
@@ -732,7 +754,7 @@ class MCEMS_Settings {
         }
 
         $tab = isset($_GET['tab']) ? sanitize_key((string) $_GET['tab']) : 'shortcodes';
-        $allowed = ['shortcodes','bookings','exam_access','email','pages','access_control'];
+        $allowed = ['shortcodes','bookings','exam_access','email','pages','role_settings'];
         if (!in_array($tab, $allowed, true)) $tab = 'shortcodes';
 
         echo '<div class="wrap">';
@@ -740,7 +762,7 @@ class MCEMS_Settings {
 
         $tabs = [
             'shortcodes'     => __('Shortcodes', 'mc-ems'),
-            'access_control' => __('Access Control', 'mc-ems'),
+            'role_settings'  => __('Role Settings', 'mc-ems'),
             'bookings'       => __('Exam booking settings', 'mc-ems'),
             'exam_access'  => __('Exam access settings', 'mc-ems'),
             'email'          => __('Email settings', 'mc-ems'),
@@ -784,8 +806,8 @@ class MCEMS_Settings {
             self::render_only_sections(['mcems_section_email']);
         } elseif ($tab === 'pages') {
             self::render_only_sections(['mcems_section_pages']);
-        } elseif ($tab === 'access_control') {
-            self::render_only_sections(['mcems_section_access_control']);
+        } elseif ($tab === 'role_settings') {
+            self::render_only_sections(['mcems_section_access_control', 'mcems_section_proctor_roles']);
         }
 
         submit_button();
@@ -1053,5 +1075,40 @@ class MCEMS_Settings {
         }
 
         echo '</div>';
+    }
+
+    public static function field_proctor_roles(array $args): void {
+        $all_roles   = wp_roles()->roles;
+        $opt         = self::get();
+        $saved       = isset($opt['proctor_roles']) && is_array($opt['proctor_roles']) ? $opt['proctor_roles'] : [];
+        $all_checked = empty($saved); // empty = all roles allowed
+
+        echo '<div style="display:flex;flex-wrap:wrap;gap:10px 20px;">';
+
+        foreach ($all_roles as $role_slug => $role_info) {
+            $role_name  = translate_user_role($role_info['name']);
+            $is_checked = $all_checked || in_array($role_slug, $saved, true);
+            $field_name = esc_attr(self::OPTION_KEY) . '[proctor_roles][]';
+
+            echo '<label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">';
+            echo '<input type="checkbox" name="' . $field_name . '" value="' . esc_attr($role_slug) . '"' . ($is_checked ? ' checked' : '') . ' />';
+            echo esc_html($role_name);
+            echo '</label>';
+        }
+
+        echo '</div>';
+        echo '<p class="description" style="margin-top:8px;">' . esc_html__('Uncheck all roles to allow any role to be assigned as Proctors.', 'mc-ems') . '</p>';
+    }
+
+    /**
+     * Returns the list of allowed proctor roles.
+     * Empty array means all roles are allowed (default behaviour).
+     *
+     * @return string[]
+     */
+    public static function get_proctor_roles(): array {
+        $opt   = self::get();
+        $roles = $opt['proctor_roles'] ?? [];
+        return is_array($roles) ? array_values(array_filter($roles)) : [];
     }
 }
