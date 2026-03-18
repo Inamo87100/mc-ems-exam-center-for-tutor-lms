@@ -459,7 +459,7 @@ class MCEMS_Admin_Sessioni {
                 const sel = document.getElementById(isSpecial ? 'mcems_special_exam_id' : 'mcems_exam_id');
                 if (sel && !sel.value) {
                     e.preventDefault();
-                    alert('Select a Tutor LMS exam before generating sessions.');
+                    alert('<?php echo esc_js(__('Select a Tutor LMS exam before generating sessions.', 'mc-ems-base')); ?>');
                     sel.focus();
                     return;
                 }
@@ -479,7 +479,7 @@ class MCEMS_Admin_Sessioni {
                         if (isTimeInput) {
                             if (!ta.value || !/^\d{2}:\d{2}$/.test(ta.value.trim())) {
                                 e.preventDefault();
-                                alert('Enter a valid time (HH:MM).');
+                                alert('<?php echo esc_js(__('Enter a valid time (HH:MM).', 'mc-ems-base')); ?>');
                                 ta.focus();
                                 return;
                             }
@@ -490,7 +490,7 @@ class MCEMS_Admin_Sessioni {
 
                             if (!hasTime) {
                                 e.preventDefault();
-                                alert('Enter at least one valid time (HH:MM), one per line.');
+                                alert('<?php echo esc_js(__('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-base')); ?>');
                                 ta.focus();
                                 return;
                             }
@@ -501,7 +501,11 @@ class MCEMS_Admin_Sessioni {
                     const maxCap = <?php echo $is_premium ? 'null' : (int) self::BASE_MAX_CAPACITY; ?>;
                     if (capInput && maxCap !== null && parseInt(capInput.value, 10) > maxCap) {
                         e.preventDefault();
-                        alert('Base license: max ' + maxCap + ' seats per session.');
+                        alert('<?php echo esc_js(sprintf(
+                            /* translators: %d: maximum number of seats per session allowed by the Base license */
+                            __('Base license: max %d seats per session.', 'mc-ems-base'),
+                            self::BASE_MAX_CAPACITY
+                        )); ?>');
                         capInput.focus();
                         return;
                     }
@@ -513,21 +517,21 @@ class MCEMS_Admin_Sessioni {
 
                     if (sDate && !sDate.value) {
                         e.preventDefault();
-                        alert('Select a date for the special session.');
+                        alert('<?php echo esc_js(__('Select a date for the special session.', 'mc-ems-base')); ?>');
                         sDate.focus();
                         return;
                     }
 
                     if (sTime && !sTime.value) {
                         e.preventDefault();
-                        alert('Select a time for the special session.');
+                        alert('<?php echo esc_js(__('Select a time for the special session.', 'mc-ems-base')); ?>');
                         sTime.focus();
                         return;
                     }
 
                     if (!sUserId || !sUserId.value) {
                         e.preventDefault();
-                        alert('Select the candidate for the special session.');
+                        alert('<?php echo esc_js(__('Select the candidate for the special session.', 'mc-ems-base')); ?>');
                         if (sUser) sUser.focus();
                         return;
                     }
@@ -818,7 +822,7 @@ class MCEMS_Admin_Sessioni {
         $exam_id = isset($_POST['exam_id']) ? absint(wp_unslash($_POST['exam_id'])) : 0;
 
         if ($exam_id <= 0) {
-            return ['', 'Select a Tutor LMS exam.'];
+            return ['', __('Select a Tutor LMS exam.', 'mc-ems-base')];
         }
 
         // Validate and deduplicate selected dates.
@@ -952,7 +956,7 @@ class MCEMS_Admin_Sessioni {
         $exam_id = absint($_POST['special_exam_id'] ?? 0);
 
         if ($exam_id <= 0) {
-            return ['', 'Select a Tutor LMS exam.'];
+            return ['', __('Select a Tutor LMS exam.', 'mc-ems-base')];
         }
 
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !preg_match('/^\d{2}:\d{2}$/', $time)) {

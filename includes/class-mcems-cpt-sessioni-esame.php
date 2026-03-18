@@ -246,7 +246,7 @@ class MCEMS_CPT_Sessioni_Esame {
             var btn=document.createElement("a");
             btn.className="page-title-action";
             btn.href=' . json_encode($manage_url) . ';
-            btn.textContent="Add new session";
+            btn.textContent=' . wp_json_encode(__('Add new session', 'mc-ems-base')) . ';
             h1.appendChild(document.createTextNode(" "));
             h1.appendChild(btn);
         })();</script>';
@@ -335,11 +335,11 @@ class MCEMS_CPT_Sessioni_Esame {
 
         echo '<table class="form-table"><tbody>';
 
-        echo '<tr><th><label>Tutor LMS exam</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Tutor LMS exam', 'mc-ems-base') . '</label></th><td>';
 if (!$exam_pt) {
-    echo '<em>Tutor LMS not detected (exam post type not found: <code>courses</code> / <code>tutor_course</code>).</em>';
+    echo '<em>' . esc_html__('Tutor LMS not detected (exam post type not found: courses / tutor_course).', 'mc-ems-base') . '</em>';
 } else {
-    echo '<select name="mcems_exam_id" required ' . esc_attr($disabled) . '><option value="0">— Select exam —</option>';
+    echo '<select name="mcems_exam_id" required ' . esc_attr($disabled) . '><option value="0">' . esc_html__('— Select exam —', 'mc-ems-base') . '</option>';
     foreach ($exams as $cid => $title) {
         printf('<option value="%d" %s>%s</option>',
             (int)$cid,
@@ -349,14 +349,14 @@ if (!$exam_pt) {
     }
     echo '</select>';
 }
-echo '<p class="description">This session will be bookable only by selecting this exam during booking.</p>';
+echo '<p class="description">' . esc_html__('This session will be bookable only by selecting this exam during booking.', 'mc-ems-base') . '</p>';
 echo '</td></tr>';
 
-        echo '<tr><th><label>Date</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Date', 'mc-ems-base') . '</label></th><td>';
         printf('<input type="date" id="mcems_date_input" name="mcems_date" value="%s" min="%s" %s />', esc_attr($date), esc_attr(current_time('Y-m-d')), esc_attr($disabled));
         echo '</td></tr>';
 
-        echo '<tr><th><label>Time</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Time', 'mc-ems-base') . '</label></th><td>';
         printf('<input type="time" id="mcems_time_input" name="mcems_time" value="%s" %s />', esc_attr($time), esc_attr($disabled));
         echo '</td></tr>';
 
@@ -366,7 +366,7 @@ echo '</td></tr>';
         echo '<script>(function(){try{var d=document.getElementById("mcems_date_input");var t=document.getElementById("mcems_time_input");if(!d||!t)return;var today="'.esc_js($today).'";var now="'.esc_js($now_time).'";function apply(){if(d.value===today){t.min=now;}else{t.removeAttribute("min");}}d.addEventListener("change",apply);apply();}catch(e){}})();</script>';
 
 
-        echo '<tr><th><label>Max seats</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Max seats', 'mc-ems-base') . '</label></th><td>';
         $is_premium = defined('EMS_PREMIUM_VERSION');
         $cap_max = $is_premium ? 500 : MCEMS_Admin_Sessioni::BASE_MAX_CAPACITY;
         printf('<input type="number" min="1" max="%d" name="mcems_capacity" value="%d" %s %s />',
@@ -375,18 +375,22 @@ echo '</td></tr>';
             ($is_spec ? 'readonly' : ''),
             esc_attr($disabled)
         );
-        if ($is_spec) echo '<p class="description"><strong>Forced to 1</strong> because it is a special requirements session.</p>';
-        elseif (!$is_premium) echo '<p class="description">Base license: max ' . (int)$cap_max . ' seats per session.</p>';
+        if ($is_spec) echo '<p class="description"><strong>' . esc_html__('Forced to 1', 'mc-ems-base') . '</strong> ' . esc_html__('because it is a special requirements session.', 'mc-ems-base') . '</p>';
+        elseif (!$is_premium) echo '<p class="description">' . esc_html(sprintf(
+            /* translators: %d: maximum number of seats per session allowed by the Base license */
+            __('Base license: max %d seats per session.', 'mc-ems-base'),
+            (int)$cap_max
+        )) . '</p>';
         echo '</td></tr>';
 
-        echo '<tr><th><label>Booked</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Booked', 'mc-ems-base') . '</label></th><td>';
         echo '<strong>' . (int)$booked . '</strong>';
         if ($booked) {
-            echo '<p class="description">Booked user IDs: ' . esc_html(implode(', ', array_map('intval', $occupati))) . '</p>';
+            echo '<p class="description">' . esc_html__('Booked user IDs:', 'mc-ems-base') . ' ' . esc_html(implode(', ', array_map('intval', $occupati))) . '</p>';
         }
         echo '</td></tr>';
 
-        echo '<tr><th><label>Proctor</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Proctor', 'mc-ems-base') . '</label></th><td>';
         echo '<div class="mcems-user-search-wrap">';
         printf('<input type="hidden" name="mcems_proctor_user_id" id="mcems_proctor_user_id" value="%d" />', (int) $proctor);
         if (!$is_past) {
@@ -415,14 +419,15 @@ echo '</td></tr>';
         echo '</div>';
         echo '</td></tr>';
 
-        echo '<tr><th><label>Special requirements</label></th><td>';
-        printf('<label><input type="checkbox" name="mcems_is_special" value="1" %s %s /> ♿ Session for special requirements</label>',
+        echo '<tr><th><label>' . esc_html__('Special requirements', 'mc-ems-base') . '</label></th><td>';
+        printf('<label><input type="checkbox" name="mcems_is_special" value="1" %s %s /> ♿ %s</label>',
             checked($is_spec, 1, false),
-            esc_attr($disabled)
+            esc_attr($disabled),
+            esc_html__('Session for special requirements', 'mc-ems-base')
         );
         echo '</td></tr>';
 
-        echo '<tr><th><label>Associated candidate (only ♿)</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Associated candidate (only ♿)', 'mc-ems-base') . '</label></th><td>';
         echo '<div class="mcems-user-search-wrap">';
         printf('<input type="hidden" name="mcems_special_user_id" id="mcems_special_user_id" value="%d" />', (int) $spec_uid);
         if (!$is_past) {
@@ -449,7 +454,7 @@ echo '</td></tr>';
             );
         }
         echo '</div>';
-        echo '<p class="description">If set, the session ♿ can be booked only by this user.</p>';
+        echo '<p class="description">' . esc_html__('If set, the session ♿ can be booked only by this user.', 'mc-ems-base') . '</p>';
         echo '</td></tr>';
 
         echo '</tbody></table>';
@@ -582,9 +587,9 @@ echo '</td></tr>';
         $new['cb'] = $cols['cb'] ?? '';
         $new['title'] = __('Session', 'mc-ems-base');
         // Subito dopo __('Session', 'mc-ems-base')
-        $new['mcems_exam'] = 'Exam';
+        $new['mcems_exam'] = __('Exam', 'mc-ems-base');
         $new['mcems_date'] = __('Date', 'mc-ems-base');
-        $new['mcems_time'] = 'Time';
+        $new['mcems_time'] = __('Time', 'mc-ems-base');
         $new['mcems_cap']  = __('Seats', 'mc-ems-base');
         $new['mcems_book'] = __('Booked', 'mc-ems-base');
         // Niente colonna data di pubblicazione

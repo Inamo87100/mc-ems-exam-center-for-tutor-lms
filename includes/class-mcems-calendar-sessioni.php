@@ -47,24 +47,49 @@ class MCEMS_Calendar_Sessioni {
             'nonce'   => wp_create_nonce(self::NONCE_ACTION),
             'locale'  => get_locale(),
             'i18n'    => [
-                'loading'    => __('Loading…', 'mc-ems-base'),
-                'loadError'  => __('Error loading calendar data.', 'mc-ems-base'),
-                'available'  => __('Available', 'mc-ems-base'),
-                'limited'    => __('Limited', 'mc-ems-base'),
-                'full'       => __('Full', 'mc-ems-base'),
-                'past'       => __('Past', 'mc-ems-base'),
-                'sessions'   => __('Sessions', 'mc-ems-base'),
-                'capacity'   => __('Capacity', 'mc-ems-base'),
-                'booked'     => __('Booked', 'mc-ems-base'),
-                'proctor'    => __('Proctor', 'mc-ems-base'),
-                'candidates' => __('Candidates', 'mc-ems-base'),
-                'mon'        => __('Mon', 'mc-ems-base'),
-                'tue'        => __('Tue', 'mc-ems-base'),
-                'wed'        => __('Wed', 'mc-ems-base'),
-                'thu'        => __('Thu', 'mc-ems-base'),
-                'fri'        => __('Fri', 'mc-ems-base'),
-                'sat'        => __('Sat', 'mc-ems-base'),
-                'sun'        => __('Sun', 'mc-ems-base'),
+                'loading'              => __('Loading…', 'mc-ems-base'),
+                'loadError'            => __('Error loading calendar data.', 'mc-ems-base'),
+                'available'            => __('Available', 'mc-ems-base'),
+                'limited'              => __('Limited', 'mc-ems-base'),
+                'full'                 => __('Full', 'mc-ems-base'),
+                'past'                 => __('Past', 'mc-ems-base'),
+                'sessions'             => __('Sessions', 'mc-ems-base'),
+                'capacity'             => __('Capacity', 'mc-ems-base'),
+                'booked'               => __('Booked', 'mc-ems-base'),
+                'proctor'              => __('Proctor', 'mc-ems-base'),
+                'candidates'           => __('Candidates', 'mc-ems-base'),
+                'mon'                  => __('Mon', 'mc-ems-base'),
+                'tue'                  => __('Tue', 'mc-ems-base'),
+                'wed'                  => __('Wed', 'mc-ems-base'),
+                'thu'                  => __('Thu', 'mc-ems-base'),
+                'fri'                  => __('Fri', 'mc-ems-base'),
+                'sat'                  => __('Sat', 'mc-ems-base'),
+                'sun'                  => __('Sun', 'mc-ems-base'),
+                'assignedTo'           => __('Assigned to', 'mc-ems-base'),
+                'assignSession'        => __('Assign session', 'mc-ems-base'),
+                'reassign'             => __('Reassign', 'mc-ems-base'),
+                'removeAssignment'     => __('Remove assignment', 'mc-ems-base'),
+                'noSessionsOnDate'     => __('No sessions on this date.', 'mc-ems-base'),
+                'seatsOccupied'        => __('seats occupied', 'mc-ems-base'),
+                'examLabel'            => __('Exam:', 'mc-ems-base'),
+                'mustBeLoggedInView'   => __('You must be logged in to view your sessions.', 'mc-ems-base'),
+                'loadingDots'          => __('Loading...', 'mc-ems-base'),
+                'noAssignedSessions'   => __('You have no assigned sessions.', 'mc-ems-base'),
+                'noSessionsFound'      => __('No sessions found for the selected period.', 'mc-ems-base'),
+                'networkError'         => __('Network error. Please try again.', 'mc-ems-base'),
+                'unableToLoad'         => __('Unable to load sessions.', 'mc-ems-base'),
+                'unableToAssign'       => __('Unable to assign the session.', 'mc-ems-base'),
+                'unableToReassign'     => __('Unable to reassign the session.', 'mc-ems-base'),
+                'unableToRemove'       => __('Unable to remove the assignment.', 'mc-ems-base'),
+                'assigning'            => __('Assigning...', 'mc-ems-base'),
+                'reassigning'          => __('Reassigning...', 'mc-ems-base'),
+                'removing'             => __('Removing...', 'mc-ems-base'),
+                'confirmReassign'      => __('Do you want to replace the current assignee and assign this session to yourself?', 'mc-ems-base'),
+                'confirmRemove'        => __('Are you sure you want to remove the current assignment?', 'mc-ems-base'),
+                'mustBeLoggedInAssign' => __('You must be logged in to assign a session.', 'mc-ems-base'),
+                'mustBeLoggedInModify' => __('You must be logged in to reassign a session.', 'mc-ems-base'),
+                'mustBeLoggedInRemove' => __('You must be logged in to remove an assignment.', 'mc-ems-base'),
+                'logInToAssign'        => __('Log in to assign yourself', 'mc-ems-base'),
             ],
         ]);
     }
@@ -303,7 +328,7 @@ class MCEMS_Calendar_Sessioni {
 
     public static function shortcode(): string {
         if (!MCEMS_Settings::user_can_view_shortcode('mcems_sessions_calendar')) {
-            return '<p>Insufficient permissions.</p>';
+            return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-base') . '</p>';
         }
 
         $nonce = wp_create_nonce(self::NONCE_ACTION);
@@ -312,53 +337,63 @@ class MCEMS_Calendar_Sessioni {
         ?>
         <div class="calendar-wrapper">
             <div class="calendar-nav">
-                <button id="prevMonth" aria-label="Previous month">&larr;</button>
+                <button id="prevMonth" aria-label="<?php echo esc_attr__('Previous month', 'mc-ems-base'); ?>">&larr;</button>
                 <span id="monthYear"></span>
-                <button id="nextMonth" aria-label="Next month">&rarr;</button>
+                <button id="nextMonth" aria-label="<?php echo esc_attr__('Next month', 'mc-ems-base'); ?>">&rarr;</button>
             </div>
 
             <div class="calendar-header">
-                <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+                <div><?php echo esc_html__('Mon', 'mc-ems-base'); ?></div><div><?php echo esc_html__('Tue', 'mc-ems-base'); ?></div><div><?php echo esc_html__('Wed', 'mc-ems-base'); ?></div><div><?php echo esc_html__('Thu', 'mc-ems-base'); ?></div><div><?php echo esc_html__('Fri', 'mc-ems-base'); ?></div><div><?php echo esc_html__('Sat', 'mc-ems-base'); ?></div><div><?php echo esc_html__('Sun', 'mc-ems-base'); ?></div>
             </div>
             <div id="calendar"></div>
 
             <div class="my-sessions-wrap">
                 <div class="btns-stack">
-                    <button id="openMySessions" class="btn-outline">View your assigned sessions</button>
-                    <button id="openAllAssignments" class="btn-outline">View all sessions</button>
+                    <button id="openMySessions" class="btn-outline"><?php echo esc_html__('View your assigned sessions', 'mc-ems-base'); ?></button>
+                    <button id="openAllAssignments" class="btn-outline"><?php echo esc_html__('View all sessions', 'mc-ems-base'); ?></button>
                 </div>
             </div>
         </div>
 
         <div id="slotModal" class="modal" aria-hidden="true">
             <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-                <span class="close" role="button" aria-label="Close">&times;</span>
-                <h2 id="modalTitle">Sessions on <span id="modalData"></span></h2>
+                <span class="close" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-base'); ?>">&times;</span>
+                <h2 id="modalTitle"><?php echo esc_html__('Sessions on', 'mc-ems-base'); ?> <span id="modalData"></span></h2>
                 <div id="modalSlotInfo"></div>
             </div>
         </div>
 
         <div id="mySessionsModal" class="modal" aria-hidden="true">
             <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="mySessionsTitle">
-                <span class="close close-my" role="button" aria-label="Close">&times;</span>
-                <h2 id="mySessionsTitle">Your assigned sessions</h2>
+                <span class="close close-my" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-base'); ?>">&times;</span>
+                <h2 id="mySessionsTitle"><?php echo esc_html__('Your assigned sessions', 'mc-ems-base'); ?></h2>
                 <div id="mySessionsBody"></div>
             </div>
         </div>
 
         <div id="allAssignmentsModal" class="modal" aria-hidden="true">
             <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="allAssignmentsTitle">
-                <span class="close close-all" role="button" aria-label="Close">&times;</span>
-                <h2 id="allAssignmentsTitle">All sessions</h2>
+                <span class="close close-all" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-base'); ?>">&times;</span>
+                <h2 id="allAssignmentsTitle"><?php echo esc_html__('All sessions', 'mc-ems-base'); ?></h2>
 
                 <div class="filters-row">
                     <label>
-                        Month
+                        <?php echo esc_html__('Month', 'mc-ems-base'); ?>
                         <select id="allMonth">
                             <?php
                             $mesi = [
-                                1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',
-                                7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'
+                                1  => __('January', 'mc-ems-base'),
+                                2  => __('February', 'mc-ems-base'),
+                                3  => __('March', 'mc-ems-base'),
+                                4  => __('April', 'mc-ems-base'),
+                                5  => __('May', 'mc-ems-base'),
+                                6  => __('June', 'mc-ems-base'),
+                                7  => __('July', 'mc-ems-base'),
+                                8  => __('August', 'mc-ems-base'),
+                                9  => __('September', 'mc-ems-base'),
+                                10 => __('October', 'mc-ems-base'),
+                                11 => __('November', 'mc-ems-base'),
+                                12 => __('December', 'mc-ems-base'),
                             ];
                             $curM = (int) wp_date('n');
                             foreach ($mesi as $num=>$nome) {
@@ -373,7 +408,7 @@ class MCEMS_Calendar_Sessioni {
                         </select>
                     </label>
                     <label>
-                        Year
+                        <?php echo esc_html__('Year', 'mc-ems-base'); ?>
                         <select id="allYear">
                             <?php
                             $curY = (int) wp_date('Y');
@@ -383,7 +418,7 @@ class MCEMS_Calendar_Sessioni {
                             ?>
                         </select>
                     </label>
-                    <button id="reloadAllAssignments" class="btn-outline small tight">Search</button>
+                    <button id="reloadAllAssignments" class="btn-outline small tight"><?php echo esc_html__('Search', 'mc-ems-base'); ?></button>
                 </div>
 
                 <div id="allAssignmentsBody" class="scrollable"></div>
@@ -627,18 +662,18 @@ class MCEMS_Calendar_Sessioni {
                                     .sort((a,b) => (a.ora || '').localeCompare(b.ora || ''))
                                     .map(s => {
                                         const assigned = (s.assegnato && s.assegnato_nome)
-                                            ? `Assigned to ${s.assegnato_nome}`
+                                            ? `${MCEMS_CAL.i18n.assignedTo} ${s.assegnato_nome}`
                                             : null;
 
                                         const btnAssegna = (!assigned && IS_LOGGED_IN)
-                                            ? `<button class="btn-assegna" data-slot="${s.id}" data-data="${d}" data-ora="${s.ora}">Assign session</button>`
+                                            ? `<button class="btn-assegna" data-slot="${s.id}" data-data="${d}" data-ora="${s.ora}">${MCEMS_CAL.i18n.assignSession}</button>`
                                             : '';
 
                                         const buttonsIfAssigned = (assigned && IS_LOGGED_IN)
                                             ? `<div class="actions">
                                                 <span class="badge-soft">${assigned}</span>
-                                                <button class="btn-modifica" data-slot="${s.id}" data-data="${d}" data-ora="${s.ora}">Reassign</button>
-                                                <button class="btn-elimina" data-slot="${s.id}" data-data="${d}" data-ora="${s.ora}">Remove assignment</button>
+                                                <button class="btn-modifica" data-slot="${s.id}" data-data="${d}" data-ora="${s.ora}">${MCEMS_CAL.i18n.reassign}</button>
+                                                <button class="btn-elimina" data-slot="${s.id}" data-data="${d}" data-ora="${s.ora}">${MCEMS_CAL.i18n.removeAssignment}</button>
                                                </div>`
                                             : '';
 
@@ -653,14 +688,14 @@ class MCEMS_Calendar_Sessioni {
                                         return `<div class="slot-row" id="slot-row-${s.id}">
                                             <div class="slot-meta">
                                                 <div>${oraHtml}</div>
-                                                ${s.exam_title ? `<div class="muted"><strong>Exam:</strong> ${s.exam_title}</div>` : ''}
-                                                <div class="muted">${s.prenotati}/${s.totali} seats occupied</div>
+                                                ${s.exam_title ? `<div class="muted"><strong>${MCEMS_CAL.i18n.examLabel}</strong> ${s.exam_title}</div>` : ''}
+                                                <div class="muted">${s.prenotati}/${s.totali} ${MCEMS_CAL.i18n.seatsOccupied}</div>
                                             </div>
                                             ${right}
                                         </div>`;
                                     }).join('');
 
-                                modalSlotInfo.innerHTML = rows || '<p class="notice">No sessions on this date.</p>';
+                                modalSlotInfo.innerHTML = rows || `<p class="notice">${MCEMS_CAL.i18n.noSessionsOnDate}</p>`;
                                 modal.style.display = 'block';
                                 modal.setAttribute('aria-hidden', 'false');
                             });
@@ -688,23 +723,23 @@ class MCEMS_Calendar_Sessioni {
             window.addEventListener('click', e => { if (e.target == modal) { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); } });
 
             openMy.addEventListener('click', function(){
-                if (!IS_LOGGED_IN) { alert('You must be logged in to view your sessions.'); return; }
-                myBody.innerHTML = '<p class="notice">Loading...</p>';
+                if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInView); return; }
+                myBody.innerHTML = `<p class="notice">${MCEMS_CAL.i18n.loadingDots}</p>`;
                 fetch(`${AJAX_URL}?action=get_user_assigned_slots&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
                     .then(r => r.json())
                     .then(json => {
-                        if (!json || !json.success) { myBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : 'Unable to load sessions.'}</p>`; return; }
+                        if (!json || !json.success) { myBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToLoad}</p>`; return; }
                         const items = json.data || [];
-                        if (!items.length) { myBody.innerHTML = '<p class="notice">You have no assigned sessions.</p>'; return; }
+                        if (!items.length) { myBody.innerHTML = `<p class="notice">${MCEMS_CAL.i18n.noAssignedSessions}</p>`; return; }
                         myBody.innerHTML = items.map(s => `
                             <div class="slot-row" id="myslot-${s.id}" data-date="${s.data}">
                                 <div class="slot-meta">
                                     <div><strong>${s.data_it}</strong></div>
                                     <div><strong>${s.ora}</strong> ${s.speciale ? specialBadgeHTML(true) : ''}</div>
-                                    ${s.exam_title ? `<div class="muted"><strong>Exam:</strong> ${s.exam_title}</div>` : ''}
+                                    ${s.exam_title ? `<div class="muted"><strong>${MCEMS_CAL.i18n.examLabel}</strong> ${s.exam_title}</div>` : ''}
                                 </div>
                                 <div class="actions">
-                                    <button class="btn-elimina" data-slot="${s.id}" data-data="${s.data}">Remove assignment</button>
+                                    <button class="btn-elimina" data-slot="${s.id}" data-data="${s.data}">${MCEMS_CAL.i18n.removeAssignment}</button>
                                 </div>
                             </div>
                         `).join('');
@@ -719,31 +754,31 @@ class MCEMS_Calendar_Sessioni {
             window.addEventListener('click', e => { if (e.target == myModal) { myModal.style.display = 'none'; myModal.setAttribute('aria-hidden','true'); } });
 
             function loadAllAssignments(){
-                allBody.innerHTML = '<p class="notice">Loading...</p>';
+                allBody.innerHTML = `<p class="notice">${MCEMS_CAL.i18n.loadingDots}</p>`;
                 const y = allYear.value, m = allMonth.value;
                 fetch(`${AJAX_URL}?action=get_all_assigned_slots&year=${encodeURIComponent(y)}&month=${encodeURIComponent(m)}&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
                     .then(r => r.json())
                     .then(json => {
-                        if (!json || !json.success) { allBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : 'Unable to load sessions.'}</p>`; return; }
+                        if (!json || !json.success) { allBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToLoad}</p>`; return; }
                         const items = json.data || [];
                         if (!items.length) { allBody.innerHTML = '<p class="notice">No sessions found for the selected period.</p>'; return; }
 
                         allBody.innerHTML = items.map(s => {
                             const actionHTML = s.assegnato
                                 ? `<div class="actions">
-                                       <span class="badge-soft">Assigned to ${s.assegnato_nome}</span>
-                                       <button class="btn-modifica" data-slot="${s.id}" data-data="${s.data}" data-ora="${s.ora}">Reassign</button>
-                                       <button class="btn-elimina"  data-slot="${s.id}" data-data="${s.data}" data-ora="${s.ora}">Remove assignment</button>
+                                       <span class="badge-soft">${MCEMS_CAL.i18n.assignedTo} ${s.assegnato_nome}</span>
+                                       <button class="btn-modifica" data-slot="${s.id}" data-data="${s.data}" data-ora="${s.ora}">${MCEMS_CAL.i18n.reassign}</button>
+                                       <button class="btn-elimina"  data-slot="${s.id}" data-data="${s.data}" data-ora="${s.ora}">${MCEMS_CAL.i18n.removeAssignment}</button>
                                    </div>`
                                 : `<div class="slot-actions">
-                                       <button class="btn-assegna" data-slot="${s.id}" data-data="${s.data}" data-ora="${s.ora}">Assign session</button>
+                                       <button class="btn-assegna" data-slot="${s.id}" data-data="${s.data}" data-ora="${s.ora}">${MCEMS_CAL.i18n.assignSession}</button>
                                    </div>`;
 
                             return `<div class="slot-row" id="allslot-${s.id}">
                                 <div class="slot-meta">
                                     <div><strong>${s.data_it}</strong></div>
                                     <div><strong>${s.ora}</strong> <span class="slot-id">ID: ${s.id}</span> ${s.speciale ? specialBadgeHTML(true) : ''}</div>
-                                    ${s.exam_title ? `<div class="muted"><strong>Exam:</strong> ${s.exam_title}</div>` : ''}
+                                    ${s.exam_title ? `<div class="muted"><strong>${MCEMS_CAL.i18n.examLabel}</strong> ${s.exam_title}</div>` : ''}
                                 </div>
                                 ${actionHTML}
                             </div>`;
@@ -766,10 +801,10 @@ class MCEMS_Calendar_Sessioni {
                 if (!btn) return;
                 e.preventDefault();
 
-                if (!IS_LOGGED_IN) { alert('You must be logged in to assign a session.'); return; }
+                if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInAssign); return; }
                 const slotId = btn.getAttribute('data-slot');
 
-                btn.disabled = true; btn.textContent = 'Assigning...';
+                btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.assigning;
                 const form = new FormData();
                 form.append('action', 'assegna_sessione_slot');
                 form.append('slot_id', slotId);
@@ -787,9 +822,9 @@ class MCEMS_Calendar_Sessioni {
                                 row.querySelector('.slot-actions')?.remove();
                                 row.insertAdjacentHTML('beforeend',
                                   `<div class="actions">
-                                      <span class="badge-soft">Assigned to ${nome}</span>
-                                      <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">Reassign</button>
-                                      <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">Remove assignment</button>
+                                      <span class="badge-soft">${MCEMS_CAL.i18n.assignedTo} ${nome}</span>
+                                      <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.reassign}</button>
+                                      <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.removeAssignment}</button>
                                    </div>`);
                             }
 
@@ -799,19 +834,19 @@ class MCEMS_Calendar_Sessioni {
                                 rowAll.appendChild(meta.cloneNode(true));
                                 rowAll.insertAdjacentHTML('beforeend',
                                   `<div class="actions">
-                                      <span class="badge-soft">Assigned to ${nome}</span>
-                                      <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">Reassign</button>
-                                      <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">Remove assignment</button>
+                                      <span class="badge-soft">${MCEMS_CAL.i18n.assignedTo} ${nome}</span>
+                                      <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.reassign}</button>
+                                      <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.removeAssignment}</button>
                                    </div>`);
                             }
 
                             updateCacheAssign(slotId, dateISO, nome);
                         } else {
-                            alert((json && json.data && json.data.message) ? json.data.message : 'Unable to assign the session.');
-                            btn.disabled = false; btn.textContent = 'Assign session';
+                            alert((json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToAssign);
+                            btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.assignSession;
                         }
                     })
-                    .catch(() => { alert('Network error. Please try again.'); btn.disabled = false; btn.textContent = 'Assign session'; });
+                    .catch(() => { alert(MCEMS_CAL.i18n.networkError); btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.assignSession; });
             });
 
             document.addEventListener('click', function(e) {
@@ -819,11 +854,11 @@ class MCEMS_Calendar_Sessioni {
                 if (!btn) return;
                 e.preventDefault();
 
-                if (!IS_LOGGED_IN) { alert('You must be logged in to reassign a session.'); return; }
+                if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInModify); return; }
                 const slotId = btn.getAttribute('data-slot');
-                if (!confirm('Do you want to replace the current assignee and assign this session to yourself?')) return;
+                if (!confirm(MCEMS_CAL.i18n.confirmReassign)) return;
 
-                btn.disabled = true; btn.textContent = 'Reassigning...';
+                btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.reassigning;
                 const form = new FormData();
                 form.append('action', 'modifica_assegnazione_sessione_slot');
                 form.append('slot_id', slotId);
@@ -841,9 +876,9 @@ class MCEMS_Calendar_Sessioni {
                                 const actionsWrap = row.querySelector('.actions');
                                 if (actionsWrap) {
                                     actionsWrap.innerHTML =
-                                      `<span class="badge-soft">Assigned to ${nome}</span>
-                                       <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">Reassign</button>
-                                       <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">Remove assignment</button>`;
+                                      `<span class="badge-soft">${MCEMS_CAL.i18n.assignedTo} ${nome}</span>
+                                       <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.reassign}</button>
+                                       <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.removeAssignment}</button>`;
                                 }
                             }
 
@@ -852,19 +887,19 @@ class MCEMS_Calendar_Sessioni {
                                 const actionsWrap = rowAll.querySelector('.actions');
                                 if (actionsWrap) {
                                     actionsWrap.innerHTML =
-                                      `<span class="badge-soft">Assigned to ${nome}</span>
-                                       <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">Reassign</button>
-                                       <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">Remove assignment</button>`;
+                                      `<span class="badge-soft">${MCEMS_CAL.i18n.assignedTo} ${nome}</span>
+                                       <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.reassign}</button>
+                                       <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.removeAssignment}</button>`;
                                 }
                             }
 
                             updateCacheAssign(slotId, dateISO, nome);
                         } else {
-                            alert((json && json.data && json.data.message) ? json.data.message : 'Unable to reassign the session.');
-                            btn.disabled = false; btn.textContent = 'Reassign';
+                            alert((json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToReassign);
+                            btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.reassign;
                         }
                     })
-                    .catch(() => { alert('Network error. Please try again.'); btn.disabled = false; btn.textContent = 'Reassign'; });
+                    .catch(() => { alert(MCEMS_CAL.i18n.networkError); btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.reassign; });
             });
 
             document.addEventListener('click', function(e) {
@@ -872,11 +907,11 @@ class MCEMS_Calendar_Sessioni {
                 if (!btn) return;
                 e.preventDefault();
 
-                if (!IS_LOGGED_IN) { alert('You must be logged in to remove an assignment.'); return; }
+                if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInRemove); return; }
                 const slotId = btn.getAttribute('data-slot');
-                if (!confirm('Are you sure you want to remove the current assignment?')) return;
+                if (!confirm(MCEMS_CAL.i18n.confirmRemove)) return;
 
-                btn.disabled = true; btn.textContent = 'Removing...';
+                btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.removing;
                 const form = new FormData();
                 form.append('action', 'elimina_assegnazione_sessione_slot');
                 form.append('slot_id', slotId);
@@ -893,12 +928,12 @@ class MCEMS_Calendar_Sessioni {
                                 row1.querySelector('.actions')?.remove();
                                 row1.insertAdjacentHTML('beforeend',
                                   `<div class="slot-actions">
-                                     <button class="btn-assegna" data-slot="${slotId}" data-data="${dateISO}">Assign session</button>
+                                     <button class="btn-assegna" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.assignSession}</button>
                                    </div>`);
                             }
 
                             const row2 = document.getElementById(`myslot-${slotId}`);
-                            if (row2) { row2.remove(); if (!myBody.querySelector('.slot-row')) myBody.innerHTML = '<p class="notice">You have no assigned sessions.</p>'; }
+                            if (row2) { row2.remove(); if (!myBody.querySelector('.slot-row')) myBody.innerHTML = `<p class="notice">${MCEMS_CAL.i18n.noAssignedSessions}</p>`; }
 
                             const row3 = document.getElementById(`allslot-${slotId}`);
                             if (row3) {
@@ -906,17 +941,17 @@ class MCEMS_Calendar_Sessioni {
                                 row3.appendChild(meta.cloneNode(true));
                                 row3.insertAdjacentHTML('beforeend',
                                   `<div class="slot-actions">
-                                     <button class="btn-assegna" data-slot="${slotId}" data-data="${dateISO}">Assign session</button>
+                                     <button class="btn-assegna" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.assignSession}</button>
                                    </div>`);
                             }
 
                             updateCacheUnassign(slotId, dateISO);
                         } else {
-                            alert((json && json.data && json.data.message) ? json.data.message : 'Unable to remove the assignment.');
-                            btn.disabled = false; btn.textContent = 'Remove assignment';
+                            alert((json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToRemove);
+                            btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.removeAssignment;
                         }
                     })
-                    .catch(() => { alert('Network error. Please try again.'); btn.disabled = false; btn.textContent = 'Remove assignment'; });
+                    .catch(() => { alert(MCEMS_CAL.i18n.networkError); btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.removeAssignment; });
             });
         });
         </script>
@@ -999,7 +1034,7 @@ class MCEMS_Calendar_Sessioni {
         check_ajax_referer(self::NONCE_ACTION);
 
         $user_id = get_current_user_id();
-        if (!$user_id) wp_send_json_error(['message' => 'You are not authenticated.'], 403);
+        if (!$user_id) wp_send_json_error(['message' => __('You are not authenticated.', 'mc-ems-base')], 403);
 
         $oggi = wp_date('Y-m-d');
 
@@ -1103,14 +1138,17 @@ class MCEMS_Calendar_Sessioni {
         check_ajax_referer(self::NONCE_ACTION);
 
         $user_id = get_current_user_id();
-        if (!$user_id) wp_send_json_error(['message' => 'You must be logged in to assign a session.'], 403);
+        if (!$user_id) wp_send_json_error(['message' => __('You must be logged in to assign a session.', 'mc-ems-base')], 403);
 
         $slot_id = isset($_POST['slot_id']) ? intval($_POST['slot_id']) : 0;
-        if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message'=>'Invalid session.'],400);
+        if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message' => __('Invalid session.', 'mc-ems-base')], 400);
 
         if (self::is_slot_assigned($slot_id)) {
             $name = self::get_slot_assigned_name($slot_id);
-            wp_send_json_error(['message' => 'This session is already assigned' . ($name ? " to $name" : '') . '.'], 409);
+            wp_send_json_error(['message' => $name
+                ? sprintf(__('This session is already assigned to %s.', 'mc-ems-base'), $name)
+                : __('This session is already assigned.', 'mc-ems-base')
+            ], 409);
         }
 
         $display = self::current_user_display_name($user_id);
@@ -1140,10 +1178,10 @@ class MCEMS_Calendar_Sessioni {
         check_ajax_referer(self::NONCE_ACTION);
 
         $user_id = get_current_user_id();
-        if (!$user_id) wp_send_json_error(['message' => 'You must be logged in to reassign a session.'], 403);
+        if (!$user_id) wp_send_json_error(['message' => __('You must be logged in to reassign a session.', 'mc-ems-base')], 403);
 
         $slot_id = isset($_POST['slot_id']) ? intval($_POST['slot_id']) : 0;
-        if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message'=>'Invalid session.'],400);
+        if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message' => __('Invalid session.', 'mc-ems-base')], 400);
 
         $old_user_id  = self::get_proctor_user_id($slot_id);
         $old_assigned = $old_user_id > 0;
@@ -1180,13 +1218,13 @@ class MCEMS_Calendar_Sessioni {
         check_ajax_referer(self::NONCE_ACTION);
 
         $request_user = get_current_user_id();
-        if (!$request_user) wp_send_json_error(['message' => 'You must be logged in to remove an assignment.'], 403);
+        if (!$request_user) wp_send_json_error(['message' => __('You must be logged in to remove an assignment.', 'mc-ems-base')], 403);
 
         $slot_id = isset($_POST['slot_id']) ? intval($_POST['slot_id']) : 0;
-        if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message'=>'Invalid session.'],400);
+        if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message' => __('Invalid session.', 'mc-ems-base')], 400);
 
         if (!self::is_slot_assigned($slot_id)) {
-            wp_send_json_error(['message' => 'This session is not currently assigned.'], 409);
+            wp_send_json_error(['message' => __('This session is not currently assigned.', 'mc-ems-base')], 409);
         }
 
         $old_user_id = self::get_proctor_user_id($slot_id);
@@ -1210,7 +1248,7 @@ class MCEMS_Calendar_Sessioni {
             );
         }
 
-        wp_send_json_success(['message' => 'Assignment removed.']);
+        wp_send_json_success(['message' => __('Assignment removed.', 'mc-ems-base')]);
     }
 
     public static function schedule_midnight_event(): void {
