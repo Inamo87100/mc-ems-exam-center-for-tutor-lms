@@ -1,7 +1,7 @@
 # MC-EMS – Exam Center for Tutor LMS
 
 **Contributors:** Mamba Coding  
-**Tags:** exam, booking, tutor lms, exam management, sessions  
+**Tags:** exam center, booking, tutor Lms, LMS, education, learning management system, courses
 **Requires at least:** 6.0  
 **Tested up to:** 6.9  
 **Stable tag:** 1.0.0  
