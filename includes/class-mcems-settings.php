@@ -512,7 +512,7 @@ class MCEMS_Settings {
 
     public static function sanitize($input): array {
         $out = self::get();
-        $tab = isset($_POST['mcems_current_tab']) ? sanitize_key(wp_unslash($_POST['mcems_current_tab'])) : '';
+        $tab = isset($_POST['mcems_current_tab']) ? sanitize_key(wp_unslash($_POST['mcems_current_tab'])) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce handled by WP settings API
 
         if (array_key_exists('tutor_gate_enabled', $input)) {
             $out['tutor_gate_enabled'] = !empty($input['tutor_gate_enabled']) ? 1 : 0;
@@ -753,7 +753,7 @@ class MCEMS_Settings {
             wp_die(esc_html__('Insufficient permissions.', 'mc-ems-base'), 403);
         }
 
-        $tab = isset($_GET['tab']) ? sanitize_key(wp_unslash($_GET['tab'])) : 'shortcodes';
+        $tab = isset($_GET['tab']) ? sanitize_key(wp_unslash($_GET['tab'])) : 'shortcodes'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only tab navigation
         $allowed = ['shortcodes','bookings','exam_access','email','pages','role_settings'];
         if (!in_array($tab, $allowed, true)) $tab = 'shortcodes';
 

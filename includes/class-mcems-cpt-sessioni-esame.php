@@ -556,7 +556,7 @@ echo '</td></tr>';
     public static function lock_past_session_ui(): void {
         $screen = function_exists('get_current_screen') ? get_current_screen() : null;
         if (!$screen || $screen->post_type !== self::CPT || $screen->base !== 'post') return;
-        $post_id = isset($_GET['post']) ? (int) $_GET['post'] : 0;
+        $post_id = isset($_GET['post']) ? (int) wp_unslash($_GET['post']) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only admin URL parameter, no data modification
         if (!$post_id) return;
         $date = (string) get_post_meta($post_id, self::MK_DATE, true);
         $time = (string) get_post_meta($post_id, self::MK_TIME, true);

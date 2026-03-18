@@ -1038,7 +1038,7 @@ class MCEMS_Booking {
             wp_send_json_error(['message' => esc_html__('Invalid nonce.', 'mc-ems-base')], 400);
         }
 
-        $slot_id = isset($_POST['slot_id']) ? (int) $_POST['slot_id'] : 0;
+        $slot_id = isset($_POST['slot_id']) ? (int) wp_unslash($_POST['slot_id']) : 0;
         if ($slot_id <= 0 || get_post_type($slot_id) !== MCEMS_CPT_Sessioni_Esame::CPT) {
             echo '<p style="color:#f44336; font-weight:bold; text-align:center;">Invalid exam session.</p>';
             wp_die();
@@ -1147,8 +1147,8 @@ class MCEMS_Booking {
             wp_send_json_error('Cancellation is disabled.');
         }
 
-        $slot_id   = isset($_POST['slot_id']) ? (int) $_POST['slot_id'] : 0;
-        $exam_id = isset($_POST['exam_id']) ? (int) $_POST['exam_id'] : 0;
+        $slot_id   = isset($_POST['slot_id']) ? (int) wp_unslash($_POST['slot_id']) : 0;
+        $exam_id = isset($_POST['exam_id']) ? (int) wp_unslash($_POST['exam_id']) : 0;
         if ($slot_id <= 0) wp_send_json_error('Invalid exam session.');
 
         if (get_post_type($slot_id) !== MCEMS_CPT_Sessioni_Esame::CPT) {

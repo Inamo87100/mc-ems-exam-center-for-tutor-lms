@@ -580,7 +580,7 @@ class MCEMS_Calendar_Sessioni {
             function fetchMonthData(year, month) {
                 const key = `${year}-${month}`;
                 if (cacheSlots[key]) return Promise.resolve(cacheSlots[key]);
-                return fetch(`${AJAX_URL}?action=get_slot_data&year=${year}&month=${month+1}`)
+                return fetch(`${AJAX_URL}?action=get_slot_data&year=${year}&month=${month+1}&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
                     .then(r => r.json())
                     .then(data => { cacheSlots[key] = data || {}; return cacheSlots[key]; });
             }
@@ -925,8 +925,10 @@ class MCEMS_Calendar_Sessioni {
     }
 
     public static function ajax_get_slot_data(): void {
-        $year  = isset($_GET['year'])  ? intval($_GET['year'])  : 0;
-        $month = isset($_GET['month']) ? intval($_GET['month']) : 0;
+        check_ajax_referer(self::NONCE_ACTION);
+
+        $year  = isset($_GET['year'])  ? (int) wp_unslash($_GET['year'])  : 0;
+        $month = isset($_GET['month']) ? (int) wp_unslash($_GET['month']) : 0;
 
         $args = [
             'post_type'      => self::cpt(),
