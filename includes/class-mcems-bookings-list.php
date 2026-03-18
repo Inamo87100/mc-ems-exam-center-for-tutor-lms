@@ -156,7 +156,11 @@ class MCEMS_Bookings_List_Base {
         $selected_date  = isset($_GET['mcems_date']) ? sanitize_text_field(wp_unslash($_GET['mcems_date'])) : '';
         $date_from      = isset($_GET['mcems_from']) ? sanitize_text_field(wp_unslash($_GET['mcems_from'])) : '';
         $date_to        = isset($_GET['mcems_to']) ? sanitize_text_field(wp_unslash($_GET['mcems_to'])) : '';
-        $selected_exam = isset($_GET['mcems_exam']) ? absint(wp_unslash($_GET['mcems_exam'])) : 0;
+        $selected_exam  = isset($_GET['mcems_exam']) ? absint(wp_unslash($_GET['mcems_exam'])) : 0;
+        $advanced       = isset($_GET['mcems_adv']) && sanitize_text_field(wp_unslash($_GET['mcems_adv'])) === '1';
+
+        $filter = self::normalize_date_filter($selected_date, $date_from, $date_to, $advanced);
+        if ($filter === null) {
             status_header(400);
             echo 'Missing or invalid date filter.';
             exit;
