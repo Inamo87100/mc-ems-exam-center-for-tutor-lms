@@ -20,6 +20,8 @@ class MCEMS_Booking {
         add_action('wp_ajax_mcems_get_booking_calendar', [__CLASS__, 'ajax_get_booking_calendar']);
         add_action('wp_ajax_nopriv_mcems_get_booking_calendar', [__CLASS__, 'ajax_get_booking_calendar']);
 
+        add_action('wp_ajax_mcems_check_enrollment', [__CLASS__, 'ajax_check_enrollment']);
+
         add_action('wp_ajax_mcems_check_active_booking', [__CLASS__, 'ajax_check_active_booking']);
 
         add_action('wp_ajax_conferma_prenotazione_slot', [__CLASS__, 'ajax_confirm_booking']);
@@ -65,6 +67,7 @@ class MCEMS_Booking {
                 'bookingConfirmed'  => __('Exam booking confirmed!', 'mc-ems-base'),
                 'bookingCancelled'  => __('Exam booking cancelled.', 'mc-ems-base'),
                 'cancellationFailed' => __('Cancellation failed.', 'mc-ems-base'),
+                'notEnrolled'        => __('You must be enrolled in this exam to book a session.', 'mc-ems-base'),
             ],
         ]);
     }
@@ -441,6 +444,34 @@ class MCEMS_Booking {
                         return true;
                     }
 
+                    function checkEnrollment() {
+                        const examId = examSelect ? examSelect.value : '';
+                        if (!examId) {
+                            hideBookingMessage();
+                            showCalendar(false);
+                            return;
+                        }
+
+                        const url = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>?action=mcems_check_enrollment&exam_id='
+                            + encodeURIComponent(examId)
+                            + '&nonce=' + encodeURIComponent(mcemsNonce);
+
+                        fetch(url)
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data && data.enrolled) {
+                                    checkExistingBooking();
+                                } else {
+                                    showBookingMessage('<p style="color:#f44336; font-weight:bold; text-align:center;">'
+                                        + '<?php echo esc_js(__('You must be enrolled in this exam to book a session.', 'mc-ems-base')); ?>'
+                                        + '</p>');
+                                }
+                            })
+                            .catch(() => {
+                                showBookingMessage('<p style="color:#f44336; font-weight:bold; text-align:center;"><?php echo esc_js(__('Error checking enrollment. Please try again.', 'mc-ems-base')); ?></p>');
+                            });
+                    }
+
                     function calendarDayClass(dayObj) {
                         if (!dayObj || Number(dayObj.totali || 0) === 0) return 'no-slot';
 
@@ -654,7 +685,7 @@ class MCEMS_Booking {
                             }
 
                             resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select a date from the calendar.', 'mc-ems-base')); ?></p>');
-                            checkExistingBooking();
+                            checkEnrollment();
                         });
                     }
 
@@ -710,7 +741,7 @@ class MCEMS_Booking {
 
                     if (examSelect && examSelect.value) {
                         resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select a date from the calendar.', 'mc-ems-base')); ?></p>');
-                        renderBookingCalendar();
+                        checkEnrollment();
                     } else {
                         showCalendar(false);
                         resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select an exam first.', 'mc-ems-base')); ?></p>');
@@ -893,6 +924,24 @@ class MCEMS_Booking {
 
         $active = self::get_active_booking_for_exam($user_id, $exam_id);
         wp_send_json(['has_booking' => !empty($active['slot_id'])]);
+    }
+
+    public static function ajax_check_enrollment(): void {
+        $nonce = isset($_GET['nonce']) ? sanitize_text_field(wp_unslash($_GET['nonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'mcems_booking')) {
+            wp_send_json(['enrolled' => false]);
+            return;
+        }
+
+        $user_id = (int) get_current_user_id();
+        $exam_id = absint($_GET['exam_id'] ?? 0);
+
+        if (!$user_id || $exam_id <= 0) {
+            wp_send_json(['enrolled' => false]);
+            return;
+        }
+
+        wp_send_json(['enrolled' => MCEMS_Tutor::is_user_enrolled($user_id, $exam_id)]);
     }
 
     public static function ajax_get_booking_calendar(): void {
