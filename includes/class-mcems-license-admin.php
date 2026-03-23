@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class MC_EMS_License_Admin {
+class MCEMS_License_Admin {
 
     const LICENSE_OPTION_NAME = 'mc_ems_license_key';
 
@@ -12,22 +12,25 @@ class MC_EMS_License_Admin {
         add_action( 'admin_init', array( $this, 'handle_license_form' ) );
     }
 
+    // Add the License page as a submenu under Exam Management System
     public function add_license_menu() {
-        add_options_page(
-            __( 'MC EMS License', 'mc-ems-base' ),
-            __( 'MC EMS License', 'mc-ems-base' ),
-            'manage_options',
-            'mc-ems-license',
-            array( $this, 'display_license_page' )
+        add_submenu_page(
+            'edit.php?post_type=mcems_exam_session', // Parent menu (see CPT definition)
+            __( 'License', 'mc-ems-base' ),         // Page title
+            __( 'License', 'mc-ems-base' ),         // Menu title
+            'manage_options',                       // Capability
+            'mc-ems-license',                       // Slug
+            array( $this, 'display_license_page' ),  // Callback
+            99                                      // Position/order
         );
     }
 
+    // Handle license save/update
     public function handle_license_form() {
         if ( isset( $_POST['mc_ems_license_submit'] ) ) {
             check_admin_referer( 'mc_ems_license_action', 'mc_ems_license_nonce' );
-            if ( ! current_user_can( 'manage_options' ) ) {
-                return;
-            }
+            if ( ! current_user_can( 'manage_options' ) ) return;
+
             $key = isset( $_POST['mc_ems_license_key'] ) ? sanitize_text_field( $_POST['mc_ems_license_key'] ) : '';
             update_option( self::LICENSE_OPTION_NAME, $key );
             add_settings_error(
@@ -39,6 +42,7 @@ class MC_EMS_License_Admin {
         }
     }
 
+    // Display the license page
     public function display_license_page() {
         $license_key = get_option( self::LICENSE_OPTION_NAME, '' );
         ?>
