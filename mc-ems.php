@@ -47,6 +47,9 @@ foreach ($mcems_class_files as $mcems_file) {
 }
 unset($mcems_class_files, $mcems_file, $mcems_full_path);
 
+// ▶▶▶ INCLUDE FUNCTIONS FOR LICENSE CHECK
+require_once MCEMS_PLUGIN_PATH . 'includes/class-mcems-license-functions.php';
+
 /**
  * Check whether Tutor LMS is installed and active.
  * Works both before and after plugins_loaded.
