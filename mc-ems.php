@@ -33,6 +33,8 @@ $mcems_class_files = [
     'includes/class-mcems-admin-banner.php',
     'includes/class-mcems-tutor-gate.php',
     'includes/class-ems-session-id-column.php',
+    // Add the license admin class:
+    'includes/class-mcems-license-admin.php',
 ];
 
 foreach ($mcems_class_files as $mcems_file) {
@@ -149,6 +151,11 @@ add_action('plugins_loaded', function () {
                 }
             }
         }
+
+        // ← AGGIUNGI QUESTA INIZIALIZZAZIONE DOPO LA BOOTSTRAP DELLE ALTRE ADMIN
+        if (class_exists('MCEMS_License_Admin')) {
+            new MCEMS_License_Admin();
+        }
     }
 });
 
@@ -160,4 +167,3 @@ function mcems_missing_tutor_notice(): void {
     echo esc_html__('MC-EMS – Exam Session Management requires Tutor LMS to be installed and active.', 'mc-ems-base');
     echo '</p></div>';
 }
-
