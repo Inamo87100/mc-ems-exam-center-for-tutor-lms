@@ -49,7 +49,8 @@ class MCEMS_Admin_Banner {
     }
 
     protected static function premium_active() {
-        return defined('EMS_PREMIUM_VERSION') || class_exists('EMS_Premium_Bootstrap');
+        // Sostituito con il vero controllo licenza
+        return mcems_is_license_valid();
     }
 
     /**
@@ -86,9 +87,6 @@ class MCEMS_Admin_Banner {
     // AJAX handler
     // -------------------------------------------------------------------------
 
-    /**
-     * Handle the AJAX dismiss request.
-     */
     public static function ajax_dismiss(): void {
         if (!current_user_can('manage_options')) {
             wp_send_json_error(['message' => 'forbidden'], 403);
