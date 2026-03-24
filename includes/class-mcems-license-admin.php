@@ -240,7 +240,7 @@ class MCEMS_License_Admin {
                         <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                             <?php submit_button( __( 'Save and verify license', 'mc-ems-base' ), 'primary', 'mc_ems_license_submit', false ); ?>
                             <span style="color:#50575e; font-size:13px;">
-                                <?php esc_html_e( 'Tip: if you changed key, the previous cached verification will be cleared automatically.', 'mc-ems-base' ); ?>
+                                
                             </span>
                         </div>
                     </form>
