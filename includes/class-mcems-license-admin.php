@@ -44,29 +44,12 @@ class MCEMS_License_Admin {
             mcems_clear_license_cache();
         }
 
-        $result = mcems_check_license( true );
-
-        $notice_code = 'saved';
-        switch ( isset( $result['status'] ) ? $result['status'] : 'error' ) {
-            case 'valid':
-                $notice_code = 'valid';
-                break;
-            case 'expired':
-                $notice_code = 'expired';
-                break;
-            case 'invalid':
-                $notice_code = 'invalid';
-                break;
-            default:
-                $notice_code = 'error';
-                break;
-        }
+        mcems_check_license( true );
 
         $redirect_url = add_query_arg(
             array(
-                'post_type'            => 'mcems_exam_session',
-                'page'                 => 'mc-ems-license',
-                'mcems_license_notice' => $notice_code,
+                'post_type' => 'mcems_exam_session',
+                'page'      => 'mc-ems-license',
             ),
             admin_url( 'edit.php' )
         );
@@ -116,51 +99,6 @@ class MCEMS_License_Admin {
         return isset( $map[ $status ] ) ? $map[ $status ] : $map['error'];
     }
 
-    private function print_notice_from_query_arg() {
-        $notice = isset( $_GET['mcems_license_notice'] ) ? sanitize_key( wp_unslash( $_GET['mcems_license_notice'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        if ( '' === $notice ) {
-            return;
-        }
-
-        $last_check = mcems_get_last_license_check();
-        $message    = isset( $last_check['message'] ) ? (string) $last_check['message'] : '';
-        $type       = 'notice-info';
-
-        switch ( $notice ) {
-            case 'valid':
-                $type = 'notice-success';
-                if ( '' === $message ) {
-                    $message = __( 'Valid and active license saved successfully.', 'mc-ems-base' );
-                }
-                break;
-            case 'expired':
-                $type = 'notice-warning';
-                if ( '' === $message ) {
-                    $message = __( 'The license was saved, but it has expired.', 'mc-ems-base' );
-                }
-                break;
-            case 'invalid':
-                $type = 'notice-error';
-                if ( '' === $message ) {
-                    $message = __( 'The entered license key is not valid.', 'mc-ems-base' );
-                }
-                break;
-            case 'error':
-                $type = 'notice-warning';
-                if ( '' === $message ) {
-                    $message = __( 'License saved, but the verification server could not be reached.', 'mc-ems-base' );
-                }
-                break;
-            default:
-                if ( '' === $message ) {
-                    $message = __( 'License settings updated.', 'mc-ems-base' );
-                }
-                break;
-        }
-
-        echo '<div class="notice ' . esc_attr( $type ) . ' is-dismissible"><p>' . esc_html( $message ) . '</p></div>';
-    }
-
     public function display_license_page() {
         $license_key = (string) get_option( self::LICENSE_OPTION_NAME, '' );
         $license     = $license_key !== '' ? mcems_check_license( false ) : mcems_get_last_license_check();
@@ -172,28 +110,17 @@ class MCEMS_License_Admin {
                     ? __( 'License information is currently unavailable.', 'mc-ems-base' )
                     : __( 'Enter a license key to activate premium features.', 'mc-ems-base' ),
                 'activated_at' => '',
-                'created_at'   => '',
                 'expires_at'   => '',
-                'checked_at'   => '',
             );
         }
 
         $status        = isset( $license['status'] ) ? strtolower( (string) $license['status'] ) : 'error';
         $status_config = $this->get_status_config( $status );
-        $activation_raw = '';
-        if ( ! empty( $license['activated_at'] ) ) {
-            $activation_raw = $license['activated_at'];
-        } elseif ( ! empty( $license['created_at'] ) ) {
-            $activation_raw = $license['created_at'];
-        }
-
-        $activated_at  = $activation_raw ? mcems_format_license_date( $activation_raw ) : '';
+        $activated_at  = isset( $license['activated_at'] ) ? mcems_format_license_date( $license['activated_at'] ) : '';
         $expires_at    = isset( $license['expires_at'] ) ? mcems_format_license_date( $license['expires_at'] ) : '';
         ?>
         <div class="wrap">
             <h1><?php esc_html_e( 'MC-EMS License Manager', 'mc-ems-base' ); ?></h1>
-
-            <?php $this->print_notice_from_query_arg(); ?>
 
             <div style="max-width:1100px; margin-top:20px; display:grid; grid-template-columns:2fr 1fr; gap:20px; align-items:start;">
                 <div style="background:#ffffff; border:1px solid #dcdcde; border-radius:14px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,.04);">
@@ -239,9 +166,6 @@ class MCEMS_License_Admin {
 
                         <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                             <?php submit_button( __( 'Save and verify license', 'mc-ems-base' ), 'primary', 'mc_ems_license_submit', false ); ?>
-                            <span style="color:#50575e; font-size:13px;">
-                                
-                            </span>
                         </div>
                     </form>
                 </div>
