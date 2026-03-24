@@ -1,190 +1,242 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
-class MCEMS_License_Admin {
+/**
+ * MC-EMS License Functions
+ *
+ * Gestione verifica remota licenza + cache locale per pannello admin.
+ */
 
-    const LICENSE_OPTION_NAME      = 'mc_ems_license_key';
-    const LICENSE_ACTIVE_NAME      = 'mc_ems_license_active';
-    const LICENSE_ACTIVATION_DATE  = 'mc_ems_license_activation_date';
-    const LICENSE_EXPIRATION_DATE  = 'mc_ems_license_expiration_date';
+if ( ! defined( 'MCEMS_LICENSE_OPTION_KEY' ) ) {
+    define( 'MCEMS_LICENSE_OPTION_KEY', 'mc_ems_license_key' );
+}
 
-    public function __construct() {
-        add_action('admin_menu', array($this, 'add_license_menu'));
-        add_action('admin_init', array($this, 'handle_license_form'));
+if ( ! defined( 'MCEMS_LICENSE_LAST_CHECK_OPTION' ) ) {
+    define( 'MCEMS_LICENSE_LAST_CHECK_OPTION', 'mc_ems_license_last_check' );
+}
+
+if ( ! defined( 'MCEMS_LICENSE_TRANSIENT_KEY' ) ) {
+    define( 'MCEMS_LICENSE_TRANSIENT_KEY', 'mcems_license_status_v2' );
+}
+
+/**
+ * Prova a recuperare il primo valore valido tra le possibili chiavi.
+ *
+ * @param array $array
+ * @param array $keys
+ * @param mixed $default
+ * @return mixed
+ */
+function mcems_array_first_not_empty( $array, $keys, $default = '' ) {
+    if ( ! is_array( $array ) ) {
+        return $default;
     }
 
-    public function add_license_menu() {
-        add_submenu_page(
-            'edit.php?post_type=mcems_exam_session',
-            __('License', 'mc-ems-base'),
-            __('License', 'mc-ems-base'),
-            'manage_options',
-            'mc-ems-license',
-            array($this, 'display_license_page'),
-            99
+    foreach ( (array) $keys as $key ) {
+        if ( isset( $array[ $key ] ) && $array[ $key ] !== '' && $array[ $key ] !== null ) {
+            return $array[ $key ];
+        }
+    }
+
+    return $default;
+}
+
+/**
+ * Converte una data in formato leggibile per l'admin.
+ *
+ * @param mixed $value
+ * @return string
+ */
+function mcems_format_license_date( $value ) {
+    if ( empty( $value ) || ! is_scalar( $value ) ) {
+        return '';
+    }
+
+    $timestamp = strtotime( (string) $value );
+    if ( ! $timestamp ) {
+        return '';
+    }
+
+    return wp_date( 'd/m/Y H:i', $timestamp );
+}
+
+/**
+ * Normalizza la risposta del server licenze, tollerando chiavi diverse.
+ *
+ * @param array $json
+ * @return array
+ */
+function mcems_normalize_license_response( $json ) {
+    $status = strtolower( (string) mcems_array_first_not_empty( $json, array( 'status', 'license_status' ), 'error' ) );
+
+    $normalized = array(
+        'status'         => $status,
+        'message'        => (string) mcems_array_first_not_empty( $json, array( 'message', 'msg', 'detail' ), '' ),
+        'license_key'    => (string) mcems_array_first_not_empty( $json, array( 'license_key', 'key' ), '' ),
+        'plan'           => (string) mcems_array_first_not_empty( $json, array( 'plan', 'license_plan', 'edition' ), '' ),
+        'activated_at'   => (string) mcems_array_first_not_empty( $json, array( 'activated_at', 'activation_date', 'created_at', 'valid_from', 'start_date' ), '' ),
+        'expires_at'     => (string) mcems_array_first_not_empty( $json, array( 'expires_at', 'expiration_date', 'expiry_date', 'expires', 'valid_until', 'end_date' ), '' ),
+        'checked_at'     => current_time( 'mysql' ),
+        'site_url'       => home_url(),
+        'raw'            => is_array( $json ) ? $json : array(),
+    );
+
+    if ( '' === $normalized['message'] ) {
+        switch ( $normalized['status'] ) {
+            case 'valid':
+                $normalized['message'] = __( 'License activated successfully.', 'mc-ems-base' );
+                break;
+            case 'expired':
+                $normalized['message'] = __( 'The license has expired.', 'mc-ems-base' );
+                break;
+            case 'invalid':
+                $normalized['message'] = __( 'The entered license key is not valid.', 'mc-ems-base' );
+                break;
+            default:
+                $normalized['message'] = __( 'Unable to verify the license at the moment.', 'mc-ems-base' );
+                break;
+        }
+    }
+
+    return $normalized;
+}
+
+/**
+ * Salva l'ultimo esito licenza in option per mostrarlo anche se la cache transient scade.
+ *
+ * @param array $data
+ * @return void
+ */
+function mcems_store_last_license_check( $data ) {
+    if ( is_array( $data ) ) {
+        update_option( MCEMS_LICENSE_LAST_CHECK_OPTION, $data, false );
+    }
+}
+
+/**
+ * Restituisce l'ultimo check disponibile.
+ *
+ * @return array
+ */
+function mcems_get_last_license_check() {
+    $data = get_option( MCEMS_LICENSE_LAST_CHECK_OPTION, array() );
+    return is_array( $data ) ? $data : array();
+}
+
+/**
+ * Resetta cache e ultimo check licenza.
+ *
+ * @return void
+ */
+function mcems_clear_license_cache() {
+    delete_transient( MCEMS_LICENSE_TRANSIENT_KEY );
+    delete_option( MCEMS_LICENSE_LAST_CHECK_OPTION );
+}
+
+/**
+ * Checks the license status by sending a POST request to the verification endpoint.
+ *
+ * @param bool $force Se true, forza una nuova richiesta al server ignorando la cache locale.
+ * @return array
+ */
+function mcems_check_license( $force = false ) {
+    $license_key = trim( (string) get_option( MCEMS_LICENSE_OPTION_KEY, '' ) );
+
+    if ( '' === $license_key ) {
+        $result = array(
+            'status'       => 'invalid',
+            'message'      => __( 'No license key configured.', 'mc-ems-base' ),
+            'license_key'  => '',
+            'plan'         => '',
+            'activated_at' => '',
+            'expires_at'   => '',
+            'checked_at'   => current_time( 'mysql' ),
+            'site_url'     => home_url(),
+            'raw'          => array(),
         );
+
+        mcems_store_last_license_check( $result );
+        return $result;
     }
 
-    public function handle_license_form() {
-        if (isset($_POST['mc_ems_license_submit'])) {
-            check_admin_referer('mc_ems_license_action', 'mc_ems_license_nonce');
-            if (!current_user_can('manage_options')) return;
-
-            $key = isset($_POST['mc_ems_license_key']) ? sanitize_text_field($_POST['mc_ems_license_key']) : '';
-            // Salva subito la chiave per la verifica remota
-            update_option(self::LICENSE_OPTION_NAME, $key);
-
-            if (!$key) {
-                update_option(self::LICENSE_ACTIVE_NAME, 0);
-                update_option(self::LICENSE_ACTIVATION_DATE, '');
-                update_option(self::LICENSE_EXPIRATION_DATE, '');
-                add_settings_error('mc_ems_license', 'mc_ems_license_empty', __('Please enter a license key.', 'mc-ems-base'), 'error');
-                return;
-            }
-
-            // Verifica remota tramite funzione fornita
-            if (!function_exists('mcems_check_license')) {
-                // Protezione: include il file se necessario
-                // require_once( YOUR_PATH . '/class-mcems-license-functions.php' );
-                add_settings_error('mc_ems_license', 'mc_ems_license_no_function', __('License check function is missing!', 'mc-ems-base'), 'error');
-                return;
-            }
-
-            $check = mcems_check_license(true);
-
-            if ($check['status'] === 'valid') {
-                update_option(self::LICENSE_ACTIVE_NAME, 1);
-                update_option(self::LICENSE_ACTIVATION_DATE, isset($check['activation_date']) ? $check['activation_date'] : date('Y-m-d'));
-                update_option(self::LICENSE_EXPIRATION_DATE, isset($check['expiration_date']) ? $check['expiration_date'] : '');
-                add_settings_error('mc_ems_license', 'mc_ems_license_activated', __('License activated successfully!', 'mc-ems-base'), 'updated');
-            }
-            elseif ($check['status'] === 'expired') {
-                update_option(self::LICENSE_ACTIVE_NAME, 0);
-                update_option(self::LICENSE_ACTIVATION_DATE, isset($check['activation_date']) ? $check['activation_date'] : '');
-                update_option(self::LICENSE_EXPIRATION_DATE, isset($check['expiration_date']) ? $check['expiration_date'] : '');
-                add_settings_error('mc_ems_license', 'mc_ems_license_expired', __('License expired. Please renew your license.', 'mc-ems-base'), 'error');
-            }
-            elseif ($check['status'] === 'invalid') {
-                update_option(self::LICENSE_ACTIVE_NAME, 0);
-                update_option(self::LICENSE_ACTIVATION_DATE, '');
-                update_option(self::LICENSE_EXPIRATION_DATE, '');
-                add_settings_error('mc_ems_license', 'mc_ems_license_invalid', __('Invalid license key. Please try again.', 'mc-ems-base'), 'error');
-            }
-            else {
-                // Errore generico API/offline
-                update_option(self::LICENSE_ACTIVE_NAME, 0);
-                add_settings_error('mc_ems_license', 'mc_ems_license_error', sprintf(__('License server error: %s', 'mc-ems-base'), isset($check['message']) ? $check['message'] : 'Unknown error.'), 'error');
-            }
+    if ( ! $force ) {
+        $cached = get_transient( MCEMS_LICENSE_TRANSIENT_KEY );
+        if ( $cached && is_array( $cached ) ) {
+            return $cached;
         }
     }
 
-    public function display_license_page() {
-        // Sempre una GET "fresca": migliora la user experience (vedi stato vero)
-        $license_key      = get_option(self::LICENSE_OPTION_NAME, '');
-        $license_active   = get_option(self::LICENSE_ACTIVE_NAME, 0);
-        $activation_date  = get_option(self::LICENSE_ACTIVATION_DATE, '');
-        $expiration_date  = get_option(self::LICENSE_EXPIRATION_DATE, '');
+    $api_url = home_url( '/wp-json/mcems/v1/license/verify' );
 
-        // Stato attuale (prova cache locale/transient per evitare richieste eccessive)
-        $status_data = function_exists('mcems_check_license') ? mcems_check_license(false) : ['status' => 'error', 'message' => 'Function not found.'];
+    $response = wp_remote_post(
+        $api_url,
+        array(
+            'timeout' => 15,
+            'body'    => array(
+                'license_key' => $license_key,
+                'site_url'    => home_url(),
+            ),
+        )
+    );
 
-        $box_class  = '';
-        $status_msg = '';
-        $date_info  = '';
+    if ( is_wp_error( $response ) ) {
+        $result = array(
+            'status'       => 'error',
+            'message'      => $response->get_error_message(),
+            'license_key'  => $license_key,
+            'plan'         => '',
+            'activated_at' => '',
+            'expires_at'   => '',
+            'checked_at'   => current_time( 'mysql' ),
+            'site_url'     => home_url(),
+            'raw'          => array(),
+        );
 
-        if ($license_key) {
-            switch ($status_data['status']) {
-                case 'valid':
-                    $box_class  = 'active';
-                    $status_msg = '<span style="color:green;font-weight:bold;">✔️ ' . esc_html__('License active', 'mc-ems-base') . '</span>';
-                    $date_info  = '';
-                    if (!empty($status_data['activation_date'])) {
-                        $date_info .= '<br><strong>' . esc_html__('Activation date:', 'mc-ems-base') . '</strong> ' . esc_html($status_data['activation_date']);
-                    } elseif ($activation_date) {
-                        $date_info .= '<br><strong>' . esc_html__('Activation date:', 'mc-ems-base') . '</strong> ' . esc_html($activation_date);
-                    }
-                    if (!empty($status_data['expiration_date'])) {
-                        $date_info .= '<br><strong>' . esc_html__('Expiration date:', 'mc-ems-base') . '</strong> ' . esc_html($status_data['expiration_date']);
-                    } elseif ($expiration_date) {
-                        $date_info .= '<br><strong>' . esc_html__('Expiration date:', 'mc-ems-base') . '</strong> ' . esc_html($expiration_date);
-                    }
-                    break;
-
-                case 'expired':
-                    $box_class  = 'inactive';
-                    $status_msg = '<span style="color:orange;font-weight:bold;">⚠️ ' . esc_html__('License expired', 'mc-ems-base') . '</span>';
-                    $date_info  = '';
-                    if (!empty($status_data['expiration_date'])) {
-                        $date_info .= '<br><strong>' . esc_html__('Expiration date:', 'mc-ems-base') . '</strong> ' . esc_html($status_data['expiration_date']);
-                    }
-                    break;
-
-                case 'invalid':
-                    $box_class  = 'inactive';
-                    $status_msg = '<span style="color:red;font-weight:bold;">❌ ' . esc_html__('License invalid', 'mc-ems-base') . '</span>';
-                    break;
-
-                case 'error':
-                    $box_class  = 'inactive';
-                    $status_msg = '<span style="color:red;font-weight:bold;">❌ ' . esc_html__('License check error', 'mc-ems-base') . '</span>';
-                    $date_info  = !empty($status_data['message']) ? '<br><em>' . esc_html($status_data['message']) . '</em>' : '';
-                    break;
-            }
-        } else {
-            $box_class  = 'inactive';
-            $status_msg = '<span style="color:red;font-weight:bold;">❌ ' . esc_html__('No license inserted.', 'mc-ems-base') . '</span>';
-        }
-        ?>
-        <div class="wrap">
-            <h1><?php esc_html_e('MC EMS License Settings', 'mc-ems-base'); ?></h1>
-            <?php settings_errors('mc_ems_license'); ?>
-
-            <div class="mcems-license-status <?php echo esc_attr($box_class); ?>">
-                <?php echo $status_msg . $date_info; ?>
-            </div>
-
-            <form method="post" action="">
-                <?php wp_nonce_field('mc_ems_license_action', 'mc_ems_license_nonce'); ?>
-                <table class="form-table" role="presentation">
-                    <tr>
-                        <th scope="row">
-                            <label for="mc_ems_license_key"><?php esc_html_e('License Key', 'mc-ems-base'); ?></label>
-                        </th>
-                        <td>
-                            <input
-                                type="text"
-                                id="mc_ems_license_key"
-                                name="mc_ems_license_key"
-                                value="<?php echo esc_attr($license_key); ?>"
-                                class="regular-text"
-                                style="min-width:350px;"
-                                autocomplete="off"
-                            />
-                            <p class="description"><?php esc_html_e('Paste your MC EMS license key here to unlock premium features.', 'mc-ems-base'); ?></p>
-                        </td>
-                    </tr>
-                </table>
-                <?php submit_button(__('Save License', 'mc-ems-base'), 'primary', 'mc_ems_license_submit'); ?>
-            </form>
-        </div>
-        <style>
-            .mcems-license-status {
-                margin: 10px 0 30px 0;
-                padding: 14px 18px;
-                border-radius: 5px;
-                font-size: 15px;
-                border: 1px solid #ccc;
-                max-width: 700px;
-            }
-            .mcems-license-status.active {
-                background: #e9f9ef;
-                border-color: #1edd58;
-            }
-            .mcems-license-status.inactive {
-                background: #ffeaea;
-                border-color: #ff3838;
-            }
-        </style>
-        <?php
+        mcems_store_last_license_check( $result );
+        return $result;
     }
+
+    $body = wp_remote_retrieve_body( $response );
+    $json = json_decode( $body, true );
+
+    if ( empty( $json ) || ! is_array( $json ) ) {
+        $result = array(
+            'status'       => 'error',
+            'message'      => __( 'Invalid response from license server.', 'mc-ems-base' ),
+            'license_key'  => $license_key,
+            'plan'         => '',
+            'activated_at' => '',
+            'expires_at'   => '',
+            'checked_at'   => current_time( 'mysql' ),
+            'site_url'     => home_url(),
+            'raw'          => array(),
+        );
+
+        mcems_store_last_license_check( $result );
+        return $result;
+    }
+
+    $result = mcems_normalize_license_response( $json );
+
+    if ( '' === $result['license_key'] ) {
+        $result['license_key'] = $license_key;
+    }
+
+    set_transient( MCEMS_LICENSE_TRANSIENT_KEY, $result, 12 * HOUR_IN_SECONDS );
+    mcems_store_last_license_check( $result );
+
+    return $result;
+}
+
+/**
+ * Returns true if the license is valid, false otherwise.
+ *
+ * @param bool $force Se true, forza una richiesta al server.
+ * @return bool
+ */
+function mcems_is_license_valid( $force = false ) {
+    $check = mcems_check_license( $force );
+    return isset( $check['status'] ) && 'valid' === $check['status'];
 }
