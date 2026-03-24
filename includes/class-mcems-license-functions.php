@@ -59,7 +59,7 @@ function mcems_format_license_date( $value ) {
         return '';
     }
 
-    return wp_date( 'd/m/Y H:i', $timestamp );
+    return wp_date( 'd/m/Y', $timestamp );
 }
 
 /**
@@ -71,12 +71,20 @@ function mcems_format_license_date( $value ) {
 function mcems_normalize_license_response( $json ) {
     $status = strtolower( (string) mcems_array_first_not_empty( $json, array( 'status', 'license_status' ), 'error' ) );
 
+    $created_at   = (string) mcems_array_first_not_empty( $json, array( 'created_at', 'creation_date', 'issued_at' ), '' );
+    $activated_at = (string) mcems_array_first_not_empty( $json, array( 'activated_at', 'activation_date', 'valid_from', 'start_date' ), '' );
+
+    if ( '' === $activated_at ) {
+        $activated_at = $created_at;
+    }
+
     $normalized = array(
         'status'         => $status,
         'message'        => (string) mcems_array_first_not_empty( $json, array( 'message', 'msg', 'detail' ), '' ),
         'license_key'    => (string) mcems_array_first_not_empty( $json, array( 'license_key', 'key' ), '' ),
         'plan'           => (string) mcems_array_first_not_empty( $json, array( 'plan', 'license_plan', 'edition' ), '' ),
-        'activated_at'   => (string) mcems_array_first_not_empty( $json, array( 'activated_at', 'activation_date', 'created_at', 'valid_from', 'start_date' ), '' ),
+        'created_at'     => $created_at,
+        'activated_at'   => $activated_at,
         'expires_at'     => (string) mcems_array_first_not_empty( $json, array( 'expires_at', 'expiration_date', 'expiry_date', 'expires', 'valid_until', 'end_date' ), '' ),
         'checked_at'     => current_time( 'mysql' ),
         'site_url'       => home_url(),
@@ -150,6 +158,7 @@ function mcems_check_license( $force = false ) {
             'message'      => __( 'No license key configured.', 'mc-ems-base' ),
             'license_key'  => '',
             'plan'         => '',
+            'created_at'   => '',
             'activated_at' => '',
             'expires_at'   => '',
             'checked_at'   => current_time( 'mysql' ),
@@ -187,6 +196,7 @@ function mcems_check_license( $force = false ) {
             'message'      => $response->get_error_message(),
             'license_key'  => $license_key,
             'plan'         => '',
+            'created_at'   => '',
             'activated_at' => '',
             'expires_at'   => '',
             'checked_at'   => current_time( 'mysql' ),
@@ -207,6 +217,7 @@ function mcems_check_license( $force = false ) {
             'message'      => __( 'Invalid response from license server.', 'mc-ems-base' ),
             'license_key'  => $license_key,
             'plan'         => '',
+            'created_at'   => '',
             'activated_at' => '',
             'expires_at'   => '',
             'checked_at'   => current_time( 'mysql' ),
