@@ -172,18 +172,23 @@ class MCEMS_License_Admin {
                     ? __( 'License information is currently unavailable.', 'mc-ems-base' )
                     : __( 'Enter a license key to activate premium features.', 'mc-ems-base' ),
                 'activated_at' => '',
+                'created_at'   => '',
                 'expires_at'   => '',
                 'checked_at'   => '',
-                'plan'         => '',
             );
         }
 
         $status        = isset( $license['status'] ) ? strtolower( (string) $license['status'] ) : 'error';
         $status_config = $this->get_status_config( $status );
-        $activated_at  = isset( $license['activated_at'] ) ? mcems_format_license_date( $license['activated_at'] ) : '';
+        $activation_raw = '';
+        if ( ! empty( $license['activated_at'] ) ) {
+            $activation_raw = $license['activated_at'];
+        } elseif ( ! empty( $license['created_at'] ) ) {
+            $activation_raw = $license['created_at'];
+        }
+
+        $activated_at  = $activation_raw ? mcems_format_license_date( $activation_raw ) : '';
         $expires_at    = isset( $license['expires_at'] ) ? mcems_format_license_date( $license['expires_at'] ) : '';
-        $checked_at    = isset( $license['checked_at'] ) ? mcems_format_license_date( $license['checked_at'] ) : '';
-        $plan          = isset( $license['plan'] ) ? (string) $license['plan'] : '';
         ?>
         <div class="wrap">
             <h1><?php esc_html_e( 'MC-EMS License Manager', 'mc-ems-base' ); ?></h1>
@@ -254,25 +259,10 @@ class MCEMS_License_Admin {
                                 <td style="padding:10px 0; border-bottom:1px solid #f0f0f1; text-align:right; font-weight:600;"><?php echo esc_html( $activated_at ? $activated_at : '—' ); ?></td>
                             </tr>
                             <tr>
-                                <td style="padding:10px 0; border-bottom:1px solid #f0f0f1; color:#50575e;"><?php esc_html_e( 'Expiration date', 'mc-ems-base' ); ?></td>
-                                <td style="padding:10px 0; border-bottom:1px solid #f0f0f1; text-align:right; font-weight:600;"><?php echo esc_html( $expires_at ? $expires_at : '—' ); ?></td>
-                            </tr>
-                            <tr>
-                                <td style="padding:10px 0; border-bottom:1px solid #f0f0f1; color:#50575e;"><?php esc_html_e( 'Plan', 'mc-ems-base' ); ?></td>
-                                <td style="padding:10px 0; border-bottom:1px solid #f0f0f1; text-align:right; font-weight:600;"><?php echo esc_html( $plan ? $plan : '—' ); ?></td>
-                            </tr>
-                            <tr>
-                                <td style="padding:10px 0; color:#50575e;"><?php esc_html_e( 'Last check', 'mc-ems-base' ); ?></td>
-                                <td style="padding:10px 0; text-align:right; font-weight:600;"><?php echo esc_html( $checked_at ? $checked_at : '—' ); ?></td>
+                                <td style="padding:10px 0; color:#50575e;"><?php esc_html_e( 'Expiration date', 'mc-ems-base' ); ?></td>
+                                <td style="padding:10px 0; text-align:right; font-weight:600;"><?php echo esc_html( $expires_at ? $expires_at : '—' ); ?></td>
                             </tr>
                         </table>
-                    </div>
-
-                    <div style="background:#ffffff; border:1px solid #dcdcde; border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.04);">
-                        <h2 style="margin:0 0 10px; font-size:18px;"><?php esc_html_e( 'Notes', 'mc-ems-base' ); ?></h2>
-                        <p style="margin:0; color:#50575e; line-height:1.6;">
-                            <?php esc_html_e( 'Activation and expiration dates are shown if the license server returns them. If your server is temporarily unreachable, the last available verification remains visible in this panel.', 'mc-ems-base' ); ?>
-                        </p>
                     </div>
                 </div>
             </div>
