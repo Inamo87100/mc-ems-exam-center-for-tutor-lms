@@ -5,7 +5,7 @@ class MCEMS_CPT_Sessioni_Esame {
 
     const CPT = 'mcems_exam_session';
 
-    // === Meta keys (COMPAT with your original snippets) ===
+    // === Meta keys ===
     const MK_DATE            = 'slot_data';            // Y-m-d
     const MK_TIME            = 'slot_orario';          // H:i
     const MK_CAPACITY        = 'slot_posti_max';       // int
@@ -13,9 +13,9 @@ class MCEMS_CPT_Sessioni_Esame {
     const MK_PROCTOR_USER_ID = 'slot_sorvegliante';    // int
     const MK_IS_SPECIAL      = 'slot_esigenze_speciali';      // 1|0
     const MK_SPECIAL_USER_ID = 'slot_esigenze_speciali_user'; // int
-    const MK_EXAM_ID      = 'slot_corso_id'; // int Tutor LMS exam ID
+    const MK_EXAM_ID         = 'slot_corso_id'; // int Tutor LMS exam ID
 
-    // === Legacy meta keys from previous NF-EMS builds (auto-migrated) ===
+    // === Legacy meta keys from previous builds ===
     const L_MK_DATE            = '_mcems_slot_date';
     const L_MK_TIME            = '_mcems_slot_time';
     const L_MK_CAPACITY        = '_mcems_slot_capacity';
@@ -26,7 +26,6 @@ class MCEMS_CPT_Sessioni_Esame {
 
     public static function init() {
         add_action('init', [__CLASS__, 'register_cpt']);
-        // Centralize session creation in "Exam Sessions Management".
         add_action('admin_menu', [__CLASS__, 'tweak_admin_menu'], 99);
         add_action('admin_head', [__CLASS__, 'tweak_list_screen_ui']);
         add_action('add_meta_boxes', [__CLASS__, 'add_metaboxes']);
@@ -35,7 +34,6 @@ class MCEMS_CPT_Sessioni_Esame {
         add_action('admin_head', [__CLASS__, 'lock_past_session_ui']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_metabox_scripts']);
         add_action('rest_api_init', [__CLASS__, 'register_rest_routes']);
-
         add_filter('manage_' . self::CPT . '_posts_columns', [__CLASS__, 'columns']);
         add_action('manage_' . self::CPT . '_posts_custom_column', [__CLASS__, 'column_render'], 10, 2);
     }
@@ -153,25 +151,11 @@ class MCEMS_CPT_Sessioni_Esame {
         return rest_ensure_response($merged);
     }
 
-    /**
-     * Escape LIKE wildcard characters in a user-supplied search string so that
-     * '%' and '_' in the input are treated as literals, not SQL wildcards.
-     *
-     * @param string $q
-     * @return string
-     */
     private static function escape_like(string $q): string {
         global $wpdb;
         return $wpdb->esc_like($q);
     }
 
-    /**
-     * Merge two user result arrays, deduplicate by ID, and format for JSON output.
-     *
-     * @param array $a
-     * @param array $b
-     * @return array
-     */
     private static function merge_user_results(array $a, array $b): array {
         $seen = [];
         $out  = [];
@@ -188,21 +172,16 @@ class MCEMS_CPT_Sessioni_Esame {
         return $out;
     }
 
-    /**
-     * Remove the default "Add New" submenu for this CPT and reorder submenus
-     * so that: Create sessions → Sessions list → Settings.
-     */
     public static function tweak_admin_menu(): void {
         global $submenu;
-
         $parent = 'edit.php?post_type=' . self::CPT;
         remove_submenu_page($parent, 'post-new.php?post_type=' . self::CPT);
 
         if (empty($submenu[$parent])) return;
 
-        $create   = null; // mcems-manage-sessions
-        $list     = null; // edit.php?post_type=mcems_exam_session  (the CPT "all items" page)
-        $settings = null; // mcems-settings-cpt
+        $create   = null;
+        $list     = null;
+        $settings = null;
         $others   = [];
 
         foreach ($submenu[$parent] as $item) {
@@ -229,10 +208,6 @@ class MCEMS_CPT_Sessioni_Esame {
         $submenu[$parent] = array_values($ordered);
     }
 
-    /**
-     * On sessions list screen, hide the standard "Add New" and replace it
-     * with a link to the management screen.
-     */
     public static function tweak_list_screen_ui(): void {
         $screen = function_exists('get_current_screen') ? get_current_screen() : null;
         if (!$screen) return;
@@ -294,10 +269,9 @@ class MCEMS_CPT_Sessioni_Esame {
     public static function metabox_html($post) {
         wp_nonce_field('mcems_session_save', 'mcems_session_nonce');
 
-        // Prefer canonical keys, fallback legacy
+        // Legacy fallback for old meta
         $date     = (string) get_post_meta($post->ID, self::MK_DATE, true);
         if ($date === '') $date = (string) get_post_meta($post->ID, self::L_MK_DATE, true);
-
         $time     = (string) get_post_meta($post->ID, self::MK_TIME, true);
         if ($time === '') $time = (string) get_post_meta($post->ID, self::L_MK_TIME, true);
 
@@ -318,10 +292,6 @@ class MCEMS_CPT_Sessioni_Esame {
         $spec_uid = (int) get_post_meta($post->ID, self::MK_SPECIAL_USER_ID, true);
         if (!$spec_uid) $spec_uid = (int) get_post_meta($post->ID, self::L_MK_SPECIAL_USER_ID, true);
 
-        // Resolve display info for pre-selected users.
-        $proctor_user   = $proctor   ? get_user_by('id', $proctor)   : null;
-        $candidate_user = $spec_uid  ? get_user_by('id', $spec_uid)  : null;
-
         $exams = MCEMS_Tutor::get_exams();
         $exam_pt = MCEMS_Tutor::exam_post_type();
         $exam_id = (int) get_post_meta($post->ID, self::MK_EXAM_ID, true);
@@ -336,21 +306,21 @@ class MCEMS_CPT_Sessioni_Esame {
         echo '<table class="form-table"><tbody>';
 
         echo '<tr><th><label>' . esc_html__('Tutor LMS exam', 'mc-ems-base') . '</label></th><td>';
-if (!$exam_pt) {
-    echo '<em>' . esc_html__('Tutor LMS not detected (exam post type not found: courses / tutor_course).', 'mc-ems-base') . '</em>';
-} else {
-    echo '<select name="mcems_exam_id" required ' . esc_attr($disabled) . '><option value="0">' . esc_html__('— Select exam —', 'mc-ems-base') . '</option>';
-    foreach ($exams as $cid => $title) {
-        printf('<option value="%d" %s>%s</option>',
-            (int)$cid,
-            selected($exam_id, (int)$cid, false),
-            esc_html($title)
-        );
-    }
-    echo '</select>';
-}
-echo '<p class="description">' . esc_html__('This session will be bookable only by selecting this exam during booking.', 'mc-ems-base') . '</p>';
-echo '</td></tr>';
+        if (!$exam_pt) {
+            echo '<em>' . esc_html__('Tutor LMS not detected (exam post type not found: courses / tutor_course).', 'mc-ems-base') . '</em>';
+        } else {
+            echo '<select name="mcems_exam_id" required ' . esc_attr($disabled) . '><option value="0">' . esc_html__('— Select exam —', 'mc-ems-base') . '</option>';
+            foreach ($exams as $cid => $title) {
+                printf('<option value="%d" %s>%s</option>',
+                    (int)$cid,
+                    selected($exam_id, (int)$cid, false),
+                    esc_html($title)
+                );
+            }
+            echo '</select>';
+        }
+        echo '<p class="description">' . esc_html__('This session will be bookable only by selecting this exam during booking.', 'mc-ems-base') . '</p>';
+        echo '</td></tr>';
 
         echo '<tr><th><label>' . esc_html__('Date', 'mc-ems-base') . '</label></th><td>';
         printf('<input type="date" id="mcems_date_input" name="mcems_date" value="%s" min="%s" %s />', esc_attr($date), esc_attr(current_time('Y-m-d')), esc_attr($disabled));
@@ -365,9 +335,9 @@ echo '</td></tr>';
         $now_time = current_time('H:i');
         echo '<script>(function(){try{var d=document.getElementById("mcems_date_input");var t=document.getElementById("mcems_time_input");if(!d||!t)return;var today="'.esc_js($today).'";var now="'.esc_js($now_time).'";function apply(){if(d.value===today){t.min=now;}else{t.removeAttribute("min");}}d.addEventListener("change",apply);apply();}catch(e){}})();</script>';
 
-
+        // Premium check per max seats
+        $is_premium = mcems_is_license_valid();
         echo '<tr><th><label>' . esc_html__('Max seats', 'mc-ems-base') . '</label></th><td>';
-        $is_premium = defined('EMS_PREMIUM_VERSION');
         $cap_max = $is_premium ? 500 : MCEMS_Admin_Sessioni::BASE_MAX_CAPACITY;
         printf('<input type="number" min="1" max="%d" name="mcems_capacity" value="%d" %s %s />',
             (int) $cap_max,
@@ -377,9 +347,8 @@ echo '</td></tr>';
         );
         if ($is_spec) echo '<p class="description"><strong>' . esc_html__('Forced to 1', 'mc-ems-base') . '</strong> ' . esc_html__('because it is a special requirements session.', 'mc-ems-base') . '</p>';
         elseif (!$is_premium) echo '<p class="description">' . esc_html(sprintf(
-            /* translators: %d: maximum number of seats per session allowed by the Base license */
             __('Base license: max %d seats per session.', 'mc-ems-base'),
-            (int)$cap_max
+            (int) $cap_max
         )) . '</p>';
         echo '</td></tr>';
 
@@ -463,7 +432,7 @@ echo '</td></tr>';
     public static function save_metabox($post_id, $post) {
         if ($post->post_type !== self::CPT) return;
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-        if (!isset($_POST['mcems_session_nonce']) || !wp_verify_nonce(wp_unslash($_POST['mcems_session_nonce']), 'mcems_session_save')) return; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+        if (!isset($_POST['mcems_session_nonce']) || !wp_verify_nonce(wp_unslash($_POST['mcems_session_nonce']), 'mcems_session_save')) return;
         if (!current_user_can('edit_post', $post_id)) return;
 
         $existing_date = (string) get_post_meta($post_id, self::MK_DATE, true);
@@ -476,14 +445,13 @@ echo '</td></tr>';
         $date = isset($_POST['mcems_date']) ? sanitize_text_field(wp_unslash($_POST['mcems_date'])) : '';
         $time = isset($_POST['mcems_time']) ? sanitize_text_field(wp_unslash($_POST['mcems_time'])) : '';
 
-        // Block past sessions (date + time).
+        // Block past sessions
         if ($date && $time && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && preg_match('/^\d{2}:\d{2}$/', $time)) {
             $tz = wp_timezone();
             try {
                 $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);
                 $now = new \DateTimeImmutable('now', $tz);
                 if ($session_dt < $now) {
-                    // Save as draft and show notice.
                     set_transient('mcems_past_session_notice', 1, 30);
                     remove_action('save_post', [__CLASS__, 'save_metabox'], 10);
                     wp_update_post([
@@ -503,16 +471,13 @@ echo '</td></tr>';
         $spec_uid = isset($_POST['mcems_special_user_id']) ? absint(wp_unslash($_POST['mcems_special_user_id'])) : 0;
 
         $exam_id = isset($_POST['mcems_exam_id']) ? absint(wp_unslash($_POST['mcems_exam_id'])) : 0;
-
         $capacity = isset($_POST['mcems_capacity']) ? absint(wp_unslash($_POST['mcems_capacity'])) : 10;
         if ($capacity < 1) $capacity = 1;
 
-        // Base license: cap capacity to the allowed maximum.
-        if (!defined('EMS_PREMIUM_VERSION') && !$is_spec) {
+        // Cap capacity based on real license!
+        if (!mcems_is_license_valid() && !$is_spec) {
             $capacity = min($capacity, MCEMS_Admin_Sessioni::BASE_MAX_CAPACITY);
         }
-
-        // In modalità ♿: capienza sempre 1
         if ($is_spec) $capacity = 1;
 
         update_post_meta($post_id, self::MK_DATE, $date);
@@ -556,12 +521,10 @@ echo '</td></tr>';
         }
     }
 
-
-
     public static function lock_past_session_ui(): void {
         $screen = function_exists('get_current_screen') ? get_current_screen() : null;
         if (!$screen || $screen->post_type !== self::CPT || $screen->base !== 'post') return;
-        $post_id = absint($_GET['post'] ?? 0); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only admin URL parameter, no data modification
+        $post_id = absint($_GET['post'] ?? 0);
         if (!$post_id) return;
         $date = (string) get_post_meta($post_id, self::MK_DATE, true);
         $time = (string) get_post_meta($post_id, self::MK_TIME, true);
@@ -586,13 +549,11 @@ echo '</td></tr>';
         $new = [];
         $new['cb'] = $cols['cb'] ?? '';
         $new['title'] = __('Session', 'mc-ems-base');
-        // Subito dopo __('Session', 'mc-ems-base')
         $new['mcems_exam'] = __('Exam', 'mc-ems-base');
         $new['mcems_date'] = __('Date', 'mc-ems-base');
         $new['mcems_time'] = __('Time', 'mc-ems-base');
         $new['mcems_cap']  = __('Seats', 'mc-ems-base');
         $new['mcems_book'] = __('Booked', 'mc-ems-base');
-        // Niente colonna data di pubblicazione
         return $new;
     }
 
@@ -602,44 +563,21 @@ echo '</td></tr>';
             echo $exam_id ? esc_html(get_the_title($exam_id)) : '—';
             return;
         }
-
         if ($col === 'mcems_date') {
             $raw = (string) get_post_meta($post_id, self::MK_DATE, true);
             $raw = trim($raw);
-
-            if ($raw === '') {
-                echo '—';
-                return;
-            }
-
-            // Se già dd/mm/YYYY
-            if (preg_match('~^(\d{2})/(\d{2})/(\d{4})$~', $raw)) {
-                echo esc_html($raw);
-                return;
-            }
-
-            // Se YYYY-MM-DD
+            if ($raw === '') { echo '—'; return; }
+            if (preg_match('~^(\d{2})/(\d{2})/(\d{4})$~', $raw)) { echo esc_html($raw); return; }
             if (preg_match('~^(\d{4})-(\d{2})-(\d{2})$~', $raw, $m)) {
                 echo esc_html($m[3] . '/' . $m[2] . '/' . $m[1]);
                 return;
             }
-
-            // Fallback
             $ts = strtotime($raw);
             echo $ts ? esc_html(date_i18n('d/m/Y', $ts)) : esc_html($raw);
             return;
         }
-
-        if ($col === 'mcems_time') {
-            echo esc_html(get_post_meta($post_id, self::MK_TIME, true));
-            return;
-        }
-
-        if ($col === 'mcems_cap')  {
-            echo (int) get_post_meta($post_id, self::MK_CAPACITY, true);
-            return;
-        }
-
+        if ($col === 'mcems_time') { echo esc_html(get_post_meta($post_id, self::MK_TIME, true)); return; }
+        if ($col === 'mcems_cap')  { echo (int) get_post_meta($post_id, self::MK_CAPACITY, true); return; }
         if ($col === 'mcems_book') {
             $occ = get_post_meta($post_id, self::MK_OCCUPATI, true);
             echo is_array($occ) ? count($occ) : 0;
