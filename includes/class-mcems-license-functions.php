@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * MC-EMS License Functions
  *
- * Gestione verifica remota licenza + cache locale per pannello admin.
+ * Remote license verification management + local cache for admin panel.
  */
 
 if ( ! defined( 'MCEMS_LICENSE_OPTION_KEY' ) ) {
@@ -26,7 +26,7 @@ if ( ! defined( 'MCEMS_LICENSE_SERVER_URL' ) ) {
 }
 
 /**
- * Normalizza un URL sito per confronto e trasmissione.
+ * Normalize a site URL for comparison and transmission.
  *
  * @param string $url URL.
  * @return string
@@ -42,7 +42,7 @@ function mcems_normalize_site_url( $url ) {
 }
 
 /**
- * Restituisce l'URL del sito corrente normalizzato.
+ * Returns the normalized URL of the current site.
  *
  * @return string
  */
@@ -51,7 +51,7 @@ function mcems_get_current_site_url() {
 }
 
 /**
- * Prova a recuperare il primo valore valido tra le possibili chiavi.
+ * Attempts to retrieve the first valid value among the possible keys.
  *
  * @param array $array
  * @param array $keys
@@ -73,7 +73,7 @@ function mcems_array_first_not_empty( $array, $keys, $default = '' ) {
 }
 
 /**
- * Converte una data in formato leggibile per l'admin.
+ * Converts a date to admin-readable format.
  *
  * @param mixed $value
  * @return string
@@ -92,7 +92,7 @@ function mcems_format_license_date( $value ) {
 }
 
 /**
- * Normalizza la risposta del server licenze.
+ * Normalize the license server response.
  *
  * @param array $json JSON già decodificato.
  * @return array
@@ -153,7 +153,7 @@ function mcems_normalize_license_response( $json ) {
 }
 
 /**
- * Salva l'ultimo esito licenza in option.
+ * Save the last license result in option.
  *
  * @param array $data
  * @return void
@@ -165,7 +165,7 @@ function mcems_store_last_license_check( $data ) {
 }
 
 /**
- * Restituisce l'ultimo check disponibile.
+ * Returns the last available check.
  *
  * @return array
  */
@@ -175,7 +175,7 @@ function mcems_get_last_license_check() {
 }
 
 /**
- * Resetta cache e ultimo check licenza.
+ * Reset cache and last license check.
  *
  * @return void
  */
@@ -185,7 +185,7 @@ function mcems_clear_license_cache() {
 }
 
 /**
- * Costruisce una risposta standard di errore.
+ * Constructs a standard error response.
  *
  * @param string $license_key Chiave.
  * @param string $message Messaggio.
