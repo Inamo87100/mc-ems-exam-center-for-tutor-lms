@@ -37,6 +37,7 @@ $mcems_class_files = [
     'includes/class-mcems-license-admin.php',
 ];
 
+// Include class files
 foreach ($mcems_class_files as $mcems_file) {
     $mcems_full_path = MCEMS_PLUGIN_PATH . $mcems_file;
     if (file_exists($mcems_full_path)) {
@@ -49,6 +50,9 @@ unset($mcems_class_files, $mcems_file, $mcems_full_path);
 
 // ▶▶▶ INCLUDE FUNCTIONS FOR LICENSE CHECK
 require_once MCEMS_PLUGIN_PATH . 'includes/class-mcems-license-functions.php';
+
+// ▶▶▶ INCLUDE THE NEW QUIZ STATS ADMIN PAGE
+require_once MCEMS_PLUGIN_PATH . 'includes/class-quiz-stats-admin.php';
 
 /**
  * Check whether Tutor LMS is installed and active.
@@ -155,10 +159,11 @@ add_action('plugins_loaded', function () {
             }
         }
 
-        // ← AGGIUNGI QUESTA INIZIALIZZAZIONE DOPO LA BOOTSTRAP DELLE ALTRE ADMIN
+        // ← EXISTING LICENSE ADMIN INSTANTIATION
         if (class_exists('MCEMS_License_Admin')) {
             new MCEMS_License_Admin();
         }
+        // The Quiz Stats admin is bootstrap by its own class via static::init, no action needed
     }
 });
 
