@@ -13,15 +13,15 @@ class MCEMS_Quiz_Stats_Admin {
         add_action('admin_post_mcems_download_quiz_stats_csv', [__CLASS__, 'handle_csv_download']);
     }
 
+    // Attach as submenu of MC-EMS (parent slug = 'mc-ems')
     public static function add_admin_menu() {
-        add_menu_page(
+        add_submenu_page(
+            'mc-ems', // <--- Main plugin menu slug, change if your MC-EMS menu has a different slug!
             'Quiz Stats',
             'Quiz Stats',
             'manage_options',
             'mcems-quiz-stats',
-            [__CLASS__, 'render_admin_page'],
-            'dashicons-chart-bar',
-            65
+            [__CLASS__, 'render_admin_page']
         );
     }
 
@@ -50,7 +50,6 @@ class MCEMS_Quiz_Stats_Admin {
                 KEY error_percentage (error_percentage)
             ) $charset_collate;";
             dbDelta($sql);
-            // Save table creation status
             if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
                 update_option('quiz_stats_table_created', 'yes');
             }
@@ -125,7 +124,6 @@ class MCEMS_Quiz_Stats_Admin {
 
     /**
      * Filters and paginated question stats.
-     * Returns array [results, total_found].
      */
     protected static function get_filtered_stats($args, $do_count = false) {
         global $wpdb;
