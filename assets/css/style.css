@@ -1,0 +1,651 @@
+/**
+ * MC-EMS Base – Frontend Stylesheet
+ *
+ * Sections:
+ *  1. CSS Variables
+ *  2. Booking Form (#prenotazione-esame)
+ *  3. Booking Calendar
+ *  4. Manage Booking (shortcode_gestisci)
+ *  5. Bookings List table
+ *  6. Utility / shared
+ *  7. Accessibility
+ *  8. Print styles
+ *  9. Media queries (responsive)
+ */
+
+/* =============================================================
+   1. CSS Variables
+   ============================================================= */
+:root {
+    --mcems-color-primary:      #2271b1;
+    --mcems-color-success:      #4caf50;
+    --mcems-color-warning:      #ff9800;
+    --mcems-color-danger:       #f44336;
+    --mcems-color-limited:      #ffeb3b;
+    --mcems-color-past:         #c3c4c7;
+    --mcems-color-text:         #1d2327;
+    --mcems-color-muted:        #667085;
+    --mcems-color-border:       #e5e7eb;
+    --mcems-color-bg:           #f9f9f9;
+    --mcems-color-card-bg:      #ffffff;
+    --mcems-color-pill-bg:      #f2f4f7;
+    --mcems-color-pill-text:    #344054;
+    --mcems-radius-sm:          5px;
+    --mcems-radius-md:          10px;
+    --mcems-radius-lg:          14px;
+    --mcems-radius-xl:          16px;
+    --mcems-shadow-card:        0 1px 2px rgba(16, 24, 40, 0.06);
+    --mcems-font-sm:            0.75rem;   /* 12px */
+    --mcems-font-base:          0.9rem;    /* ~14px */
+    --mcems-font-md:            1rem;
+    --mcems-font-lg:            1.25rem;
+    --mcems-font-xl:            1.5rem;
+    --mcems-spacing-xs:         4px;
+    --mcems-spacing-sm:         8px;
+    --mcems-spacing-md:         14px;
+    --mcems-spacing-lg:         20px;
+    --mcems-spacing-xl:         24px;
+}
+
+/* =============================================================
+   2. Booking Form (#prenotazione-esame)
+   ============================================================= */
+#prenotazione-esame {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: var(--mcems-spacing-lg);
+    border: 1px solid var(--mcems-color-border);
+    border-radius: var(--mcems-radius-md);
+    background-color: var(--mcems-color-bg);
+    box-sizing: border-box;
+}
+
+#prenotazione-esame h2 {
+    text-align: center;
+    font-size: var(--mcems-font-xl);
+    margin-bottom: var(--mcems-spacing-sm);
+}
+
+#prenotazione-esame .mcems-login-required {
+    text-align: center;
+    color: var(--mcems-color-danger);
+    font-weight: bold;
+}
+
+#prenotazione-esame .mcems-lead {
+    text-align: center;
+    margin: 0 0 var(--mcems-spacing-md);
+    font-size: var(--mcems-font-base);
+    color: var(--mcems-color-muted);
+}
+
+#prenotazione-esame label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: var(--mcems-spacing-sm);
+}
+
+#prenotazione-esame select,
+#prenotazione-esame input[type="date"],
+#prenotazione-esame input[type="text"],
+#prenotazione-esame input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: var(--mcems-radius-sm);
+    border: 1px solid #ccc;
+    margin-bottom: var(--mcems-spacing-lg);
+    font-size: var(--mcems-font-base);
+    box-sizing: border-box;
+}
+
+#prenotazione-esame select:focus,
+#prenotazione-esame input:focus {
+    outline: 2px solid var(--mcems-color-primary);
+    outline-offset: 1px;
+    border-color: var(--mcems-color-primary);
+}
+
+/* Confirm booking button */
+#confirm-button {
+    background-color: var(--mcems-color-success);
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--mcems-radius-sm);
+    cursor: pointer;
+    font-size: var(--mcems-font-md);
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+#confirm-button:hover {
+    background-color: #43a047;
+}
+
+#confirm-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#confirm-container {
+    text-align: center;
+    margin-top: var(--mcems-spacing-lg);
+}
+
+/* Slot container */
+#slot-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Individual exam slot buttons */
+.mcems-slot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 90px;
+    padding: var(--mcems-spacing-sm) var(--mcems-spacing-md);
+    border: 2px solid var(--mcems-color-border);
+    border-radius: var(--mcems-radius-md);
+    cursor: pointer;
+    font-weight: 700;
+    font-size: var(--mcems-font-sm);
+    background: var(--mcems-color-card-bg);
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.mcems-slot:hover {
+    border-color: var(--mcems-color-primary);
+    background: #e8f0fe;
+}
+
+.mcems-slot.selected {
+    border-color: var(--mcems-color-primary);
+    background: var(--mcems-color-primary);
+    color: #fff;
+}
+
+.mcems-slot.full {
+    opacity: 0.45;
+    cursor: not-allowed;
+    border-color: var(--mcems-color-danger);
+    color: var(--mcems-color-danger);
+}
+
+/* =============================================================
+   3. Booking Calendar
+   ============================================================= */
+#mcems-booking-calendar-wrap {
+    margin-bottom: var(--mcems-spacing-lg);
+}
+
+/* Calendar header nav */
+.mcems-cal-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#mcems-prev-month,
+#mcems-next-month {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 5px 7px;
+    border-radius: 50%;
+    transition: background 0.15s;
+}
+
+#mcems-prev-month:hover,
+#mcems-next-month:hover {
+    background: #e8f0fe;
+}
+
+#mcems-month-year {
+    font-weight: 700;
+    font-size: 17px;
+    text-transform: capitalize;
+}
+
+/* Calendar grid */
+#mcems-booking-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    max-width: 360px;
+    margin: 0 auto;
+    gap: var(--mcems-spacing-xs);
+}
+
+/* Day cells */
+.mcems-cal-day-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-sizing: border-box;
+}
+
+.mcems-cal-day-cell:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Color coding for availability */
+.mcems-cal-available {
+    background: var(--mcems-color-success);
+    color: #fff;
+}
+
+.mcems-cal-limited {
+    background: var(--mcems-color-limited);
+    color: #555;
+    border-color: #d4c600;
+}
+
+.mcems-cal-low {
+    background: var(--mcems-color-warning);
+    color: #fff;
+}
+
+.mcems-cal-full {
+    background: var(--mcems-color-danger);
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.mcems-cal-full:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.mcems-cal-past {
+    background: var(--mcems-color-past);
+    color: #888;
+    cursor: default;
+}
+
+.mcems-cal-past:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.mcems-cal-selected {
+    border-color: var(--mcems-color-primary) !important;
+    box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.35);
+}
+
+/* Calendar weekday header row */
+.mcems-cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    max-width: 360px;
+    margin: 0 auto var(--mcems-spacing-xs);
+    gap: var(--mcems-spacing-xs);
+}
+
+.mcems-cal-weekday {
+    text-align: center;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 3px 0;
+    color: var(--mcems-color-muted);
+}
+
+/* Legend */
+.mcems-cal-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin: 12px auto 0;
+    font-size: 12px;
+    color: #555;
+    max-width: 420px;
+}
+
+.mcems-cal-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.mcems-cal-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* =============================================================
+   4. Manage Booking (shortcode_gestisci) – .mcems-* classes
+   ============================================================= */
+.mcems-wrap {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.mcems-h3 {
+    margin: 0 0 10px;
+    font-size: var(--mcems-font-lg);
+}
+
+.mcems-sub {
+    margin: 0 0 18px;
+    color: var(--mcems-color-muted);
+    font-size: var(--mcems-font-base);
+}
+
+.mcems-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--mcems-spacing-md);
+}
+
+.mcems-card {
+    background: var(--mcems-color-card-bg);
+    border: 1px solid var(--mcems-color-border);
+    border-radius: var(--mcems-radius-lg);
+    padding: var(--mcems-spacing-md) var(--mcems-spacing-md) 12px;
+    box-shadow: var(--mcems-shadow-card);
+}
+
+.mcems-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.mcems-exam {
+    font-weight: 800;
+    font-size: var(--mcems-font-md);
+    line-height: 1.3;
+}
+
+.mcems-meta {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--mcems-spacing-sm);
+}
+
+.mcems-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--mcems-spacing-sm);
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--mcems-color-pill-bg);
+    color: var(--mcems-color-pill-text);
+    font-size: var(--mcems-font-sm);
+    font-weight: 700;
+}
+
+.mcems-pill strong {
+    font-weight: 900;
+}
+
+.mcems-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.mcems-btn {
+    appearance: none;
+    border: 1px solid #d0d5dd;
+    background: var(--mcems-color-card-bg);
+    border-radius: var(--mcems-radius-md);
+    padding: var(--mcems-spacing-sm) 12px;
+    font-weight: 800;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: var(--mcems-font-base);
+    transition: background 0.15s;
+    color: var(--mcems-color-text);
+}
+
+.mcems-btn:hover {
+    background: #f9fafb;
+}
+
+.mcems-btn:focus {
+    outline: 2px solid var(--mcems-color-primary);
+    outline-offset: 2px;
+}
+
+.mcems-muted {
+    color: var(--mcems-color-muted);
+    font-size: var(--mcems-font-sm);
+    font-weight: 700;
+}
+
+.mcems-note {
+    margin-top: var(--mcems-spacing-md);
+    color: var(--mcems-color-muted);
+    font-size: var(--mcems-font-sm);
+}
+
+/* =============================================================
+   5. Bookings List table (.mcems-bookings-*)
+   ============================================================= */
+.mcems-bookings-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    overflow-x: auto;
+}
+
+.mcems-bookings-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--mcems-spacing-sm);
+    align-items: flex-end;
+    margin-bottom: var(--mcems-spacing-md);
+}
+
+.mcems-bookings-filter-bar label {
+    font-weight: 600;
+    font-size: var(--mcems-font-sm);
+    color: var(--mcems-color-muted);
+    display: block;
+    margin-bottom: 3px;
+}
+
+.mcems-bookings-filter-bar input,
+.mcems-bookings-filter-bar select {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: var(--mcems-radius-sm);
+    font-size: var(--mcems-font-base);
+}
+
+.mcems-bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--mcems-font-base);
+}
+
+.mcems-bookings-table th {
+    text-align: left;
+    padding: var(--mcems-spacing-sm) 12px;
+    background: #f0f0f1;
+    border-bottom: 2px solid var(--mcems-color-border);
+    font-size: var(--mcems-font-sm);
+    font-weight: 700;
+    color: #3c434a;
+    white-space: nowrap;
+}
+
+.mcems-bookings-table td {
+    padding: var(--mcems-spacing-sm) 12px;
+    border-bottom: 1px solid var(--mcems-color-border);
+    vertical-align: middle;
+}
+
+.mcems-bookings-table tr:nth-child(even) td {
+    background: #f9fafb;
+}
+
+.mcems-bookings-table tr:hover td {
+    background: #eef2f7;
+}
+
+/* =============================================================
+   6. Utility / shared
+   ============================================================= */
+
+/* Loading spinner */
+.mcems-spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(34, 113, 177, 0.25);
+    border-top-color: var(--mcems-color-primary);
+    border-radius: 50%;
+    animation: mcems-spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+@keyframes mcems-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Status / feedback messages */
+.mcems-msg {
+    padding: 10px 14px;
+    border-radius: var(--mcems-radius-sm);
+    font-size: var(--mcems-font-base);
+    margin: 10px 0;
+}
+
+.mcems-msg-success {
+    background: #ecfdf3;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.mcems-msg-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.mcems-msg-info {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+
+/* =============================================================
+   7. Accessibility
+   ============================================================= */
+*:focus-visible {
+    outline: 2px solid var(--mcems-color-primary);
+    outline-offset: 2px;
+}
+
+/* Skip link (if added) */
+.mcems-skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--mcems-color-primary);
+    color: #fff;
+    padding: 6px 14px;
+    z-index: 9999;
+    transition: top 0.15s;
+    border-radius: 0 0 var(--mcems-radius-sm) 0;
+}
+
+.mcems-skip-link:focus {
+    top: 0;
+}
+
+/* =============================================================
+   8. Print styles
+   ============================================================= */
+@media print {
+    #prenotazione-esame,
+    .mcems-actions,
+    .mcems-bookings-filter-bar,
+    #confirm-container {
+        display: none !important;
+    }
+
+    .mcems-bookings-table,
+    .mcems-card {
+        page-break-inside: avoid;
+    }
+
+    .mcems-bookings-table {
+        font-size: 10pt;
+    }
+}
+
+/* =============================================================
+   9. Media queries (responsive / mobile-first)
+   ============================================================= */
+@media (max-width: 640px) {
+    #prenotazione-esame {
+        padding: var(--mcems-spacing-md);
+    }
+
+    .mcems-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #mcems-booking-calendar {
+        max-width: 100%;
+    }
+
+    .mcems-cal-weekdays {
+        max-width: 100%;
+    }
+
+    .mcems-bookings-wrap {
+        overflow-x: auto;
+    }
+
+    .mcems-bookings-filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .mcems-cal-legend {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .mcems-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .mcems-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .mcems-pill {
+        font-size: 11px;
+    }
+}
