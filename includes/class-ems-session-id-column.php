@@ -71,10 +71,14 @@ class EMS_Session_ID_Column {
             return;
         }
 
-        $value = isset($_GET['ems_session_id_filter'])
-            ? absint(wp_unslash($_GET['ems_session_id_filter'])) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $nonce_raw   = isset($_GET['ems_session_id_nonce']) ? sanitize_text_field(wp_unslash($_GET['ems_session_id_nonce'])) : '';
+        $nonce_valid = $nonce_raw && wp_verify_nonce($nonce_raw, 'ems_session_id_filter');
+
+        $value = ($nonce_valid && isset($_GET['ems_session_id_filter']))
+            ? absint(wp_unslash($_GET['ems_session_id_filter']))
             : 0;
 
+        echo '<input type="hidden" name="ems_session_id_nonce" value="' . esc_attr(wp_create_nonce('ems_session_id_filter')) . '">';
         echo '<input type="number" name="ems_session_id_filter" id="ems_session_id_filter"'
             . ' value="' . ($value > 0 ? (int) $value : '') . '"'
             . ' placeholder="' . esc_attr__('Session ID…', 'mc-ems-exam-center-for-tutor-lms') . '"'
@@ -95,7 +99,12 @@ class EMS_Session_ID_Column {
             return;
         }
 
-        $raw = isset($_GET['ems_session_id_filter']) ? absint(wp_unslash($_GET['ems_session_id_filter'])) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $nonce_raw = isset($_GET['ems_session_id_nonce']) ? sanitize_text_field(wp_unslash($_GET['ems_session_id_nonce'])) : '';
+        if (!$nonce_raw || !wp_verify_nonce($nonce_raw, 'ems_session_id_filter')) {
+            return;
+        }
+
+        $raw = isset($_GET['ems_session_id_filter']) ? absint(wp_unslash($_GET['ems_session_id_filter'])) : 0;
         if ($raw <= 0) {
             return;
         }
