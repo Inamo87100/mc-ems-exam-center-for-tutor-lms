@@ -455,7 +455,7 @@ echo '</td></tr>';
     public static function save_metabox($post_id, $post) {
         if ($post->post_type !== self::CPT) return;
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-        if (!isset($_POST['mcems_session_nonce']) || !wp_verify_nonce(wp_unslash($_POST['mcems_session_nonce']), 'mcems_session_save')) return; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+        if (!isset($_POST['mcems_session_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['mcems_session_nonce'])), 'mcems_session_save')) return;
         if (!current_user_can('edit_post', $post_id)) return;
 
         $existing_date = (string) get_post_meta($post_id, self::MK_DATE, true);
