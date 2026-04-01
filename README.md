@@ -138,3 +138,17 @@ All features listed below are fully available without any restrictions, license 
 ### 1.0.0
 
 Initial stable release of MC-EMS with all core features and WordPress.org compatibility.
+
+## Developer Notes
+
+### Query performance (meta_key / meta_query)
+
+Several features (booking calendar, session lists, bookings list) rely on `meta_query` / `meta_key` lookups against the `wp_postmeta` table (keys: `_mcems_date`, `_mcems_exam_id`, `_mcems_status`, etc.).
+
+On sites with many sessions (thousands of rows) these queries may become slow because WordPress does **not** automatically index custom post-meta keys.
+
+**Future optimisation recommendations:**
+
+1. Add a composite DB index on `(meta_key, meta_value)` (or a dedicated custom table) for the high-frequency meta keys listed above.
+2. Consider migrating session / booking data to a dedicated custom table via a migration routine in `MCEMS_Upgrader`.
+3. Profile with `EXPLAIN` before and after to confirm the gain on your target dataset size.

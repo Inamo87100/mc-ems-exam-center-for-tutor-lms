@@ -93,14 +93,10 @@ function mcems_activate(): void {
     }
 }
 
-// Load plugin text domain
-add_action('plugins_loaded', function () {
-    load_plugin_textdomain(
-        'mc-ems-exam-center-for-tutor-lms',
-        false,
-        dirname(plugin_basename(__FILE__)) . '/languages'
-    );
-}, 1);
+// load_plugin_textdomain() is not needed for plugins hosted on WordPress.org
+// with WordPress >= 4.6: translations are loaded automatically from the
+// language packs served by translate.wordpress.org.
+// See: https://developer.wordpress.org/plugins/internationalization/how-to-internationalize-your-plugin/#loading-text-domain
 
 // Bootstrap the plugin
 add_action('plugins_loaded', function () {
