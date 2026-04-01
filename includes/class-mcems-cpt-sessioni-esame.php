@@ -64,7 +64,7 @@ class MCEMS_CPT_Sessioni_Esame {
             'restUrl' => esc_url_raw(rest_url('mcems/v1/')),
             'nonce'   => wp_create_nonce('wp_rest'),
             'i18n'    => [
-                'noResults' => __('No users found.', 'mc-ems-base'),
+                'noResults' => __('No users found.', 'mc-ems-exam-center-for-tutor-lms'),
             ],
         ]);
     }
@@ -246,7 +246,7 @@ class MCEMS_CPT_Sessioni_Esame {
             var btn=document.createElement("a");
             btn.className="page-title-action";
             btn.href=' . json_encode($manage_url) . ';
-            btn.textContent=' . wp_json_encode(__('Add new session', 'mc-ems-base')) . ';
+            btn.textContent=' . wp_json_encode(__('Add new session', 'mc-ems-exam-center-for-tutor-lms')) . ';
             h1.appendChild(document.createTextNode(" "));
             h1.appendChild(btn);
         })();</script>';
@@ -255,17 +255,17 @@ class MCEMS_CPT_Sessioni_Esame {
     public static function register_cpt() {
         $labels = [
             'name'               => 'Exam Management System',
-            'singular_name'      => __('Exam session', 'mc-ems-base'),
+            'singular_name'      => __('Exam session', 'mc-ems-exam-center-for-tutor-lms'),
             'menu_name'          => 'Exam Management System',
-            'all_items'          => __('Sessions list', 'mc-ems-base'),
-            'add_new'            => __('Add session', 'mc-ems-base'),
-            'add_new_item'       => __('Add new session', 'mc-ems-base'),
-            'edit_item'          => __('Edit session', 'mc-ems-base'),
-            'new_item'           => __('New session', 'mc-ems-base'),
-            'view_item'          => __('View session', 'mc-ems-base'),
-            'search_items'       => __('Search sessions', 'mc-ems-base'),
-            'not_found'          => __('No sessions found', 'mc-ems-base'),
-            'not_found_in_trash' => __('No sessions in trash', 'mc-ems-base'),
+            'all_items'          => __('Sessions list', 'mc-ems-exam-center-for-tutor-lms'),
+            'add_new'            => __('Add session', 'mc-ems-exam-center-for-tutor-lms'),
+            'add_new_item'       => __('Add new session', 'mc-ems-exam-center-for-tutor-lms'),
+            'edit_item'          => __('Edit session', 'mc-ems-exam-center-for-tutor-lms'),
+            'new_item'           => __('New session', 'mc-ems-exam-center-for-tutor-lms'),
+            'view_item'          => __('View session', 'mc-ems-exam-center-for-tutor-lms'),
+            'search_items'       => __('Search sessions', 'mc-ems-exam-center-for-tutor-lms'),
+            'not_found'          => __('No sessions found', 'mc-ems-exam-center-for-tutor-lms'),
+            'not_found_in_trash' => __('No sessions in trash', 'mc-ems-exam-center-for-tutor-lms'),
         ];
 
         register_post_type(self::CPT, [
@@ -283,7 +283,7 @@ class MCEMS_CPT_Sessioni_Esame {
     public static function add_metaboxes() {
         add_meta_box(
             'mcems_session_details',
-            __('Session details (MC-EMS)', 'mc-ems-base'),
+            __('Session details (MC-EMS)', 'mc-ems-exam-center-for-tutor-lms'),
             [__CLASS__, 'metabox_html'],
             self::CPT,
             'normal',
@@ -328,18 +328,18 @@ class MCEMS_CPT_Sessioni_Esame {
         $is_past = self::is_past_session($date, $time);
 
         if ($is_past) {
-            echo '<div class="notice notice-warning inline"><p>' . esc_html__('Past exam sessions are read-only and cannot be modified from the backend.', 'mc-ems-base') . '</p></div>';
+            echo '<div class="notice notice-warning inline"><p>' . esc_html__('Past exam sessions are read-only and cannot be modified from the backend.', 'mc-ems-exam-center-for-tutor-lms') . '</p></div>';
         }
 
         $disabled = $is_past ? 'disabled' : '';
 
         echo '<table class="form-table"><tbody>';
 
-        echo '<tr><th><label>' . esc_html__('Tutor LMS exam', 'mc-ems-base') . '</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Tutor LMS exam', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
 if (!$exam_pt) {
-    echo '<em>' . esc_html__('Tutor LMS not detected (exam post type not found: courses / tutor_course).', 'mc-ems-base') . '</em>';
+    echo '<em>' . esc_html__('Tutor LMS not detected (exam post type not found: courses / tutor_course).', 'mc-ems-exam-center-for-tutor-lms') . '</em>';
 } else {
-    echo '<select name="mcems_exam_id" required ' . esc_attr($disabled) . '><option value="0">' . esc_html__('— Select exam —', 'mc-ems-base') . '</option>';
+    echo '<select name="mcems_exam_id" required ' . esc_attr($disabled) . '><option value="0">' . esc_html__('— Select exam —', 'mc-ems-exam-center-for-tutor-lms') . '</option>';
     foreach ($exams as $cid => $title) {
         printf('<option value="%d" %s>%s</option>',
             (int)$cid,
@@ -349,14 +349,14 @@ if (!$exam_pt) {
     }
     echo '</select>';
 }
-echo '<p class="description">' . esc_html__('This session will be bookable only by selecting this exam during booking.', 'mc-ems-base') . '</p>';
+echo '<p class="description">' . esc_html__('This session will be bookable only by selecting this exam during booking.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
 echo '</td></tr>';
 
-        echo '<tr><th><label>' . esc_html__('Date', 'mc-ems-base') . '</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Date', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
         printf('<input type="date" id="mcems_date_input" name="mcems_date" value="%s" min="%s" %s />', esc_attr($date), esc_attr(current_time('Y-m-d')), esc_attr($disabled));
         echo '</td></tr>';
 
-        echo '<tr><th><label>' . esc_html__('Time', 'mc-ems-base') . '</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Time', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
         printf('<input type="time" id="mcems_time_input" name="mcems_time" value="%s" %s />', esc_attr($time), esc_attr($disabled));
         echo '</td></tr>';
 
@@ -366,29 +366,29 @@ echo '</td></tr>';
         echo '<script>(function(){try{var d=document.getElementById("mcems_date_input");var t=document.getElementById("mcems_time_input");if(!d||!t)return;var today="'.esc_js($today).'";var now="'.esc_js($now_time).'";function apply(){if(d.value===today){t.min=now;}else{t.removeAttribute("min");}}d.addEventListener("change",apply);apply();}catch(e){}})();</script>';
 
 
-        echo '<tr><th><label>' . esc_html__('Max seats', 'mc-ems-base') . '</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Max seats', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
         printf('<input type="number" min="1" max="500" name="mcems_capacity" value="%d" %s %s />',
             (int) $capacity,
             ($is_spec ? 'readonly' : ''),
             esc_attr($disabled)
         );
-        if ($is_spec) echo '<p class="description"><strong>' . esc_html__('Forced to 1', 'mc-ems-base') . '</strong> ' . esc_html__('because it is a special requirements session.', 'mc-ems-base') . '</p>';
+        if ($is_spec) echo '<p class="description"><strong>' . esc_html__('Forced to 1', 'mc-ems-exam-center-for-tutor-lms') . '</strong> ' . esc_html__('because it is a special requirements session.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         echo '</td></tr>';
 
-        echo '<tr><th><label>' . esc_html__('Booked', 'mc-ems-base') . '</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Booked', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
         echo '<strong>' . (int)$booked . '</strong>';
         if ($booked) {
-            echo '<p class="description">' . esc_html__('Booked user IDs:', 'mc-ems-base') . ' ' . esc_html(implode(', ', array_map('intval', $occupati))) . '</p>';
+            echo '<p class="description">' . esc_html__('Booked user IDs:', 'mc-ems-exam-center-for-tutor-lms') . ' ' . esc_html(implode(', ', array_map('intval', $occupati))) . '</p>';
         }
         echo '</td></tr>';
 
-        echo '<tr><th><label>' . esc_html__('Proctor', 'mc-ems-base') . '</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Proctor', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
         echo '<div class="mcems-user-search-wrap">';
         printf('<input type="hidden" name="mcems_proctor_user_id" id="mcems_proctor_user_id" value="%d" />', (int) $proctor);
         if (!$is_past) {
             printf(
                 '<input type="text" id="mcems_proctor_search" placeholder="%s" autocomplete="off" />',
-                esc_attr__('Search by name or email…', 'mc-ems-base')
+                esc_attr__('Search by name or email…', 'mc-ems-exam-center-for-tutor-lms')
             );
             echo '<div id="mcems_proctor_results" class="mcems-user-search-results"></div>';
         }
@@ -405,27 +405,27 @@ echo '</td></tr>';
             printf(
                 '<button type="button" id="mcems_proctor_clear" class="mcems-user-search-clear" style="%s">%s</button>',
                 $proctor ? '' : 'display:none',
-                esc_html__('Clear', 'mc-ems-base')
+                esc_html__('Clear', 'mc-ems-exam-center-for-tutor-lms')
             );
         }
         echo '</div>';
         echo '</td></tr>';
 
-        echo '<tr><th><label>' . esc_html__('Special requirements', 'mc-ems-base') . '</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Special requirements', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
         printf('<label><input type="checkbox" name="mcems_is_special" value="1" %s %s /> ♿ %s</label>',
             checked($is_spec, 1, false),
             esc_attr($disabled),
-            esc_html__('Session for special requirements', 'mc-ems-base')
+            esc_html__('Session for special requirements', 'mc-ems-exam-center-for-tutor-lms')
         );
         echo '</td></tr>';
 
-        echo '<tr><th><label>' . esc_html__('Associated candidate (only ♿)', 'mc-ems-base') . '</label></th><td>';
+        echo '<tr><th><label>' . esc_html__('Associated candidate (only ♿)', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
         echo '<div class="mcems-user-search-wrap">';
         printf('<input type="hidden" name="mcems_special_user_id" id="mcems_special_user_id" value="%d" />', (int) $spec_uid);
         if (!$is_past) {
             printf(
                 '<input type="text" id="mcems_candidate_search" placeholder="%s" autocomplete="off" />',
-                esc_attr__('Search by name or email…', 'mc-ems-base')
+                esc_attr__('Search by name or email…', 'mc-ems-exam-center-for-tutor-lms')
             );
             echo '<div id="mcems_candidate_results" class="mcems-user-search-results"></div>';
         }
@@ -442,11 +442,11 @@ echo '</td></tr>';
             printf(
                 '<button type="button" id="mcems_candidate_clear" class="mcems-user-search-clear" style="%s">%s</button>',
                 $spec_uid ? '' : 'display:none',
-                esc_html__('Clear', 'mc-ems-base')
+                esc_html__('Clear', 'mc-ems-exam-center-for-tutor-lms')
             );
         }
         echo '</div>';
-        echo '<p class="description">' . esc_html__('If set, the session ♿ can be booked only by this user.', 'mc-ems-base') . '</p>';
+        echo '<p class="description">' . esc_html__('If set, the session ♿ can be booked only by this user.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         echo '</td></tr>';
 
         echo '</tbody></table>';
@@ -535,11 +535,11 @@ echo '</td></tr>';
     public static function admin_notices(): void {
         if (get_transient('mcems_past_session_notice')) {
             delete_transient('mcems_past_session_notice');
-            echo '<div class="notice notice-error"><p>' . esc_html__('Past sessions cannot be created. Please choose a future date and time.', 'mc-ems-base') . '</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('Past sessions cannot be created. Please choose a future date and time.', 'mc-ems-exam-center-for-tutor-lms') . '</p></div>';
         }
         if (get_transient('mcems_past_session_readonly_notice')) {
             delete_transient('mcems_past_session_readonly_notice');
-            echo '<div class="notice notice-warning"><p>' . esc_html__('Past exam sessions are read-only and cannot be modified from the backend.', 'mc-ems-base') . '</p></div>';
+            echo '<div class="notice notice-warning"><p>' . esc_html__('Past exam sessions are read-only and cannot be modified from the backend.', 'mc-ems-exam-center-for-tutor-lms') . '</p></div>';
         }
     }
 
@@ -572,13 +572,13 @@ echo '</td></tr>';
     public static function columns($cols) {
         $new = [];
         $new['cb'] = $cols['cb'] ?? '';
-        $new['title'] = __('Session', 'mc-ems-base');
-        // Subito dopo __('Session', 'mc-ems-base')
-        $new['mcems_exam'] = __('Exam', 'mc-ems-base');
-        $new['mcems_date'] = __('Date', 'mc-ems-base');
-        $new['mcems_time'] = __('Time', 'mc-ems-base');
-        $new['mcems_cap']  = __('Seats', 'mc-ems-base');
-        $new['mcems_book'] = __('Booked', 'mc-ems-base');
+        $new['title'] = __('Session', 'mc-ems-exam-center-for-tutor-lms');
+        // Subito dopo __('Session', 'mc-ems-exam-center-for-tutor-lms')
+        $new['mcems_exam'] = __('Exam', 'mc-ems-exam-center-for-tutor-lms');
+        $new['mcems_date'] = __('Date', 'mc-ems-exam-center-for-tutor-lms');
+        $new['mcems_time'] = __('Time', 'mc-ems-exam-center-for-tutor-lms');
+        $new['mcems_cap']  = __('Seats', 'mc-ems-exam-center-for-tutor-lms');
+        $new['mcems_book'] = __('Booked', 'mc-ems-exam-center-for-tutor-lms');
         // Niente colonna data di pubblicazione
         return $new;
     }

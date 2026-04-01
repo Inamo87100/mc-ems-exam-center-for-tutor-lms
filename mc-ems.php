@@ -5,7 +5,7 @@
  * Version: 1.0.0
  * Author: Mamba Coding
  * Author URI: https://mambacoding.com
- * Text Domain: mc-ems-base
+ * Text Domain: mc-ems-exam-center-for-tutor-lms
  * Domain Path: /languages
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -71,8 +71,8 @@ function mcems_activate(): void {
     if (!mcems_is_tutor_active()) {
         deactivate_plugins(plugin_basename(__FILE__));
         wp_die(
-            esc_html__('MC-EMS – Exam Session Management requires Tutor LMS to be installed and active. Please install and activate Tutor LMS first.', 'mc-ems-base'),
-            esc_html__('Plugin Activation Error', 'mc-ems-base'),
+            esc_html__('MC-EMS – Exam Session Management requires Tutor LMS to be installed and active. Please install and activate Tutor LMS first.', 'mc-ems-exam-center-for-tutor-lms'),
+            esc_html__('Plugin Activation Error', 'mc-ems-exam-center-for-tutor-lms'),
             ['back_link' => true]
         );
     }
@@ -92,6 +92,15 @@ function mcems_activate(): void {
         }
     }
 }
+
+// Load plugin text domain
+add_action('plugins_loaded', function () {
+    load_plugin_textdomain(
+        'mc-ems-exam-center-for-tutor-lms',
+        false,
+        dirname(plugin_basename(__FILE__)) . '/languages'
+    );
+}, 1);
 
 // Bootstrap the plugin
 add_action('plugins_loaded', function () {
@@ -155,7 +164,7 @@ add_action('plugins_loaded', function () {
  */
 function mcems_missing_tutor_notice(): void {
     echo '<div class="notice notice-error"><p>';
-    echo esc_html__('MC-EMS – Exam Session Management requires Tutor LMS to be installed and active.', 'mc-ems-base');
+    echo esc_html__('MC-EMS – Exam Session Management requires Tutor LMS to be installed and active.', 'mc-ems-exam-center-for-tutor-lms');
     echo '</p></div>';
 }
 
