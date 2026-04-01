@@ -28,27 +28,15 @@ msgstr ""
 msgid "Powered by Mamba Coding"
 msgstr ""
 
-#: includes/class-mcems-admin-banner.php:128
-msgid "Upgrade to MC-EMS Premium and unlock the full exam workflow"
-msgstr ""
-
-#: includes/class-mcems-admin-banner.php:131
+#: includes/class-mcems-admin-banner.php:130
 msgid "Discover more tools, updates and WordPress solutions on Mamba Coding."
 msgstr ""
 
-#: includes/class-mcems-admin-banner.php:132
-msgid "Sell smarter, automate more, and manage exam sessions like a pro. Get premium booking tools, advanced workflows, and extra features designed to help you save time and grow faster."
-msgstr ""
-
-#: includes/class-mcems-admin-banner.php:135
+#: includes/class-mcems-admin-banner.php:131
 msgid "Visit Mamba Coding"
 msgstr ""
 
-#: includes/class-mcems-admin-banner.php:136
-msgid "Buy MC-EMS Premium now"
-msgstr ""
-
-#: includes/class-mcems-admin-banner.php:167
+#: includes/class-mcems-admin-banner.php:160
 msgid "Dismiss"
 msgstr ""
 
@@ -92,23 +80,11 @@ msgstr ""
 msgid "Generate new sessions"
 msgstr ""
 
-#: includes/class-mcems-admin-sessioni.php:172
-msgid "Base license – session limits"
-msgstr ""
-
-#: includes/class-mcems-admin-sessioni.php:174
-msgid "Active future sessions: %d / %d — you can still create %d more session(s)."
-msgstr ""
-
-#: includes/class-mcems-admin-sessioni.php:180
-msgid "Base license: max 1 session per day, max %d active sessions, and max %d seats per session. Upgrade to Premium to remove these limits."
-msgstr ""
-
-#: includes/class-mcems-admin-sessioni.php:193
+#: includes/class-mcems-admin-sessioni.php:170
 msgid "Generation type"
 msgstr ""
 
-#: includes/class-mcems-admin-sessioni.php:197
+#: includes/class-mcems-admin-sessioni.php:174
 msgid "Create an exam session for a candidate with special requirements"
 msgstr ""
 
@@ -128,31 +104,19 @@ msgstr ""
 msgid "— Select exam —"
 msgstr ""
 
-#: includes/class-mcems-admin-sessioni.php:224
+#: includes/class-mcems-admin-sessioni.php:228
 msgid "Select dates"
 msgstr ""
 
 #: includes/class-mcems-admin-sessioni.php:252
-msgid "Exam session time"
-msgstr ""
-
-#: includes/class-mcems-admin-sessioni.php:260
-msgid "Base license: only one time per day allowed."
-msgstr ""
-
-#: includes/class-mcems-admin-sessioni.php:263
 msgid "Exam session times (one per line)"
 msgstr ""
 
-#: includes/class-mcems-admin-sessioni.php:277
+#: includes/class-mcems-admin-sessioni.php:262
 msgid "Seats per exam session"
 msgstr ""
 
-#: includes/class-mcems-admin-sessioni.php:281
-msgid "Base license: max %d seats per session."
-msgstr ""
-
-#: includes/class-mcems-admin-sessioni.php:296
+#: includes/class-mcems-admin-sessioni.php:280
 msgid "Tutor LMS not detected."
 msgstr ""
 
@@ -264,15 +228,11 @@ msgstr ""
 msgid "Su"
 msgstr ""
 
-#: includes/class-mcems-admin-sessioni.php:842
+#: includes/class-mcems-admin-sessioni.php:780
 msgid "Enter at least one valid time (HH:MM), one per line."
 msgstr ""
 
-#: includes/class-mcems-admin-sessioni.php:854
-msgid "Base license limit reached: you already have %d active (future) sessions (maximum %d). Delete or wait for existing sessions to pass before creating new ones."
-msgstr ""
-
-#: includes/class-mcems-admin-sessioni.php:922
+#: includes/class-mcems-admin-sessioni.php:810
 msgid "Unable to create sessions for: %s"
 msgstr ""
 

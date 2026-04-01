@@ -3,12 +3,6 @@ if (!defined('ABSPATH')) exit;
 
 class MCEMS_Admin_Sessioni {
 
-    /** Maximum number of future (active) sessions allowed on the Base license. */
-    const BASE_MAX_ACTIVE_SESSIONS = 5;
-
-    /** Maximum seats per session allowed on the Base license. */
-    const BASE_MAX_CAPACITY = 5;
-
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'menu']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
@@ -163,29 +157,7 @@ class MCEMS_Admin_Sessioni {
             <div class="card" style="max-width: 1100px;">
                 <h2><?php echo esc_html__('Generate new sessions', 'mc-ems-base'); ?></h2>
 
-                <?php
-                $is_premium = defined('EMS_PREMIUM_VERSION');
-                if (!$is_premium) :
-                    $future_count = self::count_future_sessions();
-                    $remaining    = max(0, self::BASE_MAX_ACTIVE_SESSIONS - $future_count);
-                ?>
-                <div style="margin-bottom:16px;padding:12px 16px;border-radius:10px;border:1px solid #fed7aa;background:#fff7ed;">
-                    <strong>📋 <?php echo esc_html__('Base license – session limits', 'mc-ems-base'); ?></strong><br>
-                    <?php echo esc_html(sprintf(
-                        /* translators: 1: number of active future sessions, 2: maximum allowed sessions, 3: remaining sessions you can create */
-                        __('Active future sessions: %1$d / %2$d — you can still create %3$d more session(s).', 'mc-ems-base'),
-                        (int) $future_count,
-                        (int) self::BASE_MAX_ACTIVE_SESSIONS,
-                        (int) $remaining
-                    )); ?>
-                    <br><small style="color:#92400e;"><?php echo esc_html(sprintf(
-                        /* translators: 1: maximum active sessions allowed, 2: maximum seats per session */
-                        __('Base license: max 1 session per day, max %1$d active sessions, and max %2$d seats per session. Upgrade to Premium to remove these limits.', 'mc-ems-base'),
-                        (int) self::BASE_MAX_ACTIVE_SESSIONS,
-                        (int) self::BASE_MAX_CAPACITY
-                    )); ?></small>
-                </div>
-                <?php endif; ?>
+
 
                 <form method="post" id="mcems-generate-form">
                     <?php wp_nonce_field('mcems_generate', 'mcems_generate_nonce'); ?>
@@ -251,44 +223,22 @@ class MCEMS_Admin_Sessioni {
                             </tr>
 
                             <tr>
-                                <?php if (!$is_premium): ?>
-                                    <th><label for="mcems_times"><?php echo esc_html__('Exam session time', 'mc-ems-base'); ?></label></th>
-                                    <td>
-                                        <input
-                                            type="time"
-                                            id="mcems_times"
-                                            name="times"
-                                            required
-                                        >
-                                        <p class="description"><?php echo esc_html__('Base license: only one time per day allowed.', 'mc-ems-base'); ?></p>
-                                    </td>
-                                <?php else: ?>
-                                    <th><label for="mcems_times"><?php echo esc_html__('Exam session times (one per line)', 'mc-ems-base'); ?></label></th>
-                                    <td>
-                                        <textarea
-                                            id="mcems_times"
-                                            name="times"
-                                            rows="5"
-                                            cols="40"
-                                            placeholder="08:30&#10;10:30&#10;12:30"
-                                        ></textarea>
-                                    </td>
-                                <?php endif; ?>
+                                <th><label for="mcems_times"><?php echo esc_html__('Exam session times (one per line)', 'mc-ems-base'); ?></label></th>
+                                <td>
+                                    <textarea
+                                        id="mcems_times"
+                                        name="times"
+                                        rows="5"
+                                        cols="40"
+                                        placeholder="08:30&#10;10:30&#10;12:30"
+                                    ></textarea>
+                                </td>
                             </tr>
 
                             <tr>
                                 <th><label for="mcems_capacity"><?php echo esc_html__('Seats per exam session', 'mc-ems-base'); ?></label></th>
                                 <td>
-                                    <?php if (!$is_premium): ?>
-                                        <input type="number" id="mcems_capacity" name="capacity" min="1" max="<?php echo (int) self::BASE_MAX_CAPACITY; ?>">
-                                        <p class="description"><?php echo esc_html(sprintf(
-                            /* translators: %d: maximum number of seats per session */
-                            __('Base license: max %d seats per session.', 'mc-ems-base'),
-                            self::BASE_MAX_CAPACITY
-                        )); ?></p>
-                                    <?php else: ?>
-                                        <input type="number" id="mcems_capacity" name="capacity" min="1" max="500">
-                                    <?php endif; ?>
+                                    <input type="number" id="mcems_capacity" name="capacity" min="1" max="500">
                                 </td>
                             </tr>
                         </table>
@@ -474,40 +424,16 @@ class MCEMS_Admin_Sessioni {
 
                     const ta = document.getElementById('mcems_times');
                     if (ta) {
-                        // Support both <input type="time"> (base) and <textarea> (premium)
-                        const isTimeInput = (ta.tagName === 'INPUT');
-                        if (isTimeInput) {
-                            if (!ta.value || !/^\d{2}:\d{2}$/.test(ta.value.trim())) {
-                                e.preventDefault();
-                                alert('<?php echo esc_js(__('Enter a valid time (HH:MM).', 'mc-ems-base')); ?>');
-                                ta.focus();
-                                return;
-                            }
-                        } else {
-                            const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(function(l){
-                                return /^\s*\d{2}:\d{2}\s*$/.test(l);
-                            });
+                        const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(function(l){
+                            return /^\s*\d{2}:\d{2}\s*$/.test(l);
+                        });
 
-                            if (!hasTime) {
-                                e.preventDefault();
-                                alert('<?php echo esc_js(__('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-base')); ?>');
-                                ta.focus();
-                                return;
-                            }
+                        if (!hasTime) {
+                            e.preventDefault();
+                            alert('<?php echo esc_js(__('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-base')); ?>');
+                            ta.focus();
+                            return;
                         }
-                    }
-
-                    const capInput = document.getElementById('mcems_capacity');
-                    const maxCap = <?php echo $is_premium ? 'null' : (int) self::BASE_MAX_CAPACITY; ?>;
-                    if (capInput && maxCap !== null && parseInt(capInput.value, 10) > maxCap) {
-                        e.preventDefault();
-                        alert('<?php echo esc_js(sprintf(
-                            /* translators: %d: maximum number of seats per session allowed by the Base license */
-                            __('Base license: max %d seats per session.', 'mc-ems-base'),
-                            self::BASE_MAX_CAPACITY
-                        )); ?>');
-                        capInput.focus();
-                        return;
                     }
                 } else {
                     const sDate = document.getElementById('mcems_special_date');
@@ -854,22 +780,6 @@ class MCEMS_Admin_Sessioni {
             return ['', __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-base')];
         }
 
-        // Base license limits: max 1 time per day, max BASE_MAX_ACTIVE_SESSIONS future sessions, max BASE_MAX_CAPACITY seats.
-        $is_premium = defined('EMS_PREMIUM_VERSION');
-        if (!$is_premium) {
-            $times = [$times[0]];
-            $capacity = min($capacity, self::BASE_MAX_CAPACITY);
-
-            $future_count = self::count_future_sessions();
-            if ($future_count >= self::BASE_MAX_ACTIVE_SESSIONS) {
-                return ['', sprintf(
-                    /* translators: 1: number of current active sessions, 2: maximum allowed active sessions */
-                    __('Base license limit reached: you already have %1$d active (future) sessions (maximum %2$d). Delete or wait for existing sessions to pass before creating new ones.', 'mc-ems-base'),
-                    (int) $future_count,
-                    (int) self::BASE_MAX_ACTIVE_SESSIONS
-                )];
-            }
-        }
 
         $created = 0;
         $skipped = 0;
@@ -878,30 +788,7 @@ class MCEMS_Admin_Sessioni {
         $tz  = wp_timezone();
         $now = new \DateTimeImmutable('now', $tz);
 
-        // For base license, track how many sessions we've created in this batch.
-        $future_count_start = $is_premium ? 0 : $future_count;
-        $batch_created      = 0;
-
-        // For base license, pre-fetch all existing session dates in the selected range to avoid
-        // one DB query per date inside the loop.
-        $existing_dates_in_range = [];
-        if (!$is_premium && $selected_dates) {
-            $existing_dates_in_range = self::get_session_dates_in_range($selected_dates[0], end($selected_dates));
-        }
-
         foreach ($selected_dates as $date) {
-            // Base license: block if max future sessions would be exceeded.
-            if (!$is_premium && ($future_count_start + $batch_created) >= self::BASE_MAX_ACTIVE_SESSIONS) {
-                $skipped++;
-                continue;
-            }
-
-            // Base license: skip days that already have a session.
-            if (!$is_premium && in_array($date, $existing_dates_in_range, true)) {
-                $skipped++;
-                continue;
-            }
-
             foreach ($times as $time) {
                 try {
                     $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);
@@ -923,7 +810,6 @@ class MCEMS_Admin_Sessioni {
 
                 if ($sid) {
                     $created++;
-                    $batch_created++;
                 } else {
                     $skipped++;
                     $insert_errors[] = $date . ' ' . $time;
@@ -1069,7 +955,6 @@ class MCEMS_Admin_Sessioni {
 
     /**
      * Count published sessions whose date is today or in the future.
-     * Used to enforce the Base license limit of BASE_MAX_ACTIVE_SESSIONS.
      */
     private static function count_future_sessions(): int {
         $today = current_time('Y-m-d');
@@ -1092,7 +977,6 @@ class MCEMS_Admin_Sessioni {
 
     /**
      * Check whether any published session (of any time) exists for the given date.
-     * Used to enforce the Base license "one session per day" rule.
      */
     private static function has_session_on_date(string $date): bool {
         $q = new WP_Query([

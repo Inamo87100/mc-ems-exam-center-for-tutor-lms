@@ -48,10 +48,6 @@ class MCEMS_Admin_Banner {
         return in_array($screen_id, $allowed, true);
     }
 
-    protected static function premium_active() {
-        return defined('EMS_PREMIUM_VERSION') || class_exists('EMS_Premium_Bootstrap');
-    }
-
     /**
      * Check whether a given banner ID has been dismissed.
      *
@@ -119,21 +115,12 @@ class MCEMS_Admin_Banner {
 
         $banner_id  = self::BANNER_ID;
         $nonce      = wp_create_nonce(self::NONCE_ACTION);
-        $is_premium = self::premium_active();
         $logo_url   = MCEMS_PLUGIN_URL . 'assets/images/mamba-logo.png';
         $target     = 'https://mambacoding.com/';
 
-        $headline = $is_premium
-            ? __('Powered by Mamba Coding', 'mc-ems-base')
-            : __('Upgrade to MC-EMS Premium and unlock the full exam workflow', 'mc-ems-base');
-
-        $text = $is_premium
-            ? __('Discover more tools, updates and WordPress solutions on Mamba Coding.', 'mc-ems-base')
-            : __('Sell smarter, automate more, and manage exam sessions like a pro. Get premium booking tools, advanced workflows, and extra features designed to help you save time and grow faster.', 'mc-ems-base');
-
-        $button = $is_premium
-            ? __('Visit Mamba Coding', 'mc-ems-base')
-            : __('Buy MC-EMS Premium now', 'mc-ems-base');
+        $headline = __('Powered by Mamba Coding', 'mc-ems-base');
+        $text     = __('Discover more tools, updates and WordPress solutions on Mamba Coding.', 'mc-ems-base');
+        $button   = __('Visit Mamba Coding', 'mc-ems-base');
 
         ?>
         <style>
