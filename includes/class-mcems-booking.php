@@ -7,7 +7,7 @@ class MCEMS_Booking {
     const UM_ACTIVE_BOOKINGS = 'mcems_active_bookings'; // array
     // Legacy single booking
     const UM_ACTIVE_BOOKING  = 'mcems_active_booking';  // array
-    const UM_HISTORY         = 'storico_prenotazioni_slot';
+    const UM_HISTORY         = 'mcems_storico_prenotazioni_slot';
 
     public static function init(): void {
         add_shortcode('mcems_book_exam', [__CLASS__, 'shortcode_prenota']);
@@ -15,15 +15,15 @@ class MCEMS_Booking {
 
         add_action('wp_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
 
-        add_action('wp_ajax_get_slot_per_data', [__CLASS__, 'ajax_get_slots_by_date']);
-        add_action('wp_ajax_nopriv_get_slot_per_data', [__CLASS__, 'ajax_get_slots_by_date']);
+        add_action('wp_ajax_mcems_get_slot_per_data', [__CLASS__, 'ajax_get_slots_by_date']);
+        add_action('wp_ajax_nopriv_mcems_get_slot_per_data', [__CLASS__, 'ajax_get_slots_by_date']);
         add_action('wp_ajax_mcems_get_booking_calendar', [__CLASS__, 'ajax_get_booking_calendar']);
         add_action('wp_ajax_nopriv_mcems_get_booking_calendar', [__CLASS__, 'ajax_get_booking_calendar']);
 
         add_action('wp_ajax_mcems_check_active_booking', [__CLASS__, 'ajax_check_active_booking']);
 
-        add_action('wp_ajax_conferma_prenotazione_slot', [__CLASS__, 'ajax_confirm_booking']);
-        add_action('wp_ajax_nopriv_conferma_prenotazione_slot', [__CLASS__, 'ajax_confirm_booking']);
+        add_action('wp_ajax_mcems_conferma_prenotazione_slot', [__CLASS__, 'ajax_confirm_booking']);
+        add_action('wp_ajax_nopriv_mcems_conferma_prenotazione_slot', [__CLASS__, 'ajax_confirm_booking']);
 
         add_action('wp_ajax_mcems_cancel_booking', [__CLASS__, 'ajax_cancel_booking']);
 
@@ -483,7 +483,7 @@ class MCEMS_Booking {
 
                         resetSlots('<p style="color:#666;"><?php echo esc_js(__('Loading available sessions...', 'mc-ems-base')); ?></p>');
 
-                        const url = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>?action=get_slot_per_data&data='
+                        const url = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>?action=mcems_get_slot_per_data&data='
                             + encodeURIComponent(dateValue)
                             + '&exam_id=' + encodeURIComponent(examSelect ? examSelect.value : '')
                             + '&nonce=' + encodeURIComponent(mcemsNonce);
@@ -692,7 +692,7 @@ class MCEMS_Booking {
                             }
 
                             const formData = new FormData();
-                            formData.append('action', 'conferma_prenotazione_slot');
+                            formData.append('action', 'mcems_conferma_prenotazione_slot');
                             formData.append('slot_id', selectedSlot);
 
                             fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>', {
