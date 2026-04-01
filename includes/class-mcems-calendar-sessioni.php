@@ -1086,6 +1086,10 @@ class MCEMS_Calendar_Sessioni {
     public static function ajax_get_all_assigned_slots(): void {
         check_ajax_referer(self::NONCE_ACTION);
 
+        if (!current_user_can('edit_published_posts')) {
+            wp_send_json_error(['message' => __('Insufficient permissions.', 'mc-ems-base')], 403);
+        }
+
         $year  = isset($_GET['year'])  ? max(1970, intval($_GET['year']))  : (int) wp_date('Y');
         $month = isset($_GET['month']) ? max(1, min(12, intval($_GET['month']))) : (int) wp_date('n');
 
@@ -1144,6 +1148,10 @@ class MCEMS_Calendar_Sessioni {
         $user_id = get_current_user_id();
         if (!$user_id) wp_send_json_error(['message' => __('You must be logged in to assign a session.', 'mc-ems-base')], 403);
 
+        if (!current_user_can('edit_published_posts')) {
+            wp_send_json_error(['message' => __('Insufficient permissions.', 'mc-ems-base')], 403);
+        }
+
         $slot_id = isset($_POST['slot_id']) ? intval($_POST['slot_id']) : 0;
         if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message' => __('Invalid session.', 'mc-ems-base')], 400);
 
@@ -1185,6 +1193,10 @@ class MCEMS_Calendar_Sessioni {
         $user_id = get_current_user_id();
         if (!$user_id) wp_send_json_error(['message' => __('You must be logged in to reassign a session.', 'mc-ems-base')], 403);
 
+        if (!current_user_can('edit_published_posts')) {
+            wp_send_json_error(['message' => __('Insufficient permissions.', 'mc-ems-base')], 403);
+        }
+
         $slot_id = isset($_POST['slot_id']) ? intval($_POST['slot_id']) : 0;
         if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message' => __('Invalid session.', 'mc-ems-base')], 400);
 
@@ -1224,6 +1236,10 @@ class MCEMS_Calendar_Sessioni {
 
         $request_user = get_current_user_id();
         if (!$request_user) wp_send_json_error(['message' => __('You must be logged in to remove an assignment.', 'mc-ems-base')], 403);
+
+        if (!current_user_can('edit_published_posts')) {
+            wp_send_json_error(['message' => __('Insufficient permissions.', 'mc-ems-base')], 403);
+        }
 
         $slot_id = isset($_POST['slot_id']) ? intval($_POST['slot_id']) : 0;
         if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message' => __('Invalid session.', 'mc-ems-base')], 400);
