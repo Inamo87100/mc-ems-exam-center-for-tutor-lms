@@ -9,7 +9,7 @@
 **License:** GPL-2.0-or-later  
 **License URI:** https://www.gnu.org/licenses/gpl-2.0-or-later.html
 
-Exam Management System – base module for managing exam sessions and bookings with Tutor LMS.
+Exam Management System – complete plugin for managing exam sessions and bookings with Tutor LMS.
 
 ## Description
 
@@ -87,23 +87,23 @@ When access is blocked:
 * System message customization
 * Administrative permission management
 
-### Base Version vs Premium Version
+### All Features Included
 
-| Feature | Base | Premium |
-|---------|------|---------|
-| Exam sessions | ✓ | ✓ |
-| Exam booking | ✓ | ✓ |
-| Booking calendar | ✓ | ✓ |
-| User booking management | ✓ | ✓ |
-| Bookings list | ✓ | ✓ |
-| CSV export of bookings | ✓ | ✓ |
-| Administrative session calendar | ✓ | ✓ |
-| Proctor assignment | ✓ | ✓ |
-| Tutor LMS integration | ✓ | ✓ |
-| Unlimited sessions | — | ✓ |
-| Session capacity | up to 5 seats | up to 500 seats |
-| Multiple time slots per day | — | ✓ |
-| Priority support | — | ✓ |
+All features listed below are fully available without any restrictions, license keys, or activation codes:
+
+| Feature |
+|---------|
+| Exam sessions (unlimited) |
+| Exam booking |
+| Booking calendar |
+| User booking management |
+| Bookings list |
+| CSV export of bookings |
+| Administrative session calendar |
+| Proctor assignment |
+| Tutor LMS integration |
+| Multiple time slots per day |
+| Session capacity up to 500 seats |
 
 ### Requirements
 
@@ -137,4 +137,4 @@ When access is blocked:
 
 ### 1.0.0
 
-Initial stable release of MC-EMS base module with all core features and WordPress.org compatibility.
+Initial stable release of MC-EMS with all core features and WordPress.org compatibility.

@@ -367,20 +367,12 @@ echo '</td></tr>';
 
 
         echo '<tr><th><label>' . esc_html__('Max seats', 'mc-ems-base') . '</label></th><td>';
-        $is_premium = defined('EMS_PREMIUM_VERSION');
-        $cap_max = $is_premium ? 500 : MCEMS_Admin_Sessioni::BASE_MAX_CAPACITY;
-        printf('<input type="number" min="1" max="%d" name="mcems_capacity" value="%d" %s %s />',
-            (int) $cap_max,
+        printf('<input type="number" min="1" max="500" name="mcems_capacity" value="%d" %s %s />',
             (int) $capacity,
             ($is_spec ? 'readonly' : ''),
             esc_attr($disabled)
         );
         if ($is_spec) echo '<p class="description"><strong>' . esc_html__('Forced to 1', 'mc-ems-base') . '</strong> ' . esc_html__('because it is a special requirements session.', 'mc-ems-base') . '</p>';
-        elseif (!$is_premium) echo '<p class="description">' . esc_html(sprintf(
-            /* translators: %d: maximum number of seats per session allowed by the Base license */
-            __('Base license: max %d seats per session.', 'mc-ems-base'),
-            (int)$cap_max
-        )) . '</p>';
         echo '</td></tr>';
 
         echo '<tr><th><label>' . esc_html__('Booked', 'mc-ems-base') . '</label></th><td>';
@@ -506,11 +498,6 @@ echo '</td></tr>';
 
         $capacity = isset($_POST['mcems_capacity']) ? absint(wp_unslash($_POST['mcems_capacity'])) : 10;
         if ($capacity < 1) $capacity = 1;
-
-        // Base license: cap capacity to the allowed maximum.
-        if (!defined('EMS_PREMIUM_VERSION') && !$is_spec) {
-            $capacity = min($capacity, MCEMS_Admin_Sessioni::BASE_MAX_CAPACITY);
-        }
 
         // In modalità ♿: capienza sempre 1
         if ($is_spec) $capacity = 1;
