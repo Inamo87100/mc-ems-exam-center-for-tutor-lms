@@ -42,10 +42,14 @@ class MCEMS_Calendar_Sessioni {
         wp_register_script('mcems-calendar-sessioni', $url . 'assets/js/calendar-sessioni.js', [], $ver, true);
         wp_enqueue_script('mcems-calendar-sessioni');
 
-        wp_localize_script('mcems-calendar-sessioni', 'MCEMS_CAL', [
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce'   => wp_create_nonce(self::NONCE_ACTION),
-            'locale'  => get_locale(),
+        wp_register_script('mcems-session-calendar', $url . 'assets/js/session-calendar.js', [], $ver, true);
+        wp_enqueue_script('mcems-session-calendar');
+
+        wp_localize_script('mcems-session-calendar', 'MCEMS_CAL', [
+            'ajaxUrl'    => admin_url('admin-ajax.php'),
+            'nonce'      => wp_create_nonce(self::NONCE_ACTION),
+            'isLoggedIn' => is_user_logged_in(),
+            'locale'     => get_locale(),
             'i18n'    => [
                 'loading'              => __('Loading…', 'mc-ems-base'),
                 'loadError'            => __('Error loading calendar data.', 'mc-ems-base'),

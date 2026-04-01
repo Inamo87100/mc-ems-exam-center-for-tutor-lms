@@ -650,3 +650,252 @@
 .mcems-user-search-clear:hover {
     background: #fee2e2;
 }
+
+/* =============================================================
+   10. Bookings List (admin shortcode/page)
+   ============================================================= */
+.mcems-adminwrap {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.mcems-panel {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .06);
+}
+
+.mcems-title {
+    margin: 0 0 6px;
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+.mcems-desc {
+    margin: 0 0 14px;
+    color: #667085;
+}
+
+.mcems-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.mcems-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mcems-field label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #344054;
+}
+
+.mcems-field input,
+.mcems-field select {
+    min-width: 240px;
+    padding: 9px 10px;
+    border-radius: 12px;
+    border: 1px solid #d0d5dd;
+    background: #fff;
+}
+
+.mcems-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.mcems-btn {
+    appearance: none;
+    border: 1px solid #d0d5dd;
+    background: #101828;
+    color: #fff;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.mcems-btn:hover {
+    filter: brightness(1.05);
+}
+
+.mcems-link {
+    font-weight: 800;
+    color: #344054;
+    text-decoration: none;
+    border: 1px solid #d0d5dd;
+    border-radius: 12px;
+    padding: 10px 14px;
+    background: #fff;
+}
+
+.mcems-link:hover {
+    background: #f9fafb;
+}
+
+.mcems-hint {
+    margin-top: 10px;
+    color: #667085;
+    font-size: 12px;
+}
+
+.mcems-tablewrap {
+    margin-top: 14px;
+    overflow: auto;
+}
+
+table.mcems-table {
+    min-width: 1100px;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+}
+
+table.mcems-table thead th {
+    background: #f9fafb;
+    color: #344054;
+    font-weight: 900;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    padding: 10px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+table.mcems-table tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #f2f4f7;
+    vertical-align: top;
+}
+
+table.mcems-table tbody tr:hover td {
+    background: #fcfcfd;
+}
+
+.mcems-empty {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px dashed #d0d5dd;
+    border-radius: 14px;
+    color: #667085;
+    background: #fcfcfd;
+}
+
+.mcems-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f2f4f7;
+    color: #344054;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* =============================================================
+   11. Admin Promotional Banner (Mamba Coding)
+   ============================================================= */
+.mcems-banner-wrap {
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    margin: 16px 0 18px 0;
+}
+
+.mcems-banner-inner {
+    background: linear-gradient(135deg, #31006F 0%, #4a1590 45%, #FDB927 100%);
+    border-radius: 18px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    box-shadow: 0 10px 24px rgba(49, 0, 111, .18);
+    position: relative;
+}
+
+.mcems-banner-logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-width: 0;
+}
+
+.mcems-banner-logo-link {
+    display: block;
+    flex: 0 0 auto;
+    background: #fff;
+    border-radius: 14px;
+    padding: 10px 14px;
+    line-height: 0;
+}
+
+.mcems-banner-logo-link img {
+    display: block;
+    height: 64px;
+    max-width: 100%;
+    width: auto;
+}
+
+.mcems-banner-text-wrap {
+    min-width: 0;
+}
+
+.mcems-banner-headline {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #fff;
+    margin: 0 0 6px 0;
+}
+
+.mcems-banner-desc {
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, .92);
+    max-width: 760px;
+}
+
+.mcems-banner-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: #FDB927;
+    color: #31006F;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .18);
+}
+
+.mcems-banner-dismiss {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, .7);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+}
+
+.mcems-banner-dismiss:hover {
+    color: #fff;
+}
