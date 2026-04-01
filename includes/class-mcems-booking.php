@@ -57,9 +57,10 @@ class MCEMS_Booking {
         wp_enqueue_script('mcems-booking');
 
         wp_localize_script('mcems-booking', 'MCEMS_BOOKING', [
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce'   => wp_create_nonce('mcems_booking'),
-            'i18n'    => [
+            'ajaxUrl'     => admin_url('admin-ajax.php'),
+            'nonce'       => wp_create_nonce('mcems_booking'),
+            'cancelNonce' => wp_create_nonce('mcems_cancel'),
+            'i18n'        => [
                 'errorLoadSessions' => __('Error loading sessions.', 'mc-ems-base'),
                 'bookingFailed'     => __('Exam booking failed.', 'mc-ems-base'),
                 'bookingConfirmed'  => __('Exam booking confirmed!', 'mc-ems-base'),
@@ -841,6 +842,9 @@ class MCEMS_Booking {
         <script>
         (function(){
             const msg = document.getElementById('mcems-cancel-msg');
+            const mcemsBooking = (typeof MCEMS_BOOKING !== 'undefined') ? MCEMS_BOOKING : {};
+            const cancelNonce = mcemsBooking.cancelNonce || '';
+            const ajaxUrl = mcemsBooking.ajaxUrl || '<?php echo esc_url(admin_url('admin-ajax.php')); ?>';
 
             document.querySelectorAll('.mcems-cancel').forEach(btn => {
                 btn.addEventListener('click', function(){
@@ -850,9 +854,9 @@ class MCEMS_Booking {
                     fd.append('action','mcems_cancel_booking');
                     fd.append('slot_id', this.dataset.slot || '');
                     fd.append('exam_id', this.dataset.exam || '');
-                    fd.append('nonce','<?php echo esc_js(wp_create_nonce('mcems_cancel')); ?>');
+                    fd.append('nonce', cancelNonce);
 
-                    fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>', { method:'POST', body: fd })
+                    fetch(ajaxUrl, { method:'POST', body: fd })
                         .then(r => r.json())
                         .then(j => {
                             if (j && j.success) {

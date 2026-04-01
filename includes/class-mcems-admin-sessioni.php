@@ -78,10 +78,11 @@ class MCEMS_Admin_Sessioni {
         wp_enqueue_script('mcems-admin');
 
         wp_localize_script('mcems-admin', 'MCEMS_ADMIN', [
-            'ajaxUrl'     => admin_url('admin-ajax.php'),
-            'nonce'       => wp_create_nonce('mcems_admin'),
-            'exportNonce' => wp_create_nonce('mcems_export_csv'),
-            'i18n'        => [
+            'ajaxUrl'          => admin_url('admin-ajax.php'),
+            'nonce'            => wp_create_nonce('mcems_admin'),
+            'exportNonce'      => wp_create_nonce('mcems_export_csv'),
+            'userSearchNonce'  => wp_create_nonce('mcems_user_search'),
+            'i18n'             => [
                 'selectAction' => __('Please select an action.', 'mc-ems-base'),
                 'selectItems'  => __('Please select at least one item.', 'mc-ems-base'),
                 'confirmBulk'  => __('Apply action to {count} item(s)?', 'mc-ems-base'),
@@ -472,7 +473,7 @@ class MCEMS_Admin_Sessioni {
 
             if (!input || !hidden || !box || typeof ajaxurl === 'undefined') return;
 
-            const nonce = <?php echo wp_json_encode(wp_create_nonce('mcems_user_search')); ?>;
+            const nonce = (typeof MCEMS_ADMIN !== 'undefined' && MCEMS_ADMIN.userSearchNonce) ? MCEMS_ADMIN.userSearchNonce : '';
             let timer = null;
             let last = '';
 

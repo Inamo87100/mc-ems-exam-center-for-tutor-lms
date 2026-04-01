@@ -113,7 +113,7 @@
         if (!confirm("Do you want to cancel the booking?")) return;
 
         cancelBtn.disabled = true;
-        post("mcems_cancel_booking", { nonce: MCEMS_BOOKING.nonce })
+        post("mcems_cancel_booking", { nonce: MCEMS_BOOKING.cancelNonce || MCEMS_BOOKING.nonce })
           .then(function (res) {
             cancelBtn.disabled = false;
             if (!res || !res.success) {
