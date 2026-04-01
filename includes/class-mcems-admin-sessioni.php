@@ -330,6 +330,34 @@ class MCEMS_Admin_Sessioni {
             <hr>
 
             <div class="card" style="max-width: 1100px;">
+                <h2><?php echo esc_html__('Bulk update session capacity', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
+                <p class="description"><?php echo esc_html__('Override the capacity of all standard (non-special) sessions in bulk.', 'mc-ems-exam-center-for-tutor-lms'); ?></p>
+                <form method="post">
+                    <?php wp_nonce_field('mcems_update_capacity', 'mcems_update_capacity_nonce'); ?>
+                    <input type="hidden" name="mcems_action" value="update_capacity">
+                    <table class="form-table">
+                        <tr>
+                            <th><label for="mcems_new_capacity"><?php echo esc_html__('New capacity', 'mc-ems-exam-center-for-tutor-lms'); ?></label></th>
+                            <td>
+                                <input type="number" id="mcems_new_capacity" name="new_capacity" min="1" max="500" value="1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><?php echo esc_html__('Scope', 'mc-ems-exam-center-for-tutor-lms'); ?></th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" name="only_future" value="1">
+                                    <?php echo esc_html__('Apply only to future sessions (today and later)', 'mc-ems-exam-center-for-tutor-lms'); ?>
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                    <p class="submit">
+                        <button type="submit" class="button button-secondary">
+                            <?php echo esc_html__('Update capacity', 'mc-ems-exam-center-for-tutor-lms'); ?>
+                        </button>
+                    </p>
+                </form>
             </div>
         </div>
 
