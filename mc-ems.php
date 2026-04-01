@@ -30,7 +30,6 @@ $mcems_class_files = [
     'includes/class-mcems-bookings-list.php',
     'includes/class-mcems-calendar-sessioni.php',
     'includes/class-mcems-admin-sessioni.php',
-    'includes/class-mcems-admin-banner.php',
     'includes/class-mcems-tutor-gate.php',
     'includes/class-ems-session-id-column.php',
 ];
@@ -130,7 +129,6 @@ add_action('plugins_loaded', function () {
         $mcems_admin_classes = [
             'MCEMS_Settings'        => 'init_admin',
             'MCEMS_Admin_Sessioni'  => 'init',
-            'MCEMS_Admin_Banner'    => 'init',
             'EMS_Session_ID_Column' => 'init',
         ];
 

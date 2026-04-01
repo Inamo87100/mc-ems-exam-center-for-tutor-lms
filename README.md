@@ -133,7 +133,7 @@ All features listed below are fully available without any restrictions, license 
 * All strings properly internationalized
 * Complete security hardening
 
-## Upgrade Notice
+## Release Notes
 
 ### 1.0.0
 
