@@ -24,22 +24,6 @@ msgstr ""
 msgid "Session ID…"
 msgstr ""
 
-#: includes/class-mcems-admin-banner.php:127
-msgid "Powered by Mamba Coding"
-msgstr ""
-
-#: includes/class-mcems-admin-banner.php:130
-msgid "Discover more tools, updates and WordPress solutions on Mamba Coding."
-msgstr ""
-
-#: includes/class-mcems-admin-banner.php:131
-msgid "Visit Mamba Coding"
-msgstr ""
-
-#: includes/class-mcems-admin-banner.php:160
-msgid "Dismiss"
-msgstr ""
-
 #: includes/class-mcems-admin-sessioni.php:91
 msgid "Please select an action."
 msgstr ""
