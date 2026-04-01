@@ -338,7 +338,7 @@
         container.innerHTML = '<div style="text-align:center;padding:20px;"><span class="mcems-spinner"></span> ' + i18n('loading', 'Loading…') + '</div>';
 
         ajaxGet({
-            action: 'get_all_assigned_slots',
+            action: 'mcems_get_all_assigned_slots',
             year:   state.year,
             month:  state.month
         }).then(function (res) {

@@ -3,30 +3,31 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-if (!defined('MC_SLOT_ESIGENZE_SPECIALI')) {
-    define('MC_SLOT_ESIGENZE_SPECIALI', 'slot_esigenze_speciali');
+if (!defined('MCEMS_SLOT_ESIGENZE_SPECIALI')) {
+    define('MCEMS_SLOT_ESIGENZE_SPECIALI', 'mcems_slot_esigenze_speciali');
 }
 
 class MCEMS_Calendar_Sessioni {
 
-    const NONCE_ACTION = 'cal_slot_nonce';
-    const CRON_HOOK    = 'cal_slot_midnight_check';
+    const NONCE_ACTION = 'mcems_cal_slot_nonce';
+    const CRON_HOOK    = 'mcems_cal_slot_midnight_check';
 
     public static function init(): void {
         add_shortcode('mcems_sessions_calendar', [__CLASS__, 'shortcode']);
-        add_shortcode('calendario_slot_esame', [__CLASS__, 'shortcode']);
+        add_shortcode('mcems_calendario_slot_esame', [__CLASS__, 'shortcode']);
+        add_shortcode('calendario_slot_esame', [__CLASS__, 'shortcode']); // deprecated: use mcems_calendario_slot_esame
 
         add_action('wp_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
 
-        add_action('wp_ajax_get_slot_data', [__CLASS__, 'ajax_get_slot_data']);
-        add_action('wp_ajax_nopriv_get_slot_data', [__CLASS__, 'ajax_get_slot_data']);
+        add_action('wp_ajax_mcems_get_slot_data', [__CLASS__, 'ajax_get_slot_data']);
+        add_action('wp_ajax_nopriv_mcems_get_slot_data', [__CLASS__, 'ajax_get_slot_data']);
 
-        add_action('wp_ajax_get_user_assigned_slots', [__CLASS__, 'ajax_get_user_assigned_slots']);
-        add_action('wp_ajax_get_all_assigned_slots', [__CLASS__, 'ajax_get_all_assigned_slots']);
+        add_action('wp_ajax_mcems_get_user_assigned_slots', [__CLASS__, 'ajax_get_user_assigned_slots']);
+        add_action('wp_ajax_mcems_get_all_assigned_slots', [__CLASS__, 'ajax_get_all_assigned_slots']);
 
-        add_action('wp_ajax_assegna_sessione_slot', [__CLASS__, 'ajax_assegna_sessione_slot']);
-        add_action('wp_ajax_modifica_assegnazione_sessione_slot', [__CLASS__, 'ajax_modifica_assegnazione_sessione_slot']);
-        add_action('wp_ajax_elimina_assegnazione_sessione_slot', [__CLASS__, 'ajax_elimina_assegnazione_sessione_slot']);
+        add_action('wp_ajax_mcems_assegna_sessione_slot', [__CLASS__, 'ajax_assegna_sessione_slot']);
+        add_action('wp_ajax_mcems_modifica_assegnazione_sessione_slot', [__CLASS__, 'ajax_modifica_assegnazione_sessione_slot']);
+        add_action('wp_ajax_mcems_elimina_assegnazione_sessione_slot', [__CLASS__, 'ajax_elimina_assegnazione_sessione_slot']);
 
         add_action('init', [__CLASS__, 'schedule_midnight_event']);
         add_action(self::CRON_HOOK, [__CLASS__, 'midnight_check_unassigned_slots']);
@@ -149,8 +150,8 @@ class MCEMS_Calendar_Sessioni {
                 'exam_id',
             ],
             'is_special' => [
-                MC_SLOT_ESIGENZE_SPECIALI,
-                self::mk('MK_IS_SPECIAL', MC_SLOT_ESIGENZE_SPECIALI),
+                MCEMS_SLOT_ESIGENZE_SPECIALI,
+                self::mk('MK_IS_SPECIAL', MCEMS_SLOT_ESIGENZE_SPECIALI),
                 '_mcems_is_special',
                 'is_special',
             ],
@@ -619,7 +620,7 @@ class MCEMS_Calendar_Sessioni {
             function fetchMonthData(year, month) {
                 const key = `${year}-${month}`;
                 if (cacheSlots[key]) return Promise.resolve(cacheSlots[key]);
-                return fetch(`${AJAX_URL}?action=get_slot_data&year=${year}&month=${month+1}&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
+                return fetch(`${AJAX_URL}?action=mcems_get_slot_data&year=${year}&month=${month+1}&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
                     .then(r => r.json())
                     .then(data => { cacheSlots[key] = data || {}; return cacheSlots[key]; });
             }
@@ -729,7 +730,7 @@ class MCEMS_Calendar_Sessioni {
             openMy.addEventListener('click', function(){
                 if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInView); return; }
                 myBody.innerHTML = `<p class="notice">${MCEMS_CAL.i18n.loadingDots}</p>`;
-                fetch(`${AJAX_URL}?action=get_user_assigned_slots&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
+                fetch(`${AJAX_URL}?action=mcems_get_user_assigned_slots&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
                     .then(r => r.json())
                     .then(json => {
                         if (!json || !json.success) { myBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToLoad}</p>`; return; }
@@ -760,7 +761,7 @@ class MCEMS_Calendar_Sessioni {
             function loadAllAssignments(){
                 allBody.innerHTML = `<p class="notice">${MCEMS_CAL.i18n.loadingDots}</p>`;
                 const y = allYear.value, m = allMonth.value;
-                fetch(`${AJAX_URL}?action=get_all_assigned_slots&year=${encodeURIComponent(y)}&month=${encodeURIComponent(m)}&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
+                fetch(`${AJAX_URL}?action=mcems_get_all_assigned_slots&year=${encodeURIComponent(y)}&month=${encodeURIComponent(m)}&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
                     .then(r => r.json())
                     .then(json => {
                         if (!json || !json.success) { allBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToLoad}</p>`; return; }
@@ -810,7 +811,7 @@ class MCEMS_Calendar_Sessioni {
 
                 btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.assigning;
                 const form = new FormData();
-                form.append('action', 'assegna_sessione_slot');
+                form.append('action', 'mcems_assegna_sessione_slot');
                 form.append('slot_id', slotId);
                 form.append('_ajax_nonce', AJAX_NONCE);
 
@@ -864,7 +865,7 @@ class MCEMS_Calendar_Sessioni {
 
                 btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.reassigning;
                 const form = new FormData();
-                form.append('action', 'modifica_assegnazione_sessione_slot');
+                form.append('action', 'mcems_modifica_assegnazione_sessione_slot');
                 form.append('slot_id', slotId);
                 form.append('_ajax_nonce', AJAX_NONCE);
 
@@ -917,7 +918,7 @@ class MCEMS_Calendar_Sessioni {
 
                 btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.removing;
                 const form = new FormData();
-                form.append('action', 'elimina_assegnazione_sessione_slot');
+                form.append('action', 'mcems_elimina_assegnazione_sessione_slot');
                 form.append('slot_id', slotId);
                 form.append('_ajax_nonce', AJAX_NONCE);
 

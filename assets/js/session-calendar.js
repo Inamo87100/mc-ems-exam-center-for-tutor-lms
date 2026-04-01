@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function fetchMonthData(year, month) {
         var key = year + '-' + month;
         if (cacheSlots[key]) return Promise.resolve(cacheSlots[key]);
-        return fetch(AJAX_URL + '?action=get_slot_data&year=' + year + '&month=' + (month + 1) + '&_ajax_nonce=' + encodeURIComponent(AJAX_NONCE))
+        return fetch(AJAX_URL + '?action=mcems_get_slot_data&year=' + year + '&month=' + (month + 1) + '&_ajax_nonce=' + encodeURIComponent(AJAX_NONCE))
             .then(function (r) { return r.json(); })
             .then(function (data) { cacheSlots[key] = data || {}; return cacheSlots[key]; });
     }
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
         openMy.addEventListener('click', function () {
             if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInView); return; }
             if (myBody) myBody.innerHTML = '<p class="notice">' + MCEMS_CAL.i18n.loadingDots + '</p>';
-            fetch(AJAX_URL + '?action=get_user_assigned_slots&_ajax_nonce=' + encodeURIComponent(AJAX_NONCE))
+            fetch(AJAX_URL + '?action=mcems_get_user_assigned_slots&_ajax_nonce=' + encodeURIComponent(AJAX_NONCE))
                 .then(function (r) { return r.json(); })
                 .then(function (json) {
                     if (!json || !json.success) {
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (allBody) allBody.innerHTML = '<p class="notice">' + MCEMS_CAL.i18n.loadingDots + '</p>';
         var y = allYear ? allYear.value : '';
         var m = allMonth ? allMonth.value : '';
-        fetch(AJAX_URL + '?action=get_all_assigned_slots&year=' + encodeURIComponent(y) + '&month=' + encodeURIComponent(m) + '&_ajax_nonce=' + encodeURIComponent(AJAX_NONCE))
+        fetch(AJAX_URL + '?action=mcems_get_all_assigned_slots&year=' + encodeURIComponent(y) + '&month=' + encodeURIComponent(m) + '&_ajax_nonce=' + encodeURIComponent(AJAX_NONCE))
             .then(function (r) { return r.json(); })
             .then(function (json) {
                 if (!json || !json.success) {
@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.assigning;
         var form = new FormData();
-        form.append('action', 'assegna_sessione_slot');
+        form.append('action', 'mcems_assegna_sessione_slot');
         form.append('slot_id', slotId);
         form.append('_ajax_nonce', AJAX_NONCE);
 
@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.reassigning;
         var form = new FormData();
-        form.append('action', 'modifica_assegnazione_sessione_slot');
+        form.append('action', 'mcems_modifica_assegnazione_sessione_slot');
         form.append('slot_id', slotId);
         form.append('_ajax_nonce', AJAX_NONCE);
 
@@ -457,7 +457,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.removing;
         var form = new FormData();
-        form.append('action', 'elimina_assegnazione_sessione_slot');
+        form.append('action', 'mcems_elimina_assegnazione_sessione_slot');
         form.append('slot_id', slotId);
         form.append('_ajax_nonce', AJAX_NONCE);
 
