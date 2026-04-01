@@ -52,49 +52,49 @@ class MCEMS_Calendar_Sessioni {
             'isLoggedIn' => is_user_logged_in(),
             'locale'     => get_locale(),
             'i18n'    => [
-                'loading'              => __('Loading…', 'mc-ems-base'),
-                'loadError'            => __('Error loading calendar data.', 'mc-ems-base'),
-                'available'            => __('Available', 'mc-ems-base'),
-                'limited'              => __('Limited', 'mc-ems-base'),
-                'full'                 => __('Full', 'mc-ems-base'),
-                'past'                 => __('Past', 'mc-ems-base'),
-                'sessions'             => __('Sessions', 'mc-ems-base'),
-                'capacity'             => __('Capacity', 'mc-ems-base'),
-                'booked'               => __('Booked', 'mc-ems-base'),
-                'proctor'              => __('Proctor', 'mc-ems-base'),
-                'candidates'           => __('Candidates', 'mc-ems-base'),
-                'mon'                  => __('Mon', 'mc-ems-base'),
-                'tue'                  => __('Tue', 'mc-ems-base'),
-                'wed'                  => __('Wed', 'mc-ems-base'),
-                'thu'                  => __('Thu', 'mc-ems-base'),
-                'fri'                  => __('Fri', 'mc-ems-base'),
-                'sat'                  => __('Sat', 'mc-ems-base'),
-                'sun'                  => __('Sun', 'mc-ems-base'),
-                'assignedTo'           => __('Assigned to', 'mc-ems-base'),
-                'assignSession'        => __('Assign session', 'mc-ems-base'),
-                'reassign'             => __('Reassign', 'mc-ems-base'),
-                'removeAssignment'     => __('Remove assignment', 'mc-ems-base'),
-                'noSessionsOnDate'     => __('No sessions on this date.', 'mc-ems-base'),
-                'seatsOccupied'        => __('seats occupied', 'mc-ems-base'),
-                'examLabel'            => __('Exam:', 'mc-ems-base'),
-                'mustBeLoggedInView'   => __('You must be logged in to view your sessions.', 'mc-ems-base'),
-                'loadingDots'          => __('Loading...', 'mc-ems-base'),
-                'noAssignedSessions'   => __('You have no assigned sessions.', 'mc-ems-base'),
-                'noSessionsFound'      => __('No sessions found for the selected period.', 'mc-ems-base'),
-                'networkError'         => __('Network error. Please try again.', 'mc-ems-base'),
-                'unableToLoad'         => __('Unable to load sessions.', 'mc-ems-base'),
-                'unableToAssign'       => __('Unable to assign the session.', 'mc-ems-base'),
-                'unableToReassign'     => __('Unable to reassign the session.', 'mc-ems-base'),
-                'unableToRemove'       => __('Unable to remove the assignment.', 'mc-ems-base'),
-                'assigning'            => __('Assigning...', 'mc-ems-base'),
-                'reassigning'          => __('Reassigning...', 'mc-ems-base'),
-                'removing'             => __('Removing...', 'mc-ems-base'),
-                'confirmReassign'      => __('Do you want to replace the current assignee and assign this session to yourself?', 'mc-ems-base'),
-                'confirmRemove'        => __('Are you sure you want to remove the current assignment?', 'mc-ems-base'),
-                'mustBeLoggedInAssign' => __('You must be logged in to assign a session.', 'mc-ems-base'),
-                'mustBeLoggedInModify' => __('You must be logged in to reassign a session.', 'mc-ems-base'),
-                'mustBeLoggedInRemove' => __('You must be logged in to remove an assignment.', 'mc-ems-base'),
-                'logInToAssign'        => __('Log in to assign yourself', 'mc-ems-base'),
+                'loading'              => __('Loading…', 'mc-ems-exam-center-for-tutor-lms'),
+                'loadError'            => __('Error loading calendar data.', 'mc-ems-exam-center-for-tutor-lms'),
+                'available'            => __('Available', 'mc-ems-exam-center-for-tutor-lms'),
+                'limited'              => __('Limited', 'mc-ems-exam-center-for-tutor-lms'),
+                'full'                 => __('Full', 'mc-ems-exam-center-for-tutor-lms'),
+                'past'                 => __('Past', 'mc-ems-exam-center-for-tutor-lms'),
+                'sessions'             => __('Sessions', 'mc-ems-exam-center-for-tutor-lms'),
+                'capacity'             => __('Capacity', 'mc-ems-exam-center-for-tutor-lms'),
+                'booked'               => __('Booked', 'mc-ems-exam-center-for-tutor-lms'),
+                'proctor'              => __('Proctor', 'mc-ems-exam-center-for-tutor-lms'),
+                'candidates'           => __('Candidates', 'mc-ems-exam-center-for-tutor-lms'),
+                'mon'                  => __('Mon', 'mc-ems-exam-center-for-tutor-lms'),
+                'tue'                  => __('Tue', 'mc-ems-exam-center-for-tutor-lms'),
+                'wed'                  => __('Wed', 'mc-ems-exam-center-for-tutor-lms'),
+                'thu'                  => __('Thu', 'mc-ems-exam-center-for-tutor-lms'),
+                'fri'                  => __('Fri', 'mc-ems-exam-center-for-tutor-lms'),
+                'sat'                  => __('Sat', 'mc-ems-exam-center-for-tutor-lms'),
+                'sun'                  => __('Sun', 'mc-ems-exam-center-for-tutor-lms'),
+                'assignedTo'           => __('Assigned to', 'mc-ems-exam-center-for-tutor-lms'),
+                'assignSession'        => __('Assign session', 'mc-ems-exam-center-for-tutor-lms'),
+                'reassign'             => __('Reassign', 'mc-ems-exam-center-for-tutor-lms'),
+                'removeAssignment'     => __('Remove assignment', 'mc-ems-exam-center-for-tutor-lms'),
+                'noSessionsOnDate'     => __('No sessions on this date.', 'mc-ems-exam-center-for-tutor-lms'),
+                'seatsOccupied'        => __('seats occupied', 'mc-ems-exam-center-for-tutor-lms'),
+                'examLabel'            => __('Exam:', 'mc-ems-exam-center-for-tutor-lms'),
+                'mustBeLoggedInView'   => __('You must be logged in to view your sessions.', 'mc-ems-exam-center-for-tutor-lms'),
+                'loadingDots'          => __('Loading...', 'mc-ems-exam-center-for-tutor-lms'),
+                'noAssignedSessions'   => __('You have no assigned sessions.', 'mc-ems-exam-center-for-tutor-lms'),
+                'noSessionsFound'      => __('No sessions found for the selected period.', 'mc-ems-exam-center-for-tutor-lms'),
+                'networkError'         => __('Network error. Please try again.', 'mc-ems-exam-center-for-tutor-lms'),
+                'unableToLoad'         => __('Unable to load sessions.', 'mc-ems-exam-center-for-tutor-lms'),
+                'unableToAssign'       => __('Unable to assign the session.', 'mc-ems-exam-center-for-tutor-lms'),
+                'unableToReassign'     => __('Unable to reassign the session.', 'mc-ems-exam-center-for-tutor-lms'),
+                'unableToRemove'       => __('Unable to remove the assignment.', 'mc-ems-exam-center-for-tutor-lms'),
+                'assigning'            => __('Assigning...', 'mc-ems-exam-center-for-tutor-lms'),
+                'reassigning'          => __('Reassigning...', 'mc-ems-exam-center-for-tutor-lms'),
+                'removing'             => __('Removing...', 'mc-ems-exam-center-for-tutor-lms'),
+                'confirmReassign'      => __('Do you want to replace the current assignee and assign this session to yourself?', 'mc-ems-exam-center-for-tutor-lms'),
+                'confirmRemove'        => __('Are you sure you want to remove the current assignment?', 'mc-ems-exam-center-for-tutor-lms'),
+                'mustBeLoggedInAssign' => __('You must be logged in to assign a session.', 'mc-ems-exam-center-for-tutor-lms'),
+                'mustBeLoggedInModify' => __('You must be logged in to reassign a session.', 'mc-ems-exam-center-for-tutor-lms'),
+                'mustBeLoggedInRemove' => __('You must be logged in to remove an assignment.', 'mc-ems-exam-center-for-tutor-lms'),
+                'logInToAssign'        => __('Log in to assign yourself', 'mc-ems-exam-center-for-tutor-lms'),
             ],
         ]);
     }
@@ -333,7 +333,7 @@ class MCEMS_Calendar_Sessioni {
 
     public static function shortcode(): string {
         if (!MCEMS_Settings::user_can_view_shortcode('mcems_sessions_calendar')) {
-            return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-base') . '</p>';
+            return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         }
 
         $nonce = wp_create_nonce(self::NONCE_ACTION);
@@ -342,63 +342,63 @@ class MCEMS_Calendar_Sessioni {
         ?>
         <div class="calendar-wrapper">
             <div class="calendar-nav">
-                <button id="prevMonth" aria-label="<?php echo esc_attr__('Previous month', 'mc-ems-base'); ?>">&larr;</button>
+                <button id="prevMonth" aria-label="<?php echo esc_attr__('Previous month', 'mc-ems-exam-center-for-tutor-lms'); ?>">&larr;</button>
                 <span id="monthYear"></span>
-                <button id="nextMonth" aria-label="<?php echo esc_attr__('Next month', 'mc-ems-base'); ?>">&rarr;</button>
+                <button id="nextMonth" aria-label="<?php echo esc_attr__('Next month', 'mc-ems-exam-center-for-tutor-lms'); ?>">&rarr;</button>
             </div>
 
             <div class="calendar-header">
-                <div><?php echo esc_html__('Mon', 'mc-ems-base'); ?></div><div><?php echo esc_html__('Tue', 'mc-ems-base'); ?></div><div><?php echo esc_html__('Wed', 'mc-ems-base'); ?></div><div><?php echo esc_html__('Thu', 'mc-ems-base'); ?></div><div><?php echo esc_html__('Fri', 'mc-ems-base'); ?></div><div><?php echo esc_html__('Sat', 'mc-ems-base'); ?></div><div><?php echo esc_html__('Sun', 'mc-ems-base'); ?></div>
+                <div><?php echo esc_html__('Mon', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Tue', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Wed', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Thu', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Fri', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Sat', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Sun', 'mc-ems-exam-center-for-tutor-lms'); ?></div>
             </div>
             <div id="calendar"></div>
 
             <div class="my-sessions-wrap">
                 <div class="btns-stack">
-                    <button id="openMySessions" class="btn-outline"><?php echo esc_html__('View your assigned sessions', 'mc-ems-base'); ?></button>
-                    <button id="openAllAssignments" class="btn-outline"><?php echo esc_html__('View all sessions', 'mc-ems-base'); ?></button>
+                    <button id="openMySessions" class="btn-outline"><?php echo esc_html__('View your assigned sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
+                    <button id="openAllAssignments" class="btn-outline"><?php echo esc_html__('View all sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
                 </div>
             </div>
         </div>
 
         <div id="slotModal" class="modal" aria-hidden="true">
             <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-                <span class="close" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-base'); ?>">&times;</span>
-                <h2 id="modalTitle"><?php echo esc_html__('Sessions on', 'mc-ems-base'); ?> <span id="modalData"></span></h2>
+                <span class="close" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-exam-center-for-tutor-lms'); ?>">&times;</span>
+                <h2 id="modalTitle"><?php echo esc_html__('Sessions on', 'mc-ems-exam-center-for-tutor-lms'); ?> <span id="modalData"></span></h2>
                 <div id="modalSlotInfo"></div>
             </div>
         </div>
 
         <div id="mySessionsModal" class="modal" aria-hidden="true">
             <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="mySessionsTitle">
-                <span class="close close-my" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-base'); ?>">&times;</span>
-                <h2 id="mySessionsTitle"><?php echo esc_html__('Your assigned sessions', 'mc-ems-base'); ?></h2>
+                <span class="close close-my" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-exam-center-for-tutor-lms'); ?>">&times;</span>
+                <h2 id="mySessionsTitle"><?php echo esc_html__('Your assigned sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
                 <div id="mySessionsBody"></div>
             </div>
         </div>
 
         <div id="allAssignmentsModal" class="modal" aria-hidden="true">
             <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="allAssignmentsTitle">
-                <span class="close close-all" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-base'); ?>">&times;</span>
-                <h2 id="allAssignmentsTitle"><?php echo esc_html__('All sessions', 'mc-ems-base'); ?></h2>
+                <span class="close close-all" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-exam-center-for-tutor-lms'); ?>">&times;</span>
+                <h2 id="allAssignmentsTitle"><?php echo esc_html__('All sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
 
                 <div class="filters-row">
                     <label>
-                        <?php echo esc_html__('Month', 'mc-ems-base'); ?>
+                        <?php echo esc_html__('Month', 'mc-ems-exam-center-for-tutor-lms'); ?>
                         <select id="allMonth">
                             <?php
                             $mesi = [
-                                1  => __('January', 'mc-ems-base'),
-                                2  => __('February', 'mc-ems-base'),
-                                3  => __('March', 'mc-ems-base'),
-                                4  => __('April', 'mc-ems-base'),
-                                5  => __('May', 'mc-ems-base'),
-                                6  => __('June', 'mc-ems-base'),
-                                7  => __('July', 'mc-ems-base'),
-                                8  => __('August', 'mc-ems-base'),
-                                9  => __('September', 'mc-ems-base'),
-                                10 => __('October', 'mc-ems-base'),
-                                11 => __('November', 'mc-ems-base'),
-                                12 => __('December', 'mc-ems-base'),
+                                1  => __('January', 'mc-ems-exam-center-for-tutor-lms'),
+                                2  => __('February', 'mc-ems-exam-center-for-tutor-lms'),
+                                3  => __('March', 'mc-ems-exam-center-for-tutor-lms'),
+                                4  => __('April', 'mc-ems-exam-center-for-tutor-lms'),
+                                5  => __('May', 'mc-ems-exam-center-for-tutor-lms'),
+                                6  => __('June', 'mc-ems-exam-center-for-tutor-lms'),
+                                7  => __('July', 'mc-ems-exam-center-for-tutor-lms'),
+                                8  => __('August', 'mc-ems-exam-center-for-tutor-lms'),
+                                9  => __('September', 'mc-ems-exam-center-for-tutor-lms'),
+                                10 => __('October', 'mc-ems-exam-center-for-tutor-lms'),
+                                11 => __('November', 'mc-ems-exam-center-for-tutor-lms'),
+                                12 => __('December', 'mc-ems-exam-center-for-tutor-lms'),
                             ];
                             $curM = (int) wp_date('n');
                             foreach ($mesi as $num=>$nome) {
@@ -413,7 +413,7 @@ class MCEMS_Calendar_Sessioni {
                         </select>
                     </label>
                     <label>
-                        <?php echo esc_html__('Year', 'mc-ems-base'); ?>
+                        <?php echo esc_html__('Year', 'mc-ems-exam-center-for-tutor-lms'); ?>
                         <select id="allYear">
                             <?php
                             $curY = (int) wp_date('Y');
@@ -423,7 +423,7 @@ class MCEMS_Calendar_Sessioni {
                             ?>
                         </select>
                     </label>
-                    <button id="reloadAllAssignments" class="btn-outline small tight"><?php echo esc_html__('Search', 'mc-ems-base'); ?></button>
+                    <button id="reloadAllAssignments" class="btn-outline small tight"><?php echo esc_html__('Search', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
                 </div>
 
                 <div id="allAssignmentsBody" class="scrollable"></div>
@@ -1039,7 +1039,7 @@ class MCEMS_Calendar_Sessioni {
         check_ajax_referer(self::NONCE_ACTION);
 
         $user_id = get_current_user_id();
-        if (!$user_id) wp_send_json_error(['message' => __('You are not authenticated.', 'mc-ems-base')], 403);
+        if (!$user_id) wp_send_json_error(['message' => __('You are not authenticated.', 'mc-ems-exam-center-for-tutor-lms')], 403);
 
         $oggi = wp_date('Y-m-d');
 
@@ -1088,7 +1088,7 @@ class MCEMS_Calendar_Sessioni {
         check_ajax_referer(self::NONCE_ACTION);
 
         if (!current_user_can('edit_published_posts')) {
-            wp_send_json_error(['message' => __('Insufficient permissions.', 'mc-ems-base')], 403);
+            wp_send_json_error(['message' => __('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms')], 403);
         }
 
         $year  = isset($_GET['year'])  ? max(1970, intval($_GET['year']))  : (int) wp_date('Y');
@@ -1147,21 +1147,21 @@ class MCEMS_Calendar_Sessioni {
         check_ajax_referer(self::NONCE_ACTION);
 
         $user_id = get_current_user_id();
-        if (!$user_id) wp_send_json_error(['message' => __('You must be logged in to assign a session.', 'mc-ems-base')], 403);
+        if (!$user_id) wp_send_json_error(['message' => __('You must be logged in to assign a session.', 'mc-ems-exam-center-for-tutor-lms')], 403);
 
         if (!current_user_can('edit_published_posts')) {
-            wp_send_json_error(['message' => __('Insufficient permissions.', 'mc-ems-base')], 403);
+            wp_send_json_error(['message' => __('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms')], 403);
         }
 
         $slot_id = isset($_POST['slot_id']) ? intval($_POST['slot_id']) : 0;
-        if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message' => __('Invalid session.', 'mc-ems-base')], 400);
+        if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message' => __('Invalid session.', 'mc-ems-exam-center-for-tutor-lms')], 400);
 
         if (self::is_slot_assigned($slot_id)) {
             $name = self::get_slot_assigned_name($slot_id);
             wp_send_json_error(['message' => $name
                 // translators: %s is the name of the user already assigned to this session
-                ? sprintf(__('This session is already assigned to %s.', 'mc-ems-base'), $name)
-                : __('This session is already assigned.', 'mc-ems-base')
+                ? sprintf(__('This session is already assigned to %s.', 'mc-ems-exam-center-for-tutor-lms'), $name)
+                : __('This session is already assigned.', 'mc-ems-exam-center-for-tutor-lms')
             ], 409);
         }
 
@@ -1192,14 +1192,14 @@ class MCEMS_Calendar_Sessioni {
         check_ajax_referer(self::NONCE_ACTION);
 
         $user_id = get_current_user_id();
-        if (!$user_id) wp_send_json_error(['message' => __('You must be logged in to reassign a session.', 'mc-ems-base')], 403);
+        if (!$user_id) wp_send_json_error(['message' => __('You must be logged in to reassign a session.', 'mc-ems-exam-center-for-tutor-lms')], 403);
 
         if (!current_user_can('edit_published_posts')) {
-            wp_send_json_error(['message' => __('Insufficient permissions.', 'mc-ems-base')], 403);
+            wp_send_json_error(['message' => __('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms')], 403);
         }
 
         $slot_id = isset($_POST['slot_id']) ? intval($_POST['slot_id']) : 0;
-        if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message' => __('Invalid session.', 'mc-ems-base')], 400);
+        if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message' => __('Invalid session.', 'mc-ems-exam-center-for-tutor-lms')], 400);
 
         $old_user_id  = self::get_proctor_user_id($slot_id);
         $old_assigned = $old_user_id > 0;
@@ -1236,17 +1236,17 @@ class MCEMS_Calendar_Sessioni {
         check_ajax_referer(self::NONCE_ACTION);
 
         $request_user = get_current_user_id();
-        if (!$request_user) wp_send_json_error(['message' => __('You must be logged in to remove an assignment.', 'mc-ems-base')], 403);
+        if (!$request_user) wp_send_json_error(['message' => __('You must be logged in to remove an assignment.', 'mc-ems-exam-center-for-tutor-lms')], 403);
 
         if (!current_user_can('edit_published_posts')) {
-            wp_send_json_error(['message' => __('Insufficient permissions.', 'mc-ems-base')], 403);
+            wp_send_json_error(['message' => __('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms')], 403);
         }
 
         $slot_id = isset($_POST['slot_id']) ? intval($_POST['slot_id']) : 0;
-        if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message' => __('Invalid session.', 'mc-ems-base')], 400);
+        if (!$slot_id || get_post_type($slot_id) !== self::cpt()) wp_send_json_error(['message' => __('Invalid session.', 'mc-ems-exam-center-for-tutor-lms')], 400);
 
         if (!self::is_slot_assigned($slot_id)) {
-            wp_send_json_error(['message' => __('This session is not currently assigned.', 'mc-ems-base')], 409);
+            wp_send_json_error(['message' => __('This session is not currently assigned.', 'mc-ems-exam-center-for-tutor-lms')], 409);
         }
 
         $old_user_id = self::get_proctor_user_id($slot_id);
@@ -1270,7 +1270,7 @@ class MCEMS_Calendar_Sessioni {
             );
         }
 
-        wp_send_json_success(['message' => __('Assignment removed.', 'mc-ems-base')]);
+        wp_send_json_success(['message' => __('Assignment removed.', 'mc-ems-exam-center-for-tutor-lms')]);
     }
 
     public static function schedule_midnight_event(): void {

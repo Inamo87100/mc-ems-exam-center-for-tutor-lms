@@ -215,8 +215,8 @@ class MCEMS_Settings {
     public static function menu(): void {
         add_submenu_page(
             'edit.php?post_type=' . MCEMS_CPT_Sessioni_Esame::CPT,
-            __('Settings', 'mc-ems-base'),
-            __('Settings', 'mc-ems-base'),
+            __('Settings', 'mc-ems-exam-center-for-tutor-lms'),
+            __('Settings', 'mc-ems-exam-center-for-tutor-lms'),
             'manage_options',
             'mcems-settings-cpt',
             [__CLASS__, 'render']
@@ -227,11 +227,11 @@ class MCEMS_Settings {
         add_action('wp_ajax_mcems_search_pages', [__CLASS__, 'ajax_search_pages']);
         register_setting(self::OPTION_KEY, self::OPTION_KEY, [__CLASS__, 'sanitize']);
 
-        add_settings_section('mcems_section_main', __('Bookings', 'mc-ems-base'), function () {
+        add_settings_section('mcems_section_main', __('Bookings', 'mc-ems-exam-center-for-tutor-lms'), function () {
             echo '<p class="description">Main rules for booking availability and cancellations.</p>';
         }, self::OPTION_KEY);
 
-        add_settings_field('anticipo_ore_prenotazione', __('Booking allowed up to (hours)', 'mc-ems-base'), [__CLASS__, 'field_number'], self::OPTION_KEY, 'mcems_section_main', [
+        add_settings_field('anticipo_ore_prenotazione', __('Booking allowed up to (hours)', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_number'], self::OPTION_KEY, 'mcems_section_main', [
             'key' => 'anticipo_ore_prenotazione',
             'min' => 0,
             'max' => 720,
@@ -239,37 +239,37 @@ class MCEMS_Settings {
             'desc'=> 'Example: 48 = do not show sessions with notice < 48 hours.'
         ]);
 
-        add_settings_field('consenti_annullamento', __('Allow booking cancellation', 'mc-ems-base'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_main', [
+        add_settings_field('consenti_annullamento', __('Allow booking cancellation', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_main', [
             'key' => 'consenti_annullamento',
             'desc'=> 'If disabled, the user will not be able to cancel from the front-end.'
         ]);
 
-        add_settings_field('annullamento_ore', __('Cancellation allowed up to (hours)', 'mc-ems-base'), [__CLASS__, 'field_number'], self::OPTION_KEY, 'mcems_section_main', [
+        add_settings_field('annullamento_ore', __('Cancellation allowed up to (hours)', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_number'], self::OPTION_KEY, 'mcems_section_main', [
             'key' => 'annullamento_ore',
             'min' => 0,
             'max' => 720,
             'step'=> 1,
-            'desc'=> __('Example: 48 = cancellation allowed only if more than 48 hours remain.', 'mc-ems-base')
+            'desc'=> __('Example: 48 = cancellation allowed only if more than 48 hours remain.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_section('mcems_section_gate', __('Exam access settings', 'mc-ems-base'), function () {
+        add_settings_section('mcems_section_gate', __('Exam access settings', 'mc-ems-exam-center-for-tutor-lms'), function () {
             echo '<p class="description">Define how long an exam booking remains valid for exam access after the exam session time.</p>';
         }, self::OPTION_KEY);
 
-        add_settings_field('tutor_gate_enabled', __('Enable exam access gate', 'mc-ems-base'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_gate', [
+        add_settings_field('tutor_gate_enabled', __('Enable exam access gate', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_gate', [
             'key'  => 'tutor_gate_enabled',
-            'desc' => __('If enabled, users can access protected Tutor LMS exams only when they have a valid exam booking for that exam.', 'mc-ems-base'),
+            'desc' => __('If enabled, users can access protected Tutor LMS exams only when they have a valid exam booking for that exam.', 'mc-ems-exam-center-for-tutor-lms'),
         ]);
 
-        add_settings_field('tutor_gate_unlock_lead_minutes', __('Unlock before session (minutes)', 'mc-ems-base'), [__CLASS__, 'field_number'], self::OPTION_KEY, 'mcems_section_gate', [
+        add_settings_field('tutor_gate_unlock_lead_minutes', __('Unlock before session (minutes)', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_number'], self::OPTION_KEY, 'mcems_section_gate', [
             'key'  => 'tutor_gate_unlock_lead_minutes',
             'min'  => 0,
             'max'  => 1440,
             'step' => 1,
-            'desc' => __('Example: 15 = allow exam access 15 minutes before the booked exam time.', 'mc-ems-base'),
+            'desc' => __('Example: 15 = allow exam access 15 minutes before the booked exam time.', 'mc-ems-exam-center-for-tutor-lms'),
         ]);
 
-        add_settings_field('tutor_gate_booking_expiry_combo', __('Booking validity after session', 'mc-ems-base'), [__CLASS__, 'field_booking_expiry_combo'], self::OPTION_KEY, 'mcems_section_gate', [
+        add_settings_field('tutor_gate_booking_expiry_combo', __('Booking validity after session', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_booking_expiry_combo'], self::OPTION_KEY, 'mcems_section_gate', [
             'value_key' => 'tutor_gate_booking_expiry_value',
             'unit_key'  => 'tutor_gate_booking_expiry_unit',
             'min'       => 0,
@@ -278,199 +278,199 @@ class MCEMS_Settings {
             'desc'      => '0 = never expires.'
         ]);
 
-        add_settings_field('tutor_gate_exam_ids', __('Protected exams', 'mc-ems-base'), [__CLASS__, 'field_exam_multiselect'], self::OPTION_KEY, 'mcems_section_gate', [
+        add_settings_field('tutor_gate_exam_ids', __('Protected exams', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_exam_multiselect'], self::OPTION_KEY, 'mcems_section_gate', [
             'key'  => 'tutor_gate_exam_ids',
-            'desc' => __('If you select one or more exams, the exam access gate will apply only to those exams. If left empty, the gate applies to all Tutor LMS exams.', 'mc-ems-base'),
+            'desc' => __('If you select one or more exams, the exam access gate will apply only to those exams. If left empty, the gate applies to all Tutor LMS exams.', 'mc-ems-exam-center-for-tutor-lms'),
         ]);
 
-        add_settings_field('booking_exam_ids', __('Exams visible in booking dropdown', 'mc-ems-base'), [__CLASS__, 'field_exam_multiselect'], self::OPTION_KEY, 'mcems_section_gate', [
+        add_settings_field('booking_exam_ids', __('Exams visible in booking dropdown', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_exam_multiselect'], self::OPTION_KEY, 'mcems_section_gate', [
             'key'  => 'booking_exam_ids',
-            'desc' => __('Select which exams appear in the exam dropdown during session booking. If left empty, all published Tutor LMS exams will be shown.', 'mc-ems-base'),
+            'desc' => __('Select which exams appear in the exam dropdown during session booking. If left empty, all published Tutor LMS exams will be shown.', 'mc-ems-exam-center-for-tutor-lms'),
         ]);
 
-        add_settings_section('mcems_section_email', __('Email settings', 'mc-ems-base'), function () {
+        add_settings_section('mcems_section_email', __('Email settings', 'mc-ems-exam-center-for-tutor-lms'), function () {
             echo '<p class="description">Choose which notifications to send and configure sender/recipient settings.</p>';
         }, self::OPTION_KEY);
 
-        add_settings_field('email_sender_name', __('Sender name', 'mc-ems-base'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_sender_name', __('Sender name', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_sender_name',
-            'placeholder' => __('Example: MC-EMS Notifications', 'mc-ems-base'),
-            'desc' => __('Name shown as the email sender.', 'mc-ems-base')
+            'placeholder' => __('Example: MC-EMS Notifications', 'mc-ems-exam-center-for-tutor-lms'),
+            'desc' => __('Name shown as the email sender.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_sender_email', __('Sender email', 'mc-ems-base'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_sender_email', __('Sender email', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_sender_email',
             'type' => 'email',
-            'placeholder' => __('notifications@example.com', 'mc-ems-base'),
-            'desc' => __('Email address used in the From header.', 'mc-ems-base')
+            'placeholder' => __('notifications@example.com', 'mc-ems-exam-center-for-tutor-lms'),
+            'desc' => __('Email address used in the From header.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_admin_recipients', __('Admin recipients', 'mc-ems-base'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_admin_recipients', __('Admin recipients', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_admin_recipients',
-            'placeholder' => __('admin@example.com, exams@example.com', 'mc-ems-base'),
-            'desc' => __('Comma-separated list of recipients for admin notifications.', 'mc-ems-base')
+            'placeholder' => __('admin@example.com, exams@example.com', 'mc-ems-exam-center-for-tutor-lms'),
+            'desc' => __('Comma-separated list of recipients for admin notifications.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_send_booking_confirmation', __('Exam booking confirmation email', 'mc-ems-base'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_send_booking_confirmation', __('Exam booking confirmation email', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_send_booking_confirmation',
-            'desc'=> __('Send a confirmation email to the candidate after a booking is created.', 'mc-ems-base')
+            'desc'=> __('Send a confirmation email to the candidate after a booking is created.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_send_booking_cancellation', __('Exam booking cancellation email', 'mc-ems-base'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_send_booking_cancellation', __('Exam booking cancellation email', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_send_booking_cancellation',
-            'desc'=> __('Send a confirmation email to the candidate after an exam booking is cancelled.', 'mc-ems-base')
+            'desc'=> __('Send a confirmation email to the candidate after an exam booking is cancelled.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_send_admin_booking', __('Admin exam booking notification', 'mc-ems-base'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_send_admin_booking', __('Admin exam booking notification', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_send_admin_booking',
-            'desc'=> __('Notify the configured admin recipients when an exam booking is created.', 'mc-ems-base')
+            'desc'=> __('Notify the configured admin recipients when an exam booking is created.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_send_admin_cancellation', __('Admin exam booking cancellation notification', 'mc-ems-base'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_send_admin_cancellation', __('Admin exam booking cancellation notification', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_send_admin_cancellation',
-            'desc'=> __('Notify the configured admin recipients when an exam booking is cancelled.', 'mc-ems-base')
+            'desc'=> __('Notify the configured admin recipients when an exam booking is cancelled.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('cal_allow_reassign', __('Allow proctor reassignment', 'mc-ems-base'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('cal_allow_reassign', __('Allow proctor reassignment', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_allow_reassign',
-            'desc'=> __('Allow replacing the currently assigned proctor from the calendar.', 'mc-ems-base')
+            'desc'=> __('Allow replacing the currently assigned proctor from the calendar.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('cal_allow_unassign', __('Allow proctor unassignment', 'mc-ems-base'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('cal_allow_unassign', __('Allow proctor unassignment', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_allow_unassign',
-            'desc'=> __('Allow removing the current proctor assignment from the calendar.', 'mc-ems-base')
+            'desc'=> __('Allow removing the current proctor assignment from the calendar.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('cal_email_on_assign', __('Proctor assignment email', 'mc-ems-base'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('cal_email_on_assign', __('Proctor assignment email', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_on_assign',
-            'desc'=> __('Send an email when a proctor is assigned to an exam session.', 'mc-ems-base')
+            'desc'=> __('Send an email when a proctor is assigned to an exam session.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('cal_email_on_unassign', __('Proctor unassignment email', 'mc-ems-base'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('cal_email_on_unassign', __('Proctor unassignment email', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_on_unassign',
-            'desc'=> __('Send an email when a proctor assignment is removed from an exam session.', 'mc-ems-base')
+            'desc'=> __('Send an email when a proctor assignment is removed from an exam session.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('cal_email_on_unassigned_warning', __('24-hour unassigned session warning', 'mc-ems-base'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('cal_email_on_unassigned_warning', __('24-hour unassigned session warning', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_checkbox'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_on_unassigned_warning',
-            'desc'=> __('Send a daily warning email for tomorrow\'s sessions that still have no assigned proctor.', 'mc-ems-base')
+            'desc'=> __('Send a daily warning email for tomorrow\'s sessions that still have no assigned proctor.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('cal_email_notify_to', __('Calendar email recipients', 'mc-ems-base'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('cal_email_notify_to', __('Calendar email recipients', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_notify_to',
-            'placeholder' => __('admin@example.com, exams@example.com', 'mc-ems-base'),
-            'desc' => __('Comma-separated list of recipients for calendar assignment, unassignment and warning emails.', 'mc-ems-base')
+            'placeholder' => __('admin@example.com, exams@example.com', 'mc-ems-exam-center-for-tutor-lms'),
+            'desc' => __('Comma-separated list of recipients for calendar assignment, unassignment and warning emails.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_subject_booking_confirmation', __('Exam booking confirmation subject', 'mc-ems-base'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_subject_booking_confirmation', __('Exam booking confirmation subject', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_subject_booking_confirmation',
-            'placeholder' => __('Exam booking confirmed — {exam_title}', 'mc-ems-base'),
-            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems-base')
+            'placeholder' => __('Exam booking confirmed — {exam_title}', 'mc-ems-exam-center-for-tutor-lms'),
+            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_body_booking_confirmation', __('Exam booking confirmation body', 'mc-ems-base'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_body_booking_confirmation', __('Exam booking confirmation body', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_body_booking_confirmation',
             'rows' => 8,
-            'desc' => __('Plain-text email body. Same placeholders as above.', 'mc-ems-base')
+            'desc' => __('Plain-text email body. Same placeholders as above.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_subject_booking_cancellation', __('Exam booking cancellation subject', 'mc-ems-base'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_subject_booking_cancellation', __('Exam booking cancellation subject', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_subject_booking_cancellation',
-            'placeholder' => __('Exam booking cancelled — {exam_title}', 'mc-ems-base'),
-            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems-base')
+            'placeholder' => __('Exam booking cancelled — {exam_title}', 'mc-ems-exam-center-for-tutor-lms'),
+            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_body_booking_cancellation', __('Exam booking cancellation body', 'mc-ems-base'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_body_booking_cancellation', __('Exam booking cancellation body', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_body_booking_cancellation',
             'rows' => 8,
-            'desc' => __('Plain-text email body. Same placeholders as above.', 'mc-ems-base')
+            'desc' => __('Plain-text email body. Same placeholders as above.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_subject_admin_booking', __('Admin exam booking subject', 'mc-ems-base'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_subject_admin_booking', __('Admin exam booking subject', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_subject_admin_booking',
-            'placeholder' => __('New exam booking — {exam_title}', 'mc-ems-base'),
-            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems-base')
+            'placeholder' => __('New exam booking — {exam_title}', 'mc-ems-exam-center-for-tutor-lms'),
+            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_body_admin_booking', __('Admin exam booking body', 'mc-ems-base'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_body_admin_booking', __('Admin exam booking body', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_body_admin_booking',
             'rows' => 8,
-            'desc' => __('Plain-text email body. Same placeholders as above.', 'mc-ems-base')
+            'desc' => __('Plain-text email body. Same placeholders as above.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_subject_admin_cancellation', __('Admin cancellation subject', 'mc-ems-base'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_subject_admin_cancellation', __('Admin cancellation subject', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_subject_admin_cancellation',
-            'placeholder' => __('Exam booking cancelled — {exam_title}', 'mc-ems-base'),
-            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems-base')
+            'placeholder' => __('Exam booking cancelled — {exam_title}', 'mc-ems-exam-center-for-tutor-lms'),
+            'desc' => __('Placeholders: {site_name}, {candidate_name}, {candidate_email}, {exam_title}, {session_date}, {session_time}, {manage_booking_url}, {booking_page_url}, {session_id}', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('email_body_admin_cancellation', __('Admin cancellation body', 'mc-ems-base'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('email_body_admin_cancellation', __('Admin cancellation body', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'email_body_admin_cancellation',
             'rows' => 8,
-            'desc' => __('Plain-text email body. Same placeholders as above.', 'mc-ems-base')
+            'desc' => __('Plain-text email body. Same placeholders as above.', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('cal_email_subject', __('Proctor assignment subject', 'mc-ems-base'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('cal_email_subject', __('Proctor assignment subject', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_subject',
-            'placeholder' => __('Exam session assigned — {session_date} {session_time}', 'mc-ems-base'),
-            'desc' => __('Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems-base')
+            'placeholder' => __('Exam session assigned — {session_date} {session_time}', 'mc-ems-exam-center-for-tutor-lms'),
+            'desc' => __('Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('cal_email_body', __('Proctor assignment body', 'mc-ems-base'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('cal_email_body', __('Proctor assignment body', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_body',
             'rows' => 8,
-            'desc' => __('Plain-text email body. Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems-base')
+            'desc' => __('Plain-text email body. Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('cal_email_subject_unassign', __('Proctor unassignment subject', 'mc-ems-base'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('cal_email_subject_unassign', __('Proctor unassignment subject', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_subject_unassign',
-            'placeholder' => __('Exam session unassigned — {session_date} {session_time}', 'mc-ems-base'),
-            'desc' => __('Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems-base')
+            'placeholder' => __('Exam session unassigned — {session_date} {session_time}', 'mc-ems-exam-center-for-tutor-lms'),
+            'desc' => __('Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('cal_email_body_unassign', __('Proctor unassignment body', 'mc-ems-base'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('cal_email_body_unassign', __('Proctor unassignment body', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_body_unassign',
             'rows' => 8,
-            'desc' => __('Plain-text email body. Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems-base')
+            'desc' => __('Plain-text email body. Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {proctor_name}, {session_id}', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('cal_email_subject_warning', __('Unassigned session warning subject', 'mc-ems-base'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('cal_email_subject_warning', __('Unassigned session warning subject', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_text'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_subject_warning',
-            'placeholder' => __('Unassigned exam session reminder — {session_date} {session_time}', 'mc-ems-base'),
-            'desc' => __('Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {session_id}', 'mc-ems-base')
+            'placeholder' => __('Unassigned exam session reminder — {session_date} {session_time}', 'mc-ems-exam-center-for-tutor-lms'),
+            'desc' => __('Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {session_id}', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_field('cal_email_body_warning', __('Unassigned session warning body', 'mc-ems-base'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
+        add_settings_field('cal_email_body_warning', __('Unassigned session warning body', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_textarea'], self::OPTION_KEY, 'mcems_section_email', [
             'key' => 'cal_email_body_warning',
             'rows' => 8,
-            'desc' => __('Plain-text email body. Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {session_id}', 'mc-ems-base')
+            'desc' => __('Plain-text email body. Placeholders: {site_name}, {exam_title}, {session_date}, {session_time}, {session_id}', 'mc-ems-exam-center-for-tutor-lms')
         ]);
 
-        add_settings_section('mcems_section_pages', __('Pages', 'mc-ems-base'), function () {
+        add_settings_section('mcems_section_pages', __('Pages', 'mc-ems-exam-center-for-tutor-lms'), function () {
             echo '<p class="description">Select the pages used by MC-EMS for front-end navigation.</p>';
         }, self::OPTION_KEY);
 
-        add_settings_field('booking_page_id', __('Exam booking page (calendar)', 'mc-ems-base'), [__CLASS__, 'field_page_dropdown_clear'], self::OPTION_KEY, 'mcems_section_pages', [
+        add_settings_field('booking_page_id', __('Exam booking page (calendar)', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_page_dropdown_clear'], self::OPTION_KEY, 'mcems_section_pages', [
             'key'  => 'booking_page_id',
-            'desc' => __('Choose the page where you placed the [mcems_book_exam] shortcode. The plugin will use this to generate dynamic links to the exam booking calendar.', 'mc-ems-base'),
+            'desc' => __('Choose the page where you placed the [mcems_book_exam] shortcode. The plugin will use this to generate dynamic links to the exam booking calendar.', 'mc-ems-exam-center-for-tutor-lms'),
         ]);
 
-        add_settings_field('manage_booking_page_id', __('Manage exam booking page', 'mc-ems-base'), [__CLASS__, 'field_page_dropdown_clear'], self::OPTION_KEY, 'mcems_section_pages', [
+        add_settings_field('manage_booking_page_id', __('Manage exam booking page', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_page_dropdown_clear'], self::OPTION_KEY, 'mcems_section_pages', [
             'key'  => 'manage_booking_page_id',
-            'desc' => __('Choose the page where you placed the [mcems_manage_booking] shortcode. The plugin will use this to generate dynamic links to the “Manage exam booking” page.', 'mc-ems-base'),
+            'desc' => __('Choose the page where you placed the [mcems_manage_booking] shortcode. The plugin will use this to generate dynamic links to the “Manage exam booking” page.', 'mc-ems-exam-center-for-tutor-lms'),
         ]);
 
-        add_settings_section('mcems_section_access_control', __('Access Control', 'mc-ems-base'), function () {
-            echo '<p class="description">' . esc_html__('Select which WordPress roles can view each shortcode. By default all roles are allowed (no restrictions).', 'mc-ems-base') . '</p>';
+        add_settings_section('mcems_section_access_control', __('Access Control', 'mc-ems-exam-center-for-tutor-lms'), function () {
+            echo '<p class="description">' . esc_html__('Select which WordPress roles can view each shortcode. By default all roles are allowed (no restrictions).', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         }, self::OPTION_KEY);
 
-        add_settings_field('shortcode_roles', __('Shortcode visibility by role', 'mc-ems-base'), [__CLASS__, 'field_shortcode_roles'], self::OPTION_KEY, 'mcems_section_access_control', []);
+        add_settings_field('shortcode_roles', __('Shortcode visibility by role', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_shortcode_roles'], self::OPTION_KEY, 'mcems_section_access_control', []);
 
-        add_settings_section('mcems_section_proctor_roles', __('Proctor Roles', 'mc-ems-base'), function () {
-            echo '<p class="description">' . esc_html__('Select which WordPress roles can be searched and assigned as Proctors. If no roles are selected, all roles with sufficient permissions can be assigned.', 'mc-ems-base') . '</p>';
+        add_settings_section('mcems_section_proctor_roles', __('Proctor Roles', 'mc-ems-exam-center-for-tutor-lms'), function () {
+            echo '<p class="description">' . esc_html__('Select which WordPress roles can be searched and assigned as Proctors. If no roles are selected, all roles with sufficient permissions can be assigned.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         }, self::OPTION_KEY);
 
-        add_settings_field('proctor_roles', __('Allowed proctor roles', 'mc-ems-base'), [__CLASS__, 'field_proctor_roles'], self::OPTION_KEY, 'mcems_section_proctor_roles', []);
+        add_settings_field('proctor_roles', __('Allowed proctor roles', 'mc-ems-exam-center-for-tutor-lms'), [__CLASS__, 'field_proctor_roles'], self::OPTION_KEY, 'mcems_section_proctor_roles', []);
     }
 
     /**
@@ -676,10 +676,10 @@ class MCEMS_Settings {
      */
     public static function get_access_control_shortcodes(): array {
         return [
-            'mcems_book_exam'          => __('Exam Booking', 'mc-ems-base'),
-            'mcems_manage_booking'     => __('Manage Booking', 'mc-ems-base'),
-            'mcems_sessions_calendar'  => __('Sessions Calendar', 'mc-ems-base'),
-            'mcems_bookings_list'      => __('Bookings List', 'mc-ems-base'),
+            'mcems_book_exam'          => __('Exam Booking', 'mc-ems-exam-center-for-tutor-lms'),
+            'mcems_manage_booking'     => __('Manage Booking', 'mc-ems-exam-center-for-tutor-lms'),
+            'mcems_sessions_calendar'  => __('Sessions Calendar', 'mc-ems-exam-center-for-tutor-lms'),
+            'mcems_bookings_list'      => __('Bookings List', 'mc-ems-exam-center-for-tutor-lms'),
         ];
     }
 
@@ -750,7 +750,7 @@ class MCEMS_Settings {
 
     public static function render(): void {
         if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Insufficient permissions.', 'mc-ems-base'), 403);
+            wp_die(esc_html__('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms'), 403);
         }
 
         $tab = isset($_GET['tab']) ? sanitize_key(wp_unslash($_GET['tab'])) : 'shortcodes'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only tab navigation
@@ -758,15 +758,15 @@ class MCEMS_Settings {
         if (!in_array($tab, $allowed, true)) $tab = 'shortcodes';
 
         echo '<div class="wrap">';
-        echo '<h1>' . esc_html__('MC-EMS Settings', 'mc-ems-base') . '</h1>';
+        echo '<h1>' . esc_html__('MC-EMS Settings', 'mc-ems-exam-center-for-tutor-lms') . '</h1>';
 
         $tabs = [
-            'shortcodes'     => __('Shortcodes', 'mc-ems-base'),
-            'role_settings'  => __('Role Settings', 'mc-ems-base'),
-            'bookings'       => __('Exam booking settings', 'mc-ems-base'),
-            'exam_access'  => __('Exam access settings', 'mc-ems-base'),
-            'email'          => __('Email settings', 'mc-ems-base'),
-            'pages'          => __('Pages', 'mc-ems-base'),
+            'shortcodes'     => __('Shortcodes', 'mc-ems-exam-center-for-tutor-lms'),
+            'role_settings'  => __('Role Settings', 'mc-ems-exam-center-for-tutor-lms'),
+            'bookings'       => __('Exam booking settings', 'mc-ems-exam-center-for-tutor-lms'),
+            'exam_access'  => __('Exam access settings', 'mc-ems-exam-center-for-tutor-lms'),
+            'email'          => __('Email settings', 'mc-ems-exam-center-for-tutor-lms'),
+            'pages'          => __('Pages', 'mc-ems-exam-center-for-tutor-lms'),
         ];
 
         echo '<h2 class="nav-tab-wrapper" style="margin-top:12px;">';
@@ -778,14 +778,14 @@ class MCEMS_Settings {
 
         if ($tab === 'shortcodes') {
             echo '<div style="margin:16px 0;padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">';
-            echo '<h2 style="margin:0 0 10px 0;">' . esc_html__('Available shortcodes', 'mc-ems-base') . '</h2>';
+            echo '<h2 style="margin:0 0 10px 0;">' . esc_html__('Available shortcodes', 'mc-ems-exam-center-for-tutor-lms') . '</h2>';
             echo '<table class="widefat striped" style="margin:0;">';
-            echo '<thead><tr><th style="width:260px;">Shortcode</th><th>' . esc_html__('Description', 'mc-ems-base') . '</th></tr></thead><tbody>';
+            echo '<thead><tr><th style="width:260px;">Shortcode</th><th>' . esc_html__('Description', 'mc-ems-exam-center-for-tutor-lms') . '</th></tr></thead><tbody>';
 
-            echo '<tr><td><code>[mcems_book_exam]</code></td><td>' . esc_html__('Exam booking (select exam → calendar → choose exam session).', 'mc-ems-base') . '</td></tr>';
-            echo '<tr><td><code>[mcems_manage_booking]</code></td><td>' . esc_html__('Shows the logged-in user exam bookings and allows cancellation.', 'mc-ems-base') . '</td></tr>';
-            echo '<tr><td><code>[mcems_sessions_calendar]</code></td><td>' . esc_html__('Calendar to assign proctors to exam sessions.', 'mc-ems-base') . '</td></tr>';
-            echo '<tr><td><code>[mcems_bookings_list]</code></td><td>' . esc_html__('Exam bookings list (with date and exam filters).', 'mc-ems-base') . '</td></tr>';
+            echo '<tr><td><code>[mcems_book_exam]</code></td><td>' . esc_html__('Exam booking (select exam → calendar → choose exam session).', 'mc-ems-exam-center-for-tutor-lms') . '</td></tr>';
+            echo '<tr><td><code>[mcems_manage_booking]</code></td><td>' . esc_html__('Shows the logged-in user exam bookings and allows cancellation.', 'mc-ems-exam-center-for-tutor-lms') . '</td></tr>';
+            echo '<tr><td><code>[mcems_sessions_calendar]</code></td><td>' . esc_html__('Calendar to assign proctors to exam sessions.', 'mc-ems-exam-center-for-tutor-lms') . '</td></tr>';
+            echo '<tr><td><code>[mcems_bookings_list]</code></td><td>' . esc_html__('Exam bookings list (with date and exam filters).', 'mc-ems-exam-center-for-tutor-lms') . '</td></tr>';
 
             echo '</tbody></table>';
             echo '</div>';
@@ -834,16 +834,16 @@ class MCEMS_Settings {
         echo '<div style="max-width:560px">';
 
         if (!$exams) {
-            echo '<p><em>' . esc_html__('No published Tutor LMS exam found.', 'mc-ems-base') . '</em></p>';
+            echo '<p><em>' . esc_html__('No published Tutor LMS exam found.', 'mc-ems-exam-center-for-tutor-lms') . '</em></p>';
         } else {
             // Search input
-            echo '<input type="text" id="' . esc_attr($id_filter) . '" placeholder="' . esc_attr__('Search exam…', 'mc-ems-base') . '" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #d0d5dd;margin-bottom:8px;box-sizing:border-box;">';
+            echo '<input type="text" id="' . esc_attr($id_filter) . '" placeholder="' . esc_attr__('Search exam…', 'mc-ems-exam-center-for-tutor-lms') . '" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #d0d5dd;margin-bottom:8px;box-sizing:border-box;">';
 
             // Select-all / Deselect-all links
             echo '<div style="margin-bottom:6px;font-size:13px;">';
-            echo '<a href="#" id="' . esc_attr($id_list) . '_all" style="text-decoration:none;">' . esc_html__('Select all', 'mc-ems-base') . '</a>';
+            echo '<a href="#" id="' . esc_attr($id_list) . '_all" style="text-decoration:none;">' . esc_html__('Select all', 'mc-ems-exam-center-for-tutor-lms') . '</a>';
             echo ' &nbsp;|&nbsp; ';
-            echo '<a href="#" id="' . esc_attr($id_list) . '_none" style="text-decoration:none;">' . esc_html__('Deselect all', 'mc-ems-base') . '</a>';
+            echo '<a href="#" id="' . esc_attr($id_list) . '_none" style="text-decoration:none;">' . esc_html__('Deselect all', 'mc-ems-exam-center-for-tutor-lms') . '</a>';
             echo '</div>';
 
             // Checkbox list
@@ -1061,7 +1061,7 @@ class MCEMS_Settings {
             echo '<code>[' . esc_html($sc_tag) . ']</code>';
             echo ' &mdash; ' . esc_html($sc_label);
             echo '</p>';
-            echo '<p style="margin:0 0 12px 0;font-size:12px;color:#6b7280;">' . esc_html__('Check the roles that are allowed to see this shortcode. If none are checked, all roles can see it.', 'mc-ems-base') . '</p>';
+            echo '<p style="margin:0 0 12px 0;font-size:12px;color:#6b7280;">' . esc_html__('Check the roles that are allowed to see this shortcode. If none are checked, all roles can see it.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
             echo '<div style="display:flex;flex-wrap:wrap;gap:10px 20px;">';
 
             foreach ($all_roles as $role_slug => $role_info) {
@@ -1111,7 +1111,7 @@ class MCEMS_Settings {
         }
 
         echo '</div>';
-        echo '<p class="description" style="margin-top:8px;">' . esc_html__('Uncheck all roles to allow any role to be assigned as Proctors.', 'mc-ems-base') . '</p>';
+        echo '<p class="description" style="margin-top:8px;">' . esc_html__('Uncheck all roles to allow any role to be assigned as Proctors.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
     }
 
     /**

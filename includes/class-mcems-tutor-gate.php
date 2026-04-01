@@ -298,8 +298,8 @@ class MCEMS_Tutor_Gate {
 
         if ($user_id <= 0) {
             self::inject_sidebar_block(
-                __('Restricted access', 'mc-ems-base'),
-                esc_html__('You must be logged in to access this exam.', 'mc-ems-base')
+                __('Restricted access', 'mc-ems-exam-center-for-tutor-lms'),
+                esc_html__('You must be logged in to access this exam.', 'mc-ems-exam-center-for-tutor-lms')
             );
             return;
         }
@@ -311,15 +311,15 @@ class MCEMS_Tutor_Gate {
         $slot_id = self::get_active_slot_id($user_id, $exam_id);
 
         if ($slot_id <= 0) {
-            $body = esc_html__('To access, you must first create a booking for an exam session.', 'mc-ems-base');
+            $body = esc_html__('To access, you must first create a booking for an exam session.', 'mc-ems-exam-center-for-tutor-lms');
 
             $mb = self::get_manage_booking_url();
             if ($mb) {
-                $body .= '<br><br><a href="' . esc_url($mb) . '" style="display:inline-block;padding:10px 14px;border-radius:10px;background:#1a73e8;color:#fff;text-decoration:none;font-weight:900;">' . esc_html__('Manage exam booking', 'mc-ems-base') . '</a>';
+                $body .= '<br><br><a href="' . esc_url($mb) . '" style="display:inline-block;padding:10px 14px;border-radius:10px;background:#1a73e8;color:#fff;text-decoration:none;font-weight:900;">' . esc_html__('Manage exam booking', 'mc-ems-exam-center-for-tutor-lms') . '</a>';
             }
 
             self::inject_sidebar_block(
-                esc_html__('Exam access not available', 'mc-ems-base'),
+                esc_html__('Exam access not available', 'mc-ems-exam-center-for-tutor-lms'),
                 $body
             );
             return;
@@ -329,8 +329,8 @@ class MCEMS_Tutor_Gate {
 
         if ($session_ts <= 0) {
             self::inject_sidebar_block(
-                __('Exam access not available', 'mc-ems-base'),
-                esc_html__('Your exam booking does not contain a valid date/time. Please contact support.', 'mc-ems-base')
+                __('Exam access not available', 'mc-ems-exam-center-for-tutor-lms'),
+                esc_html__('Your exam booking does not contain a valid date/time. Please contact support.', 'mc-ems-exam-center-for-tutor-lms')
             );
             return;
         }
@@ -351,15 +351,15 @@ class MCEMS_Tutor_Gate {
                     update_user_meta($user_id, 'mcems_active_bookings', $map);
                 }
 
-                $body = esc_html__('Your exam booking has expired and is no longer valid to access this exam. Please book a new exam session.', 'mc-ems-base');
+                $body = esc_html__('Your exam booking has expired and is no longer valid to access this exam. Please book a new exam session.', 'mc-ems-exam-center-for-tutor-lms');
 
                 $mb = self::get_manage_booking_url();
                 if ($mb) {
-                    $body .= '<br><br><a href="' . esc_url($mb) . '" style="display:inline-block;padding:10px 14px;border-radius:10px;background:#1a73e8;color:#fff;text-decoration:none;font-weight:900;">' . esc_html__('Manage exam booking', 'mc-ems-base') . '</a>';
+                    $body .= '<br><br><a href="' . esc_url($mb) . '" style="display:inline-block;padding:10px 14px;border-radius:10px;background:#1a73e8;color:#fff;text-decoration:none;font-weight:900;">' . esc_html__('Manage exam booking', 'mc-ems-exam-center-for-tutor-lms') . '</a>';
                 }
 
                 self::inject_sidebar_block(
-                    esc_html__('Exam access not available', 'mc-ems-base'),
+                    esc_html__('Exam access not available', 'mc-ems-exam-center-for-tutor-lms'),
                     $body
                 );
                 return;
@@ -373,10 +373,10 @@ class MCEMS_Tutor_Gate {
         $unlock_h = wp_date('d/m/Y \a\t H:i', $unlock_ts, wp_timezone());
 
         self::inject_sidebar_block(
-            esc_html__('Exam locked', 'mc-ems-base'),
+            esc_html__('Exam locked', 'mc-ems-exam-center-for-tutor-lms'),
             sprintf(
                 '%s <strong>%s</strong>.',
-                esc_html__('You can access starting from', 'mc-ems-base'),
+                esc_html__('You can access starting from', 'mc-ems-exam-center-for-tutor-lms'),
                 esc_html($unlock_h)
             )
         );

@@ -61,11 +61,11 @@ class MCEMS_Booking {
             'nonce'       => wp_create_nonce('mcems_booking'),
             'cancelNonce' => wp_create_nonce('mcems_cancel'),
             'i18n'        => [
-                'errorLoadSessions' => __('Error loading sessions.', 'mc-ems-base'),
-                'bookingFailed'     => __('Exam booking failed.', 'mc-ems-base'),
-                'bookingConfirmed'  => __('Exam booking confirmed!', 'mc-ems-base'),
-                'bookingCancelled'  => __('Exam booking cancelled.', 'mc-ems-base'),
-                'cancellationFailed' => __('Cancellation failed.', 'mc-ems-base'),
+                'errorLoadSessions' => __('Error loading sessions.', 'mc-ems-exam-center-for-tutor-lms'),
+                'bookingFailed'     => __('Exam booking failed.', 'mc-ems-exam-center-for-tutor-lms'),
+                'bookingConfirmed'  => __('Exam booking confirmed!', 'mc-ems-exam-center-for-tutor-lms'),
+                'bookingCancelled'  => __('Exam booking cancelled.', 'mc-ems-exam-center-for-tutor-lms'),
+                'cancellationFailed' => __('Cancellation failed.', 'mc-ems-exam-center-for-tutor-lms'),
             ],
         ]);
     }
@@ -242,7 +242,7 @@ class MCEMS_Booking {
 
     public static function shortcode_prenota(): string {
         if (!MCEMS_Settings::user_can_view_shortcode('mcems_book_exam')) {
-            return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-base') . '</p>';
+            return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         }
 
         $user_id   = (int) get_current_user_id();
@@ -256,27 +256,27 @@ class MCEMS_Booking {
         ob_start();
         ?>
         <div id="prenotazione-esame" style="max-width: 640px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
-            <h2 style="text-align: center; font-size: 1.5rem; margin-bottom: 8px;"><?php echo esc_html__('Book your exam', 'mc-ems-base'); ?></h2>
+            <h2 style="text-align: center; font-size: 1.5rem; margin-bottom: 8px;"><?php echo esc_html__('Book your exam', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
 
             <?php if (!$user_id): ?>
-                <p style="text-align:center; color:#f44336; font-weight:bold;"><?php echo esc_html__('You must be logged in to book an exam.', 'mc-ems-base'); ?></p>
+                <p style="text-align:center; color:#f44336; font-weight:bold;"><?php echo esc_html__('You must be logged in to book an exam.', 'mc-ems-exam-center-for-tutor-lms'); ?></p>
             <?php else: ?>
                 <p style="text-align:center; margin:0 0 16px; font-size: 0.9rem; color:#666;">
                     <?php echo sprintf(
                         /* translators: %d: number of hours before the exam session by which booking must be made */
-                        esc_html__('You can book up to %d hours before the exam session time.', 'mc-ems-base'),
+                        esc_html__('You can book up to %d hours before the exam session time.', 'mc-ems-exam-center-for-tutor-lms'),
                         (int) self::get_anticipo_ore()
                     ); ?>
                 </p>
 
-                <label for="mcems_exam_select" style="font-weight:bold; display:block; margin-bottom:8px;"><?php echo esc_html__('Choose the exam:', 'mc-ems-base'); ?></label>
+                <label for="mcems_exam_select" style="font-weight:bold; display:block; margin-bottom:8px;"><?php echo esc_html__('Choose the exam:', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                 <?php if (!$exam_pt): ?>
-                    <p style="color:#f44336; font-weight:bold;"><?php echo esc_html__('Tutor LMS not detected (exam post type not found).', 'mc-ems-base'); ?></p>
+                    <p style="color:#f44336; font-weight:bold;"><?php echo esc_html__('Tutor LMS not detected (exam post type not found).', 'mc-ems-exam-center-for-tutor-lms'); ?></p>
                 <?php elseif (!$exams): ?>
-                    <p style="color:#f44336; font-weight:bold;"><?php echo esc_html__('No published Tutor LMS exam found.', 'mc-ems-base'); ?></p>
+                    <p style="color:#f44336; font-weight:bold;"><?php echo esc_html__('No published Tutor LMS exam found.', 'mc-ems-exam-center-for-tutor-lms'); ?></p>
                 <?php else: ?>
                     <select id="mcems_exam_select" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc; margin-bottom:20px;">
-                        <option value=""><?php echo esc_html__('— Select exam —', 'mc-ems-base'); ?></option>
+                        <option value=""><?php echo esc_html__('— Select exam —', 'mc-ems-exam-center-for-tutor-lms'); ?></option>
                         <?php foreach ($exams as $cid => $title): ?>
                             <option value="<?php echo (int) $cid; ?>"><?php echo esc_html($title); ?></option>
                         <?php endforeach; ?>
@@ -297,13 +297,13 @@ class MCEMS_Booking {
                     </div>
 
                     <div style="display:grid; grid-template-columns:repeat(7,1fr); max-width:360px; margin:0 auto 4px; gap:4px;">
-                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Mon', 'mc-ems-base'); ?></div>
-                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Tue', 'mc-ems-base'); ?></div>
-                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Wed', 'mc-ems-base'); ?></div>
-                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Thu', 'mc-ems-base'); ?></div>
-                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Fri', 'mc-ems-base'); ?></div>
-                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Sat', 'mc-ems-base'); ?></div>
-                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Sun', 'mc-ems-base'); ?></div>
+                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Mon', 'mc-ems-exam-center-for-tutor-lms'); ?></div>
+                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Tue', 'mc-ems-exam-center-for-tutor-lms'); ?></div>
+                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Wed', 'mc-ems-exam-center-for-tutor-lms'); ?></div>
+                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Thu', 'mc-ems-exam-center-for-tutor-lms'); ?></div>
+                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Fri', 'mc-ems-exam-center-for-tutor-lms'); ?></div>
+                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Sat', 'mc-ems-exam-center-for-tutor-lms'); ?></div>
+                        <div style="text-align:center; font-weight:700; font-size:12px; padding:3px 0;"><?php echo esc_html__('Sun', 'mc-ems-exam-center-for-tutor-lms'); ?></div>
                     </div>
 
                     <div id="mcems-booking-calendar" style="display:grid; grid-template-columns:repeat(7,1fr); max-width:360px; margin:0 auto; gap:4px;"></div>
@@ -311,19 +311,19 @@ class MCEMS_Booking {
                     <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:12px auto 0; font-size:12px; color:#555; max-width:420px;">
                         <span style="display:inline-flex; align-items:center; gap:5px;">
                             <span style="width:10px; height:10px; border-radius:50%; background:#4caf50; display:inline-block;"></span>
-                            <?php echo esc_html__('High availability', 'mc-ems-base'); ?>
+                            <?php echo esc_html__('High availability', 'mc-ems-exam-center-for-tutor-lms'); ?>
                         </span>
                         <span style="display:inline-flex; align-items:center; gap:5px;">
                             <span style="width:10px; height:10px; border-radius:50%; background:#ffeb3b; display:inline-block; border:1px solid #d4c600;"></span>
-                            <?php echo esc_html__('Medium availability', 'mc-ems-base'); ?>
+                            <?php echo esc_html__('Medium availability', 'mc-ems-exam-center-for-tutor-lms'); ?>
                         </span>
                         <span style="display:inline-flex; align-items:center; gap:5px;">
                             <span style="width:10px; height:10px; border-radius:50%; background:#ff9800; display:inline-block;"></span>
-                            <?php echo esc_html__('Low availability', 'mc-ems-base'); ?>
+                            <?php echo esc_html__('Low availability', 'mc-ems-exam-center-for-tutor-lms'); ?>
                         </span>
                         <span style="display:inline-flex; align-items:center; gap:5px;">
                             <span style="width:10px; height:10px; border-radius:50%; background:#f44336; display:inline-block;"></span>
-                            <?php echo esc_html__('Full', 'mc-ems-base'); ?>
+                            <?php echo esc_html__('Full', 'mc-ems-exam-center-for-tutor-lms'); ?>
                         </span>
                     </div>
                 </div>
@@ -331,7 +331,7 @@ class MCEMS_Booking {
                 <div id="slot-container" style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;"></div>
 
                 <div id="confirm-container" style="display:none; text-align:center; margin-top:20px;">
-                    <button id="confirm-button" style="background-color:#4CAF50; color:#fff; padding:12px 24px; border:none; border-radius:5px; cursor:pointer;"><?php echo esc_html__('Confirm booking', 'mc-ems-base'); ?></button>
+                    <button id="confirm-button" style="background-color:#4CAF50; color:#fff; padding:12px 24px; border:none; border-radius:5px; cursor:pointer;"><?php echo esc_html__('Confirm booking', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
                 </div>
 
                 <script>
@@ -409,14 +409,14 @@ class MCEMS_Booking {
                             .then(data => {
                                 if (data && data.has_booking) {
                                     let msg = '<p style="text-align:center;">'
-                                        + '<?php echo esc_js(__('You already have an active booking for this exam.', 'mc-ems-base')); ?>'
+                                        + '<?php echo esc_js(__('You already have an active booking for this exam.', 'mc-ems-exam-center-for-tutor-lms')); ?>'
                                         + '<br>';
                                     if (manageBookingUrl) {
-                                        msg += '<?php echo esc_js(__('Go to', 'mc-ems-base')); ?> <a href="' + manageBookingUrl + '">'
-                                            + '<?php echo esc_js(__('Manage exam booking', 'mc-ems-base')); ?>'
-                                            + '</a> <?php echo esc_js(__('to cancel it.', 'mc-ems-base')); ?>';
+                                        msg += '<?php echo esc_js(__('Go to', 'mc-ems-exam-center-for-tutor-lms')); ?> <a href="' + manageBookingUrl + '">'
+                                            + '<?php echo esc_js(__('Manage exam booking', 'mc-ems-exam-center-for-tutor-lms')); ?>'
+                                            + '</a> <?php echo esc_js(__('to cancel it.', 'mc-ems-exam-center-for-tutor-lms')); ?>';
                                     } else {
-                                        msg += '<?php echo esc_js(__('Please open the Manage exam booking page to cancel it.', 'mc-ems-base')); ?>';
+                                        msg += '<?php echo esc_js(__('Please open the Manage exam booking page to cancel it.', 'mc-ems-exam-center-for-tutor-lms')); ?>';
                                     }
                                     msg += '</p>';
                                     showBookingMessage(msg);
@@ -435,7 +435,7 @@ class MCEMS_Booking {
                         if (!examSelect || !examSelect.value) {
                             if (dateInput) dateInput.value = '';
                             showCalendar(false);
-                            resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select an exam first.', 'mc-ems-base')); ?></p>');
+                            resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select an exam first.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
                             return false;
                         }
                         showCalendar(true);
@@ -477,11 +477,11 @@ class MCEMS_Booking {
 
                     function loadSlotsForDate(dateValue) {
                         if (!dateValue) {
-                            resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select a date from the calendar.', 'mc-ems-base')); ?></p>');
+                            resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select a date from the calendar.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
                             return;
                         }
 
-                        resetSlots('<p style="color:#666;"><?php echo esc_js(__('Loading available sessions...', 'mc-ems-base')); ?></p>');
+                        resetSlots('<p style="color:#666;"><?php echo esc_js(__('Loading available sessions...', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
 
                         const url = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>?action=mcems_get_slot_per_data&data='
                             + encodeURIComponent(dateValue)
@@ -497,7 +497,7 @@ class MCEMS_Booking {
                                 }
 
                                 if (!Array.isArray(data) || !data.length) {
-                                    resetSlots('<p style="color:#888;"><?php echo esc_js(__('No sessions available for this exam and date.', 'mc-ems-base')); ?></p>');
+                                    resetSlots('<p style="color:#888;"><?php echo esc_js(__('No sessions available for this exam and date.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
                                     return;
                                 }
 
@@ -543,7 +543,7 @@ class MCEMS_Booking {
                                 });
                             })
                             .catch(() => {
-                                resetSlots('<p style="color:#f44336;"><?php echo esc_js(__('Error loading sessions. Please try again.', 'mc-ems-base')); ?></p>');
+                                resetSlots('<p style="color:#f44336;"><?php echo esc_js(__('Error loading sessions. Please try again.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
                             });
                     }
 
@@ -642,7 +642,7 @@ class MCEMS_Booking {
                                 });
                             })
                             .catch(() => {
-                                resetSlots('<p style="color:#f44336;"><?php echo esc_js(__('Unable to load calendar availability. Please try again.', 'mc-ems-base')); ?></p>');
+                                resetSlots('<p style="color:#f44336;"><?php echo esc_js(__('Unable to load calendar availability. Please try again.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
                             });
                     }
 
@@ -654,7 +654,7 @@ class MCEMS_Booking {
                                 dateInput.value = '';
                             }
 
-                            resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select a date from the calendar.', 'mc-ems-base')); ?></p>');
+                            resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select a date from the calendar.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
                             checkExistingBooking();
                         });
                     }
@@ -688,7 +688,7 @@ class MCEMS_Booking {
                     if (confirmButton) {
                         confirmButton.addEventListener('click', function () {
                             if (!selectedSlot) {
-                                return alert('<?php echo esc_js(__('Select an exam session before confirming.', 'mc-ems-base')); ?>');
+                                return alert('<?php echo esc_js(__('Select an exam session before confirming.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
                             }
 
                             const formData = new FormData();
@@ -704,17 +704,17 @@ class MCEMS_Booking {
                                 document.getElementById('prenotazione-esame').innerHTML = html;
                             })
                             .catch(() => {
-                                alert('<?php echo esc_js(__('An error occurred. Please try again.', 'mc-ems-base')); ?>');
+                                alert('<?php echo esc_js(__('An error occurred. Please try again.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
                             });
                         });
                     }
 
                     if (examSelect && examSelect.value) {
-                        resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select a date from the calendar.', 'mc-ems-base')); ?></p>');
+                        resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select a date from the calendar.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
                         renderBookingCalendar();
                     } else {
                         showCalendar(false);
-                        resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select an exam first.', 'mc-ems-base')); ?></p>');
+                        resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select an exam first.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
                     }
                 });
                 </script>
@@ -726,20 +726,20 @@ class MCEMS_Booking {
 
     public static function shortcode_gestisci(): string {
         if (!MCEMS_Settings::user_can_view_shortcode('mcems_manage_booking')) {
-            return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-base') . '</p>';
+            return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         }
 
         $user_id = (int) get_current_user_id();
-        if (!$user_id) return '<p>' . esc_html__('You must be logged in.', 'mc-ems-base') . '</p>';
+        if (!$user_id) return '<p>' . esc_html__('You must be logged in.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
 
         $map = self::get_active_bookings($user_id);
         if (!$map) {
             $url = MCEMS_Settings::get_booking_page_url();
             if ($url) {
-                $btn = '<p><a class="button button-primary" href="' . esc_url($url) . '">' . esc_html__('Open exam booking calendar', 'mc-ems-base') . '</a></p>';
-                return '<p>' . esc_html__('No active exam booking.', 'mc-ems-base') . '</p>' . $btn;
+                $btn = '<p><a class="button button-primary" href="' . esc_url($url) . '">' . esc_html__('Open exam booking calendar', 'mc-ems-exam-center-for-tutor-lms') . '</a></p>';
+                return '<p>' . esc_html__('No active exam booking.', 'mc-ems-exam-center-for-tutor-lms') . '</p>' . $btn;
             }
-            return '<p>' . esc_html__('No active exam booking.', 'mc-ems-base') . '</p>';
+            return '<p>' . esc_html__('No active exam booking.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         }
 
         uasort($map, function($a, $b) {
@@ -772,8 +772,8 @@ class MCEMS_Booking {
             <div style="padding:16px;border:1px solid #e5e7eb;border-radius:16px;background:linear-gradient(180deg,#ffffff 0%, #fbfcff 100%);">
                 <div class="mcems-row">
                     <div>
-                        <h3 class="mcems-h3"><?php echo esc_html__('My exam bookings', 'mc-ems-base'); ?></h3>
-                        <p class="mcems-sub"><?php echo esc_html__('Here you can find your active exam bookings (one per exam). You can cancel them according to the notice rules.', 'mc-ems-base'); ?></p>
+                        <h3 class="mcems-h3"><?php echo esc_html__('My exam bookings', 'mc-ems-exam-center-for-tutor-lms'); ?></h3>
+                        <p class="mcems-sub"><?php echo esc_html__('Here you can find your active exam bookings (one per exam). You can cancel them according to the notice rules.', 'mc-ems-exam-center-for-tutor-lms'); ?></p>
                     </div>
                 </div>
 
@@ -809,24 +809,24 @@ class MCEMS_Booking {
 
                             <div class="mcems-actions">
                                 <?php if ($gcal_url): ?>
-                                    <a class="mcems-btn" target="_blank" rel="noopener noreferrer" href="<?php echo esc_url($gcal_url); ?>"><?php echo esc_html__('Add to Google Calendar', 'mc-ems-base'); ?></a>
+                                    <a class="mcems-btn" target="_blank" rel="noopener noreferrer" href="<?php echo esc_url($gcal_url); ?>"><?php echo esc_html__('Add to Google Calendar', 'mc-ems-exam-center-for-tutor-lms'); ?></a>
                                 <?php endif; ?>
 
                                 <?php if ($can_cancel): ?>
-                                    <button class="mcems-btn mcems-cancel" data-slot="<?php echo (int) $slot_id; ?>" data-exam="<?php echo (int) $exam_id; ?>"><?php echo esc_html__('Cancel exam booking', 'mc-ems-base'); ?></button>
+                                    <button class="mcems-btn mcems-cancel" data-slot="<?php echo (int) $slot_id; ?>" data-exam="<?php echo (int) $exam_id; ?>"><?php echo esc_html__('Cancel exam booking', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
                                     <?php if ($slot_ts > $now_ts): ?>
                                         <span class="mcems-muted"><?php echo esc_html(sprintf(
                                             /* translators: %d: number of hours before the exam session by which cancellation is allowed */
-                                            __('Exam booking cancellation deadline: %dh before the exam session', 'mc-ems-base'),
+                                            __('Exam booking cancellation deadline: %dh before the exam session', 'mc-ems-exam-center-for-tutor-lms'),
                                             (int) self::get_annullamento_ore()
                                         )); ?></span>
                                     <?php else: ?>
-                                        <span class="mcems-muted"><?php echo esc_html__('Past exam session — cancellation allowed', 'mc-ems-base'); ?></span>
+                                        <span class="mcems-muted"><?php echo esc_html__('Past exam session — cancellation allowed', 'mc-ems-exam-center-for-tutor-lms'); ?></span>
                                     <?php endif; ?>
                                 <?php else: ?>
                                     <span class="mcems-muted"><?php echo esc_html(sprintf(
                                         /* translators: %d: number of hours before the exam session within which cancellation is not allowed */
-                                        __('Cancellation is allowed only up to %dh before the exam session.', 'mc-ems-base'),
+                                        __('Cancellation is allowed only up to %dh before the exam session.', 'mc-ems-exam-center-for-tutor-lms'),
                                         (int) self::get_annullamento_ore()
                                     )); ?></span>
                                 <?php endif; ?>
@@ -848,7 +848,7 @@ class MCEMS_Booking {
 
             document.querySelectorAll('.mcems-cancel').forEach(btn => {
                 btn.addEventListener('click', function(){
-                    if (!confirm('<?php echo esc_js(__('Confirm exam booking cancellation?', 'mc-ems-base')); ?>')) return;
+                    if (!confirm('<?php echo esc_js(__('Confirm exam booking cancellation?', 'mc-ems-exam-center-for-tutor-lms')); ?>')) return;
 
                     const fd = new FormData();
                     fd.append('action','mcems_cancel_booking');
@@ -860,14 +860,14 @@ class MCEMS_Booking {
                         .then(r => r.json())
                         .then(j => {
                             if (j && j.success) {
-                                msg.textContent = '✅ <?php echo esc_js(__('Exam booking cancelled.', 'mc-ems-base')); ?>';
+                                msg.textContent = '✅ <?php echo esc_js(__('Exam booking cancelled.', 'mc-ems-exam-center-for-tutor-lms')); ?>';
                                 location.reload();
                             } else {
-                                msg.textContent = '⚠️ ' + ((j && j.data) ? j.data : '<?php echo esc_js(__('Error.', 'mc-ems-base')); ?>');
+                                msg.textContent = '⚠️ ' + ((j && j.data) ? j.data : '<?php echo esc_js(__('Error.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
                             }
                         })
                         .catch(() => {
-                            msg.textContent='⚠️ <?php echo esc_js(__('Network error', 'mc-ems-base')); ?>';
+                            msg.textContent='⚠️ <?php echo esc_js(__('Network error', 'mc-ems-exam-center-for-tutor-lms')); ?>';
                         });
                 });
             });
@@ -1046,35 +1046,35 @@ class MCEMS_Booking {
     public static function ajax_confirm_booking(): void {
         $user_id = (int) get_current_user_id();
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('You must be logged in to book.', 'mc-ems-base')], 403);
+            wp_send_json_error(['message' => esc_html__('You must be logged in to book.', 'mc-ems-exam-center-for-tutor-lms')], 403);
         }
 
         $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
         if (!wp_verify_nonce($nonce, 'mcems_booking')) {
-            wp_send_json_error(['message' => esc_html__('Invalid nonce.', 'mc-ems-base')], 400);
+            wp_send_json_error(['message' => esc_html__('Invalid nonce.', 'mc-ems-exam-center-for-tutor-lms')], 400);
         }
 
         $slot_id = absint($_POST['slot_id'] ?? 0);
         if ($slot_id <= 0 || get_post_type($slot_id) !== MCEMS_CPT_Sessioni_Esame::CPT) {
-            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('Invalid exam session.', 'mc-ems-base') . '</p>';
+            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('Invalid exam session.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
             wp_die();
         }
 
         $exam_id = (int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, true);
         if ($exam_id <= 0) {
-            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('Exam session is not associated with an exam.', 'mc-ems-base') . '</p>';
+            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('Exam session is not associated with an exam.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
             wp_die();
         }
 
         $active_for_exam = self::get_active_booking_for_exam($user_id, $exam_id);
         if (!empty($active_for_exam['slot_id']) && (int) $active_for_exam['slot_id'] !== $slot_id) {
-            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('You already have an active booking for this exam.', 'mc-ems-base') . '</p>';
+            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('You already have an active booking for this exam.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
             wp_die();
         }
 
         $lock_key = '_mcems_lock';
         if (get_post_meta($slot_id, $lock_key, true)) {
-            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('Exam session is being updated, please try again.', 'mc-ems-base') . '</p>';
+            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('Exam session is being updated, please try again.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
             wp_die();
         }
         update_post_meta($slot_id, $lock_key, time());
@@ -1090,7 +1090,7 @@ class MCEMS_Booking {
         $spec_uid   = (int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, true);
         if ($is_special && $spec_uid > 0 && $user_id !== $spec_uid) {
             delete_post_meta($slot_id, $lock_key);
-            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('This exam session is reserved.', 'mc-ems-base') . '</p>';
+            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('This exam session is reserved.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
             wp_die();
         }
 
@@ -1102,13 +1102,13 @@ class MCEMS_Booking {
                 'created_at' => current_time('mysql'),
             ]);
             delete_post_meta($slot_id, $lock_key);
-            echo '<p style="text-align:center; color:#4CAF50; font-weight:bold;">' . esc_html__('Exam booking already exists.', 'mc-ems-base') . '</p>';
+            echo '<p style="text-align:center; color:#4CAF50; font-weight:bold;">' . esc_html__('Exam booking already exists.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
             wp_die();
         }
 
         if (count($occupati) >= $max) {
             delete_post_meta($slot_id, $lock_key);
-            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('This exam session is full.', 'mc-ems-base') . '</p>';
+            echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('This exam session is full.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
             wp_die();
         }
 
@@ -1129,23 +1129,23 @@ class MCEMS_Booking {
 
         $exam_title = MCEMS_Tutor::exam_title($exam_id);
 
-        echo '<p style="text-align:center; color:#4CAF50; font-weight:bold;">' . esc_html__('Exam booking confirmed!', 'mc-ems-base') . '</p>';
+        echo '<p style="text-align:center; color:#4CAF50; font-weight:bold;">' . esc_html__('Exam booking confirmed!', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         if ($exam_title) {
-            echo '<p style="text-align:center;">' . esc_html__('Exam:', 'mc-ems-base') . ' <strong>' . esc_html($exam_title) . '</strong></p>';
+            echo '<p style="text-align:center;">' . esc_html__('Exam:', 'mc-ems-exam-center-for-tutor-lms') . ' <strong>' . esc_html($exam_title) . '</strong></p>';
         }
-        echo '<p style="text-align:center;">' . esc_html__('Exam session:', 'mc-ems-base') . ' <strong>' . esc_html(date_i18n('d/m/Y', strtotime($data))) . '</strong> ' . esc_html__('at', 'mc-ems-base') . ' <strong>' . esc_html($orario) . '</strong></p>';
+        echo '<p style="text-align:center;">' . esc_html__('Exam session:', 'mc-ems-exam-center-for-tutor-lms') . ' <strong>' . esc_html(date_i18n('d/m/Y', strtotime($data))) . '</strong> ' . esc_html__('at', 'mc-ems-exam-center-for-tutor-lms') . ' <strong>' . esc_html($orario) . '</strong></p>';
 
         $gcal_url = self::mcems_get_google_calendar_url($slot_id, $exam_id);
         if ($gcal_url) {
             echo '<p style="text-align:center; margin-top:14px;">';
-            echo '<a class="button" target="_blank" rel="noopener noreferrer" href="' . esc_url($gcal_url) . '">' . esc_html__('Add to Google Calendar', 'mc-ems-base') . '</a>';
+            echo '<a class="button" target="_blank" rel="noopener noreferrer" href="' . esc_url($gcal_url) . '">' . esc_html__('Add to Google Calendar', 'mc-ems-exam-center-for-tutor-lms') . '</a>';
             echo '</p>';
         }
 
         $manage_url = MCEMS_Settings::get_manage_booking_page_url();
         if ($manage_url) {
             $manage_link = add_query_arg(['exam_id' => $exam_id], $manage_url);
-            echo '<p style="text-align:center; margin-top:14px;"><a class="button button-primary" href="' . esc_url($manage_link) . '">' . esc_html__('Manage exam booking', 'mc-ems-base') . '</a></p>';
+            echo '<p style="text-align:center; margin-top:14px;"><a class="button button-primary" href="' . esc_url($manage_link) . '">' . esc_html__('Manage exam booking', 'mc-ems-exam-center-for-tutor-lms') . '</a></p>';
         }
 
         wp_die();
@@ -1153,19 +1153,19 @@ class MCEMS_Booking {
 
     public static function ajax_cancel_booking(): void {
         $user_id = (int) get_current_user_id();
-        if (!$user_id) wp_send_json_error(__('You must be logged in.', 'mc-ems-base'));
+        if (!$user_id) wp_send_json_error(__('You must be logged in.', 'mc-ems-exam-center-for-tutor-lms'));
 
         if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'mcems_cancel')) {
-            wp_send_json_error(__('Invalid nonce.', 'mc-ems-base'));
+            wp_send_json_error(__('Invalid nonce.', 'mc-ems-exam-center-for-tutor-lms'));
         }
 
         if (!self::is_annullamento_consentito()) {
-            wp_send_json_error(__('Cancellation is disabled.', 'mc-ems-base'));
+            wp_send_json_error(__('Cancellation is disabled.', 'mc-ems-exam-center-for-tutor-lms'));
         }
 
         $slot_id = absint($_POST['slot_id'] ?? 0);
         $exam_id = absint($_POST['exam_id'] ?? 0);
-        if ($slot_id <= 0) wp_send_json_error(__('Invalid exam session.', 'mc-ems-base'));
+        if ($slot_id <= 0) wp_send_json_error(__('Invalid exam session.', 'mc-ems-exam-center-for-tutor-lms'));
 
         if (get_post_type($slot_id) !== MCEMS_CPT_Sessioni_Esame::CPT) {
             if ($exam_id > 0) self::remove_active_booking_for_exam($user_id, $exam_id);
@@ -1182,7 +1182,7 @@ class MCEMS_Booking {
 
         if ($slot_ts > $now_ts) {
             if (($slot_ts - $now_ts) <= (self::get_annullamento_ore() * HOUR_IN_SECONDS)) {
-                wp_send_json_error(__('Too late to cancel.', 'mc-ems-base'));
+                wp_send_json_error(__('Too late to cancel.', 'mc-ems-exam-center-for-tutor-lms'));
             }
         }
 
@@ -1191,13 +1191,13 @@ class MCEMS_Booking {
 
         if (!in_array($user_id, $occupati, true)) {
             if ($exam_id > 0) self::remove_active_booking_for_exam($user_id, $exam_id);
-            wp_send_json_error(__('You are not booked on this session (meta realigned).', 'mc-ems-base'));
+            wp_send_json_error(__('You are not booked on this session (meta realigned).', 'mc-ems-exam-center-for-tutor-lms'));
         }
 
         $is_special = ((int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
         $spec_uid   = (int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, true);
         if ($is_special && $spec_uid > 0) {
-            wp_send_json_error(__('This session is reserved and cannot be cancelled from the front-end.', 'mc-ems-base'));
+            wp_send_json_error(__('This session is reserved and cannot be cancelled from the front-end.', 'mc-ems-exam-center-for-tutor-lms'));
         }
 
         $occupati = array_values(array_filter(array_map('intval', $occupati), function($id) use ($user_id) {

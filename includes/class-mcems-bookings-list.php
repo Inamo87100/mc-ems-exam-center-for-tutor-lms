@@ -162,7 +162,7 @@ class MCEMS_Bookings_List_Base {
         $filter = self::normalize_date_filter($selected_date, $date_from, $date_to, $advanced);
         if ($filter === null) {
             status_header(400);
-            echo esc_html__('Missing or invalid date filter.', 'mc-ems-base');
+            echo esc_html__('Missing or invalid date filter.', 'mc-ems-exam-center-for-tutor-lms');
             exit;
         }
 
@@ -282,14 +282,14 @@ class MCEMS_Bookings_List_Base {
 
         <div class="mcems-adminwrap">
             <div class="mcems-panel">
-                <h3 class="mcems-title"><?php echo esc_html__('Bookings list', 'mc-ems-base'); ?></h3>
+                <h3 class="mcems-title"><?php echo esc_html__('Bookings list', 'mc-ems-exam-center-for-tutor-lms'); ?></h3>
                 <p class="mcems-desc"><?php
                 // translators: %1$s and %2$s are HTML <strong> tags wrapping the word "date"
-                echo sprintf(esc_html__('Filter by %1$sdate%2$s (single day or date range). You can also filter by exam.', 'mc-ems-base'), '<strong>', '</strong>'); ?></p>
+                echo sprintf(esc_html__('Filter by %1$sdate%2$s (single day or date range). You can also filter by exam.', 'mc-ems-exam-center-for-tutor-lms'), '<strong>', '</strong>'); ?></p>
 
                 <div class="mcems-search-toggle" style="margin:8px 0 14px 0;">
                     <button type="button" id="mcems_adv_btn" class="mcems-btn" aria-pressed="false">
-                        <?php echo esc_html__('Advanced search', 'mc-ems-base'); ?>
+                        <?php echo esc_html__('Advanced search', 'mc-ems-exam-center-for-tutor-lms'); ?>
                     </button>
                 </div>
 
@@ -307,13 +307,13 @@ class MCEMS_Bookings_List_Base {
 
                     <div class="mcems-basic-filters" style="display:flex; gap:12px; flex-wrap:wrap;">
                         <div class="mcems-field">
-                            <label for="mcems_date"><?php echo esc_html__('Date', 'mc-ems-base'); ?></label>
+                            <label for="mcems_date"><?php echo esc_html__('Date', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                             <input type="date" id="mcems_date" name="mcems_date" value="<?php echo esc_attr($selected_date); ?>">
                         </div>
                         <div class="mcems-field">
-                            <label for="mcems_exam"><?php echo esc_html__('Exam', 'mc-ems-base'); ?></label>
+                            <label for="mcems_exam"><?php echo esc_html__('Exam', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                             <select id="mcems_exam" name="mcems_exam">
-                                <option value="0"><?php echo esc_html__('All exams', 'mc-ems-base'); ?></option>
+                                <option value="0"><?php echo esc_html__('All exams', 'mc-ems-exam-center-for-tutor-lms'); ?></option>
                                 <?php if ($exam_pt && $exams): foreach ($exams as $cid => $title): ?>
                                     <option value="<?php echo (int) $cid; ?>" <?php selected($selected_exam, (int) $cid); ?>>
                                         <?php echo esc_html($title); ?>
@@ -325,17 +325,17 @@ class MCEMS_Bookings_List_Base {
 
                     <div class="mcems-advanced-filters" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:10px;">
                         <div class="mcems-field">
-                            <label for="mcems_from"><?php echo esc_html__('From', 'mc-ems-base'); ?></label>
+                            <label for="mcems_from"><?php echo esc_html__('From', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                             <input type="date" id="mcems_from" name="mcems_from" value="<?php echo esc_attr($date_from); ?>">
                         </div>
                         <div class="mcems-field">
-                            <label for="mcems_to"><?php echo esc_html__('To', 'mc-ems-base'); ?></label>
+                            <label for="mcems_to"><?php echo esc_html__('To', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                             <input type="date" id="mcems_to" name="mcems_to" value="<?php echo esc_attr($date_to); ?>">
                         </div>
                         <div class="mcems-field">
-                            <label for="mcems_exam_adv"><?php echo esc_html__('Exam', 'mc-ems-base'); ?></label>
+                            <label for="mcems_exam_adv"><?php echo esc_html__('Exam', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                             <select id="mcems_exam_adv" name="mcems_exam">
-                                <option value="0"><?php echo esc_html__('All exams', 'mc-ems-base'); ?></option>
+                                <option value="0"><?php echo esc_html__('All exams', 'mc-ems-exam-center-for-tutor-lms'); ?></option>
                                 <?php if ($exam_pt && $exams): foreach ($exams as $cid => $title): ?>
                                     <option value="<?php echo (int) $cid; ?>" <?php selected($selected_exam, (int) $cid); ?>>
                                         <?php echo esc_html($title); ?>
@@ -346,10 +346,10 @@ class MCEMS_Bookings_List_Base {
                     </div>
 
                     <div class="mcems-actions">
-                        <button class="mcems-btn" type="submit"><?php echo esc_html__('Filter', 'mc-ems-base'); ?></button>
-                        <a class="mcems-link" href="<?php echo esc_url(remove_query_arg(['mcems_date', 'mcems_from', 'mcems_to', 'mcems_exam', 'mcems_adv'])); ?>"><?php echo esc_html__('Reset', 'mc-ems-base'); ?></a>
+                        <button class="mcems-btn" type="submit"><?php echo esc_html__('Filter', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
+                        <a class="mcems-link" href="<?php echo esc_url(remove_query_arg(['mcems_date', 'mcems_from', 'mcems_to', 'mcems_exam', 'mcems_adv'])); ?>"><?php echo esc_html__('Reset', 'mc-ems-exam-center-for-tutor-lms'); ?></a>
                         <?php if ($has_filter): ?>
-                            <button class="mcems-btn" type="submit" name="mcems_export" value="csv"><?php echo esc_html__('Export CSV', 'mc-ems-base'); ?></button>
+                            <button class="mcems-btn" type="submit" name="mcems_export" value="csv"><?php echo esc_html__('Export CSV', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
                         <?php endif; ?>
                     </div>
 
@@ -366,7 +366,7 @@ class MCEMS_Bookings_List_Base {
         if(advWrap) advWrap.style.display = isAdv ? 'flex':'none';
         if(btn){
             btn.setAttribute('aria-pressed', isAdv ? 'true' : 'false');
-            btn.textContent = isAdv ? '<?php echo esc_js(__('Basic search', 'mc-ems-base')); ?>' : '<?php echo esc_js(__('Advanced search', 'mc-ems-base')); ?>';
+            btn.textContent = isAdv ? '<?php echo esc_js(__('Basic search', 'mc-ems-exam-center-for-tutor-lms')); ?>' : '<?php echo esc_js(__('Advanced search', 'mc-ems-exam-center-for-tutor-lms')); ?>';
         }
         if(isAdv){
             var d = document.getElementById('mcems_date'); if(d) d.value='';
@@ -392,7 +392,7 @@ class MCEMS_Bookings_List_Base {
                 <?php if (!$has_filter): ?>
                     <div class="mcems-empty">📌 <?php
                     // translators: %1$s and %2$s are HTML <strong> tags wrapping the word "Filter"
-                    echo sprintf(esc_html__('Select a date filter and press %1$sFilter%2$s to see the bookings list.', 'mc-ems-base'), '<strong>', '</strong>'); ?></div>
+                    echo sprintf(esc_html__('Select a date filter and press %1$sFilter%2$s to see the bookings list.', 'mc-ems-exam-center-for-tutor-lms'), '<strong>', '</strong>'); ?></div>
                 <?php else: ?>
 
                     <?php
@@ -406,33 +406,33 @@ class MCEMS_Bookings_List_Base {
                     }
                     ?>
                     <div class="mcems-hint">
-                        <span class="mcems-pill">📅 <?php echo esc_html__('Date:', 'mc-ems-base'); ?> <strong><?php echo esc_html($label); ?></strong></span>
+                        <span class="mcems-pill">📅 <?php echo esc_html__('Date:', 'mc-ems-exam-center-for-tutor-lms'); ?> <strong><?php echo esc_html($label); ?></strong></span>
                         <?php if ($selected_exam > 0): ?>
-                            <span class="mcems-pill">📘 <?php echo esc_html__('Exam:', 'mc-ems-base'); ?> <strong><?php echo esc_html(MCEMS_Tutor::exam_title($selected_exam)); ?></strong></span>
+                            <span class="mcems-pill">📘 <?php echo esc_html__('Exam:', 'mc-ems-exam-center-for-tutor-lms'); ?> <strong><?php echo esc_html(MCEMS_Tutor::exam_title($selected_exam)); ?></strong></span>
                         <?php else: ?>
-                            <span class="mcems-pill">📘 <?php echo esc_html__('Exam:', 'mc-ems-base'); ?> <strong><?php echo esc_html__('All', 'mc-ems-base'); ?></strong></span>
+                            <span class="mcems-pill">📘 <?php echo esc_html__('Exam:', 'mc-ems-exam-center-for-tutor-lms'); ?> <strong><?php echo esc_html__('All', 'mc-ems-exam-center-for-tutor-lms'); ?></strong></span>
                         <?php endif; ?>
-                        <span class="mcems-pill">👥 <?php echo esc_html__('Bookings:', 'mc-ems-base'); ?> <strong><?php echo (int) count($rows); ?></strong></span>
+                        <span class="mcems-pill">👥 <?php echo esc_html__('Bookings:', 'mc-ems-exam-center-for-tutor-lms'); ?> <strong><?php echo (int) count($rows); ?></strong></span>
                     </div>
 
                     <div class="mcems-tablewrap">
                         <table class="mcems-table">
                             <thead>
                                 <tr>
-                                    <th><?php echo esc_html__('Last name', 'mc-ems-base'); ?></th>
-                                    <th><?php echo esc_html__('First name', 'mc-ems-base'); ?></th>
-                                    <th><?php echo esc_html__('Email', 'mc-ems-base'); ?></th>
-                                    <th><?php echo esc_html__('Session ID', 'mc-ems-base'); ?></th>
-                                    <th><?php echo esc_html__('Exam session date', 'mc-ems-base'); ?></th>
-                                    <th><?php echo esc_html__('Exam session time', 'mc-ems-base'); ?></th>
-                                    <th><?php echo esc_html__('Exam', 'mc-ems-base'); ?></th>
+                                    <th><?php echo esc_html__('Last name', 'mc-ems-exam-center-for-tutor-lms'); ?></th>
+                                    <th><?php echo esc_html__('First name', 'mc-ems-exam-center-for-tutor-lms'); ?></th>
+                                    <th><?php echo esc_html__('Email', 'mc-ems-exam-center-for-tutor-lms'); ?></th>
+                                    <th><?php echo esc_html__('Session ID', 'mc-ems-exam-center-for-tutor-lms'); ?></th>
+                                    <th><?php echo esc_html__('Exam session date', 'mc-ems-exam-center-for-tutor-lms'); ?></th>
+                                    <th><?php echo esc_html__('Exam session time', 'mc-ems-exam-center-for-tutor-lms'); ?></th>
+                                    <th><?php echo esc_html__('Exam', 'mc-ems-exam-center-for-tutor-lms'); ?></th>
                                     <th>♿</th>
-                                    <th><?php echo esc_html__('Proctor', 'mc-ems-base'); ?></th>
+                                    <th><?php echo esc_html__('Proctor', 'mc-ems-exam-center-for-tutor-lms'); ?></th>
                                 </tr>
                             </thead>
                             <tbody>
                             <?php if (!$rows): ?>
-                                <tr><td colspan="9" style="text-align:center;color:#667085;padding:14px;"><?php echo esc_html__('No exam bookings found for these filters.', 'mc-ems-base'); ?></td></tr>
+                                <tr><td colspan="9" style="text-align:center;color:#667085;padding:14px;"><?php echo esc_html__('No exam bookings found for these filters.', 'mc-ems-exam-center-for-tutor-lms'); ?></td></tr>
                             <?php else: foreach ($rows as $r): ?>
                                 <tr>
                                     <td><?php echo esc_html($r['cognome']); ?></td>
