@@ -145,7 +145,7 @@ class MCEMS_Admin_Sessioni {
                 $upgrade_notice = $result[2] ?? '';
             }
 
-            if ($action === 'update_capacity' && check_admin_referer('mcems_update_capacity', 'mcems_update_capacity_nonce')) {
+            if ($action === 'update_capacity' && !$free_plan && check_admin_referer('mcems_update_capacity', 'mcems_update_capacity_nonce')) {
                 $result = self::handle_update_capacity();
                 $notice         = $result[0] ?? '';
                 $error          = $result[1] ?? '';
@@ -156,6 +156,33 @@ class MCEMS_Admin_Sessioni {
         ?>
         <div class="wrap">
             <h1><?php echo esc_html__('Exam Sessions Management', 'mc-ems-exam-center-for-tutor-lms'); ?></h1>
+
+            <?php if ($free_plan): ?>
+            <div class="notice notice-info" style="margin-left:0;">
+                <p>
+                    <strong><?php esc_html_e('MC-EMS Free plan limits:', 'mc-ems-exam-center-for-tutor-lms'); ?></strong>
+                    <?php esc_html_e('1 session per day', 'mc-ems-exam-center-for-tutor-lms'); ?> &bull;
+                    <?php
+                    printf(
+                        /* translators: %d: maximum number of active sessions allowed on the free plan */
+                        esc_html__('max %d active sessions', 'mc-ems-exam-center-for-tutor-lms'),
+                        (int) MCEMS_Upsell::FREE_MAX_ACTIVE_SESSIONS
+                    );
+                    ?> &bull;
+                    <?php
+                    printf(
+                        /* translators: %d: maximum number of seats per session allowed on the free plan */
+                        esc_html__('max %d seats per session', 'mc-ems-exam-center-for-tutor-lms'),
+                        (int) MCEMS_Upsell::FREE_MAX_SEATS_PER_SESSION
+                    );
+                    ?>
+                    &mdash;
+                    <a href="<?php echo esc_url(MCEMS_Upsell::UPGRADE_URL); ?>" target="_blank" rel="noopener noreferrer">
+                        <?php esc_html_e('Upgrade to MC-EMS Premium', 'mc-ems-exam-center-for-tutor-lms'); ?> &rarr;
+                    </a>
+                </p>
+            </div>
+            <?php endif; ?>
 
             <?php if ($notice): ?>
                 <div class="notice notice-success"><p><?php echo esc_html($notice); ?></p></div>
@@ -355,6 +382,7 @@ class MCEMS_Admin_Sessioni {
                 </form>
             </div>
 
+            <?php if (!$free_plan): ?>
             <hr>
 
             <div class="card" style="max-width: 1100px;">
@@ -389,6 +417,7 @@ class MCEMS_Admin_Sessioni {
                     </p>
                 </form>
             </div>
+            <?php endif; ?>
         </div>
 
         <script>
