@@ -223,11 +223,6 @@ class MCEMS_Upsell {
 							'✅',
 						],
 						[
-							__( 'Advanced statistics & analytics', 'mc-ems-exam-center-for-tutor-lms' ),
-							'❌',
-							'✅',
-						],
-						[
 							__( 'Priority support', 'mc-ems-exam-center-for-tutor-lms' ),
 							'❌',
 							'✅',
