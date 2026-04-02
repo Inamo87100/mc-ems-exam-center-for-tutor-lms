@@ -1092,6 +1092,9 @@ class MCEMS_Settings {
         $saved       = isset($opt['proctor_roles']) && is_array($opt['proctor_roles']) ? $opt['proctor_roles'] : [];
         $all_checked = empty($saved); // empty = all roles allowed
 
+        echo '<div style="display:flex;flex-direction:column;gap:24px;max-width:700px;">';
+        echo '<div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px;background:#fff;">';
+        echo '<p style="margin:0 0 12px 0;font-size:12px;color:#6b7280;">' . esc_html__('Check the roles that are allowed to be searched and assigned as Proctors. If none are checked, all roles with sufficient permissions can be assigned.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         echo '<div style="display:flex;flex-wrap:wrap;gap:10px 20px;">';
 
         foreach ($all_roles as $role_slug => $role_info) {
@@ -1112,6 +1115,8 @@ class MCEMS_Settings {
 
         echo '</div>';
         echo '<p class="description" style="margin-top:8px;">' . esc_html__('Uncheck all roles to allow any role to be assigned as Proctors.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
+        echo '</div>';
+        echo '</div>';
     }
 
     /**

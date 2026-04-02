@@ -12,6 +12,9 @@ class MCEMS_Upgrader {
             add_option(MCEMS_Settings::OPTION_KEY, MCEMS_Settings::defaults());
         }
 
+        // Create / update custom tables.
+        self::create_quiz_stats_table();
+
         // Rename CPT slug from Italian 'slot_esame' to English 'mcems_exam_session'
         // Must run before migrate_legacy_meta() so that meta migration finds the renamed posts.
         if (version_compare($installed, '1.5.0', '<')) {
@@ -40,6 +43,35 @@ class MCEMS_Upgrader {
         if ($result === false && defined('WP_DEBUG') && WP_DEBUG) {
             error_log('MC-EMS: CPT slug migration failed – ' . $wpdb->last_error); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
         }
+    }
+
+    /**
+     * Create (or silently update) the mcems_quiz_stats table using dbDelta.
+     * Safe to call on every upgrade; dbDelta is idempotent.
+     */
+    private static function create_quiz_stats_table(): void {
+        global $wpdb;
+
+        $table   = $wpdb->prefix . 'mcems_quiz_stats';
+        $collate = $wpdb->has_cap('collation') ? $wpdb->get_charset_collate() : '';
+
+        $sql = "CREATE TABLE {$table} (
+            quiz_id          bigint(20) unsigned NOT NULL,
+            quiz_title       varchar(255)        NOT NULL DEFAULT '',
+            total_attempts   int(11)             NOT NULL DEFAULT 0,
+            unique_students  int(11)             NOT NULL DEFAULT 0,
+            avg_score        decimal(5,2)        NOT NULL DEFAULT '0.00',
+            pass_count       int(11)             NOT NULL DEFAULT 0,
+            fail_count       int(11)             NOT NULL DEFAULT 0,
+            pass_rate        decimal(5,2)        NOT NULL DEFAULT '0.00',
+            highest_score    decimal(5,2)        NOT NULL DEFAULT '0.00',
+            lowest_score     decimal(5,2)        NOT NULL DEFAULT '0.00',
+            last_updated     datetime            NOT NULL DEFAULT '0000-00-00 00:00:00',
+            PRIMARY KEY (quiz_id)
+        ) {$collate};";
+
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        dbDelta($sql);
     }
 
     private static function migrate_legacy_meta(): void {
