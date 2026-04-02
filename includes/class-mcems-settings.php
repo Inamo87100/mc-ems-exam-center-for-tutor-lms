@@ -755,6 +755,9 @@ class MCEMS_Settings {
 
         $tab = isset($_GET['tab']) ? sanitize_key(wp_unslash($_GET['tab'])) : 'shortcodes'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only tab navigation
         $allowed = ['shortcodes','bookings','exam_access','email','pages','role_settings'];
+        if (!class_exists('MCEMS_Upsell') || !MCEMS_Upsell::is_premium()) {
+            $allowed[] = 'upgrade';
+        }
         if (!in_array($tab, $allowed, true)) $tab = 'shortcodes';
 
         echo '<div class="wrap">';
@@ -768,6 +771,10 @@ class MCEMS_Settings {
             'email'          => __('Email settings', 'mc-ems-exam-center-for-tutor-lms'),
             'pages'          => __('Pages', 'mc-ems-exam-center-for-tutor-lms'),
         ];
+
+        if (!class_exists('MCEMS_Upsell') || !MCEMS_Upsell::is_premium()) {
+            $tabs['upgrade'] = __('⭐ Upgrade / Pro', 'mc-ems-exam-center-for-tutor-lms');
+        }
 
         echo '<h2 class="nav-tab-wrapper" style="margin-top:12px;">';
         foreach ($tabs as $key => $label) {
@@ -789,6 +796,14 @@ class MCEMS_Settings {
 
             echo '</tbody></table>';
             echo '</div>';
+            echo '</div>';
+            return;
+        }
+
+        if ($tab === 'upgrade') {
+            if (class_exists('MCEMS_Upsell')) {
+                MCEMS_Upsell::render_upgrade_tab();
+            }
             echo '</div>';
             return;
         }

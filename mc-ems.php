@@ -23,6 +23,7 @@ define('MCEMS_PLUGIN_PATH', plugin_dir_path(__FILE__));
 // Load all classes with file existence checks
 $mcems_class_files = [
     'includes/class-mcems-tutor.php',
+    'includes/class-mcems-upsell.php',
     'includes/class-mcems-settings.php',
     'includes/class-mcems-upgrader.php',
     'includes/class-mcems-cpt-sessioni-esame.php',
@@ -132,6 +133,10 @@ add_action('plugins_loaded', function () {
     }
 
     if (is_admin()) {
+        if (class_exists('MCEMS_Upsell')) {
+            MCEMS_Upsell::init();
+        }
+
         $mcems_admin_classes = [
             'MCEMS_Settings'        => 'init_admin',
             'MCEMS_Admin_Sessioni'  => 'init',
