@@ -172,25 +172,6 @@ class MCEMS_Admin_Sessioni {
             <div class="card" style="max-width: 1100px;">
                 <h2><?php echo esc_html__('Generate new sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
 
-                <?php if ($free_plan) : ?>
-                <div class="notice notice-info inline" style="margin:0 0 16px 0;">
-                    <p>
-                        <strong><?php esc_html_e('Free plan session limits:', 'mc-ems-exam-center-for-tutor-lms'); ?></strong>
-                        <?php
-                        printf(
-                            /* translators: 1: max sessions per day, 2: max active sessions, 3: max seats per session */
-                            esc_html__('%1$d session per day &bull; max %2$d active sessions &bull; max %3$d seats per session', 'mc-ems-exam-center-for-tutor-lms'),
-                            MCEMS_Upsell::FREE_MAX_SESSIONS_PER_DAY,
-                            MCEMS_Upsell::FREE_MAX_ACTIVE_SESSIONS,
-                            MCEMS_Upsell::FREE_MAX_SEATS_PER_SESSION
-                        );
-                        ?> &mdash;
-                        <a href="<?php echo esc_url(MCEMS_Upsell::UPGRADE_URL); ?>" target="_blank" rel="noopener noreferrer">
-                            <?php esc_html_e('Upgrade to remove limits', 'mc-ems-exam-center-for-tutor-lms'); ?>
-                        </a>
-                    </p>
-                </div>
-                <?php endif; ?>
                 <form method="post" id="mcems-generate-form">
                     <?php wp_nonce_field('mcems_generate', 'mcems_generate_nonce'); ?>
                     <input type="hidden" name="mcems_action" value="generate">
@@ -255,8 +236,21 @@ class MCEMS_Admin_Sessioni {
                             </tr>
 
                             <tr>
-                                <th><label for="mcems_times"><?php echo esc_html__('Exam session times (one per line)', 'mc-ems-exam-center-for-tutor-lms'); ?></label></th>
+                                <th>
+                                    <?php if ($free_plan): ?>
+                                    <label for="mcems_time_single"><?php echo esc_html__('Exam session time', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                                    <?php else: ?>
+                                    <label for="mcems_times"><?php echo esc_html__('Exam session times (one per line)', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                                    <?php endif; ?>
+                                </th>
                                 <td>
+                                    <?php if ($free_plan): ?>
+                                    <input
+                                        type="time"
+                                        id="mcems_time_single"
+                                        name="time_single"
+                                    >
+                                    <?php else: ?>
                                     <textarea
                                         id="mcems_times"
                                         name="times"
@@ -264,30 +258,16 @@ class MCEMS_Admin_Sessioni {
                                         cols="40"
                                         placeholder="08:30&#10;10:30&#10;12:30"
                                     ></textarea>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
 
                             <tr>
                                 <th>
                                     <label for="mcems_capacity"><?php echo esc_html__('Seats per exam session', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
-                                    <?php if ($free_plan) MCEMS_Upsell::premium_badge(); ?>
                                 </th>
                                 <td>
                                     <input type="number" id="mcems_capacity" name="capacity" min="1" max="<?php echo (int) $max_capacity; ?>">
-                                    <?php if ($free_plan) : ?>
-                                    <p class="description">
-                                        <?php
-                                        printf(
-                                            /* translators: 1: max seats on free plan, 2: upgrade link HTML */
-                                            esc_html__('Free plan: max %1$d seats per session. %2$s for up to 500 seats.', 'mc-ems-exam-center-for-tutor-lms'),
-                                            (int) MCEMS_Upsell::FREE_MAX_SEATS_PER_SESSION,
-                                            '<a href="' . esc_url(MCEMS_Upsell::UPGRADE_URL) . '" target="_blank" rel="noopener noreferrer">'
-                                                . esc_html__('Upgrade to Premium', 'mc-ems-exam-center-for-tutor-lms')
-                                            . '</a>'
-                                        );
-                                        ?>
-                                    </p>
-                                    <?php endif; ?>
                                 </td>
                             </tr>
                         </table>
@@ -387,24 +367,9 @@ class MCEMS_Admin_Sessioni {
                         <tr>
                             <th>
                                 <label for="mcems_new_capacity"><?php echo esc_html__('New capacity', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
-                                <?php if ($free_plan) MCEMS_Upsell::premium_badge(); ?>
                             </th>
                             <td>
                                 <input type="number" id="mcems_new_capacity" name="new_capacity" min="1" max="<?php echo (int) $max_capacity; ?>" value="1">
-                                <?php if ($free_plan) : ?>
-                                <p class="description">
-                                    <?php
-                                    printf(
-                                        /* translators: 1: max seats on free plan, 2: upgrade link HTML */
-                                        esc_html__('Free plan: max %1$d seats per session. %2$s for up to 500 seats.', 'mc-ems-exam-center-for-tutor-lms'),
-                                        (int) MCEMS_Upsell::FREE_MAX_SEATS_PER_SESSION,
-                                        '<a href="' . esc_url(MCEMS_Upsell::UPGRADE_URL) . '" target="_blank" rel="noopener noreferrer">'
-                                            . esc_html__('Upgrade to Premium', 'mc-ems-exam-center-for-tutor-lms')
-                                        . '</a>'
-                                    );
-                                    ?>
-                                </p>
-                                <?php endif; ?>
                             </td>
                         </tr>
                         <tr>
@@ -440,7 +405,7 @@ class MCEMS_Admin_Sessioni {
             const standardExam = document.getElementById('mcems_exam_id');
             const standardStart  = document.getElementById('mcems_date_start');
             const standardEnd    = document.getElementById('mcems_date_end');
-            const standardTimes  = document.getElementById('mcems_times');
+            const standardTimes  = document.getElementById('<?php echo $free_plan ? 'mcems_time_single' : 'mcems_times'; ?>');
             const standardCap    = document.getElementById('mcems_capacity');
 
             if (!cb) return;
@@ -516,6 +481,15 @@ class MCEMS_Admin_Sessioni {
                         return;
                     }
 
+                    <?php if ($free_plan): ?>
+                    const ti = document.getElementById('mcems_time_single');
+                    if (ti && !ti.value) {
+                        e.preventDefault();
+                        alert('<?php echo esc_js(__('Select a valid session time.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
+                        ti.focus();
+                        return;
+                    }
+                    <?php else: ?>
                     const ta = document.getElementById('mcems_times');
                     if (ta) {
                         const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(function(l){
@@ -529,6 +503,7 @@ class MCEMS_Admin_Sessioni {
                             return;
                         }
                     }
+                    <?php endif; ?>
                 } else {
                     const sDate = document.getElementById('mcems_special_date');
                     const sTime = document.getElementById('mcems_special_time');
@@ -837,7 +812,6 @@ class MCEMS_Admin_Sessioni {
         $selected_dates_raw = isset($_POST['selected_dates']) && is_array($_POST['selected_dates'])
             ? array_map('sanitize_text_field', wp_unslash($_POST['selected_dates']))
             : [];
-        $times_raw = sanitize_textarea_field(wp_unslash($_POST['times'] ?? ''));
         $capacity  = max(1, absint(wp_unslash($_POST['capacity'] ?? 1)));
         $exam_id = isset($_POST['exam_id']) ? absint(wp_unslash($_POST['exam_id'])) : 0;
 
@@ -870,19 +844,27 @@ class MCEMS_Admin_Sessioni {
             return ['', __('Select at least one date from the calendar.', 'mc-ems-exam-center-for-tutor-lms'), ''];
         }
 
-        $times = [];
-        foreach (preg_split("/\r\n|\r|\n/", $times_raw) as $line) {
-            $t = trim($line);
-            if ($t === '') continue;
-            if (!preg_match('/^\d{2}:\d{2}$/', $t)) continue;
-            $times[] = $t;
-        }
-
-        $times = array_values(array_unique($times));
-        sort($times);
-
-        if (!$times) {
-            return ['', __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-exam-center-for-tutor-lms'), ''];
+        // Build the times array: single input on free plan, textarea on premium.
+        if (self::is_free_plan()) {
+            $time_single = sanitize_text_field(wp_unslash($_POST['time_single'] ?? ''));
+            if (!preg_match('/^\d{2}:\d{2}$/', $time_single)) {
+                return ['', __('Select a valid session time.', 'mc-ems-exam-center-for-tutor-lms'), ''];
+            }
+            $times = [$time_single];
+        } else {
+            $times_raw = sanitize_textarea_field(wp_unslash($_POST['times'] ?? ''));
+            $times = [];
+            foreach (preg_split("/\r\n|\r|\n/", $times_raw) as $line) {
+                $t = trim($line);
+                if ($t === '') continue;
+                if (!preg_match('/^\d{2}:\d{2}$/', $t)) continue;
+                $times[] = $t;
+            }
+            $times = array_values(array_unique($times));
+            sort($times);
+            if (!$times) {
+                return ['', __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-exam-center-for-tutor-lms'), ''];
+            }
         }
 
         // Free plan: enforce max active sessions. Check current count before the loop.
