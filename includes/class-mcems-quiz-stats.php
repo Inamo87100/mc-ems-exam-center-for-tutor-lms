@@ -22,6 +22,7 @@ class MCEMS_Quiz_Stats {
     const PARENT_POST_TYPE = 'mcems_exam_session';
     const PAGE_SLUG        = 'mcems-quiz-stats';
 
+    /** In-request cache for question answer options. */
     protected static $question_options_cache = [];
     protected static $question_columns_cache = null;
 
@@ -34,6 +35,37 @@ class MCEMS_Quiz_Stats {
         add_action( 'init',       [ __CLASS__, 'ensure_stats_table' ] );
         add_action( 'admin_post_mcems_recalc_quiz_stats',       [ __CLASS__, 'handle_recalc' ] );
         add_action( 'admin_post_mcems_download_quiz_stats_csv', [ __CLASS__, 'handle_csv_download' ] );
+    }
+
+    // -------------------------------------------------------------------------
+    // Object-cache helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the current stats-cache version number.
+     * All stats cache keys are prefixed with this version so that a single
+     * wp_cache_incr() call invalidates the entire logical "group" without
+     * requiring wp_cache_flush_group() (available only from WP 6.1+).
+     * Uses wp_cache_add() to avoid race conditions on first initialization.
+     */
+    protected static function stats_cache_version(): int {
+        $ver = wp_cache_get( 'mcems_stats_ver', 'mcems' );
+        if ( false !== $ver ) {
+            return (int) $ver;
+        }
+        // Only sets the value if the key does not already exist (atomic, avoids race conditions).
+        wp_cache_add( 'mcems_stats_ver', 1, 'mcems', 0 );
+        return (int) wp_cache_get( 'mcems_stats_ver', 'mcems' );
+    }
+
+    /**
+     * Bumps the stats-cache version, effectively invalidating all stats caches.
+     * Ensures the key exists first so wp_cache_incr() does not fail silently.
+     */
+    protected static function invalidate_stats_cache(): void {
+        // Guarantee the key exists before incrementing.
+        self::stats_cache_version();
+        wp_cache_incr( 'mcems_stats_ver', 1, 'mcems' );
     }
 
     // -------------------------------------------------------------------------
@@ -75,14 +107,24 @@ class MCEMS_Quiz_Stats {
 
     protected static function get_courses(): array {
         global $wpdb;
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-        return (array) $wpdb->get_results(
+
+        $cache_key = 'mcems_quiz_stats_courses';
+        $cached    = wp_cache_get( $cache_key, 'mcems' );
+        if ( false !== $cached ) {
+            return (array) $cached;
+        }
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $results = (array) $wpdb->get_results(
             "SELECT ID, post_title
                FROM {$wpdb->posts}
               WHERE post_type = 'courses'
                 AND post_status = 'publish'
               ORDER BY post_title"
         );
+
+        wp_cache_set( $cache_key, $results, 'mcems', 300 );
+        return $results;
     }
 
     // -------------------------------------------------------------------------
@@ -279,17 +321,25 @@ class MCEMS_Quiz_Stats {
 
         $table_name = self::table_name();
 
-        $courses_sql = "
-            SELECT ID, post_title
-            FROM {$wpdb->posts}
-            WHERE post_type = 'courses' AND post_status = 'publish'";
-
         if ( $course_id > 0 ) {
-            $courses_sql .= $wpdb->prepare( ' AND ID = %d', $course_id );
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            $courses = $wpdb->get_results( $wpdb->prepare(
+                "SELECT ID, post_title
+                   FROM {$wpdb->posts}
+                  WHERE post_type = 'courses'
+                    AND post_status = 'publish'
+                    AND ID = %d",
+                $course_id
+            ) );
+        } else {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            $courses = $wpdb->get_results(
+                "SELECT ID, post_title
+                   FROM {$wpdb->posts}
+                  WHERE post_type = 'courses'
+                    AND post_status = 'publish'"
+            );
         }
-
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
-        $courses = $wpdb->get_results( $courses_sql );
 
         if ( empty( $courses ) ) {
             return;
@@ -353,6 +403,10 @@ class MCEMS_Quiz_Stats {
                 );
             }
         }
+
+        // Invalidate object-cache entries so the next page load reflects fresh data.
+        // Bumping the version key invalidates all versioned stats cache entries.
+        self::invalidate_stats_cache();
     }
 
     // -------------------------------------------------------------------------
@@ -361,9 +415,11 @@ class MCEMS_Quiz_Stats {
 
     protected static function get_filtered_stats( array $args, bool $do_count = false ) {
         global $wpdb;
-        $table  = self::table_name();
-        $where  = [];
-        $params = [];
+        $table   = self::table_name();
+        $where   = [];
+        $params  = [];
+        // Fetch the version once to avoid multiple cache round-trips for key computation.
+        $ver = self::stats_cache_version();
 
         if ( ! empty( $args['course_id'] ) ) {
             $where[]  = 'course_id = %d';
@@ -381,9 +437,18 @@ class MCEMS_Quiz_Stats {
         $sql_where = $where ? ( 'WHERE ' . implode( ' AND ', $where ) ) : '';
 
         if ( $do_count ) {
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $sql = "SELECT COUNT(*) FROM {$table} {$sql_where}";
-            return (int) $wpdb->get_var( $wpdb->prepare( $sql, $params ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            $cache_key = 'cnt_' . $ver . '_' . md5( wp_json_encode( $args ) );
+            $cached    = wp_cache_get( $cache_key, 'mcems' );
+            if ( false !== $cached ) {
+                return (int) $cached;
+            }
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $sql   = "SELECT COUNT(*) FROM {$table} {$sql_where}";
+            $count = empty( $params )
+                ? (int) $wpdb->get_var( $sql ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+                : (int) $wpdb->get_var( $wpdb->prepare( $sql, $params ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            wp_cache_set( $cache_key, $count, 'mcems', 300 );
+            return $count;
         }
 
         $allowed_sort = [ 'question_id', 'quiz_title', 'question_title', 'total_answers', 'wrong_answers', 'error_percentage', 'last_updated' ];
@@ -397,12 +462,21 @@ class MCEMS_Quiz_Stats {
         $limit  = ! empty( $args['per_page'] ) ? absint( $args['per_page'] ) : self::ITEMS_PER_PAGE;
         $offset = ! empty( $args['offset'] )   ? absint( $args['offset'] )   : 0;
 
+        // $sort and $dir are derived from $args, so only $args, $limit, and $offset are needed for uniqueness.
+        $cache_key = 'rows_' . $ver . '_' . md5( wp_json_encode( $args ) . $limit . $offset );
+        $cached    = wp_cache_get( $cache_key, 'mcems' );
+        if ( false !== $cached ) {
+            return (array) $cached;
+        }
+
         $params[] = $limit;
         $params[] = $offset;
 
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-        $sql = "SELECT * FROM {$table} {$sql_where} ORDER BY {$sort} {$dir} LIMIT %d OFFSET %d";
-        return (array) $wpdb->get_results( $wpdb->prepare( $sql, $params ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $sql     = "SELECT * FROM {$table} {$sql_where} ORDER BY {$sort} {$dir} LIMIT %d OFFSET %d";
+        $results = (array) $wpdb->get_results( $wpdb->prepare( $sql, $params ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        wp_cache_set( $cache_key, $results, 'mcems', 300 );
+        return $results;
     }
 
     protected static function get_last_updated( int $course_id ): string {
@@ -411,11 +485,18 @@ class MCEMS_Quiz_Stats {
         if ( $course_id <= 0 ) {
             return '';
         }
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-        return (string) $wpdb->get_var( $wpdb->prepare(
+        $cache_key = 'lu_' . self::stats_cache_version() . '_' . $course_id;
+        $cached    = wp_cache_get( $cache_key, 'mcems' );
+        if ( false !== $cached ) {
+            return (string) $cached;
+        }
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $value = (string) $wpdb->get_var( $wpdb->prepare(
             "SELECT MAX(last_updated) FROM {$table} WHERE course_id = %d",
             $course_id
         ) );
+        wp_cache_set( $cache_key, $value, 'mcems', 300 );
+        return $value;
     }
 
     // -------------------------------------------------------------------------
@@ -989,9 +1070,9 @@ class MCEMS_Quiz_Stats {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $course_id = isset( $_GET['course_id'] ) ? absint( $_GET['course_id'] ) : 0;
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        $order_by  = isset( $_GET['order_by'] ) ? sanitize_key( $_GET['order_by'] ) : 'error_percentage';
+        $order_by  = isset( $_GET['order_by'] ) ? sanitize_key( wp_unslash( $_GET['order_by'] ) ) : 'error_percentage';
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        $order     = ( isset( $_GET['order'] ) && strtolower( $_GET['order'] ) === 'asc' ) ? 'asc' : 'desc';
+        $order     = ( isset( $_GET['order'] ) && strtolower( sanitize_text_field( wp_unslash( $_GET['order'] ) ) ) === 'asc' ) ? 'asc' : 'desc';
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $auto_refresh = isset( $_GET['auto_refresh'] ) ? absint( $_GET['auto_refresh'] ) : 0;
 
