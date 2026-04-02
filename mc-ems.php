@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MC-EMS – Exam Center for Tutor LMS
  * Description: Advanced exam session management system for Tutor LMS with booking calendar, student reservations, and exam access control.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Mamba Coding
  * Author URI: https://mambacoding.com
  * Text Domain: mc-ems-exam-center-for-tutor-lms
@@ -15,8 +15,8 @@
 if (!defined('ABSPATH')) exit;
 
 // Constants
-define('MCEMS_VERSION',    '1.0.0');
-define('MCEMS_DB_VERSION', '1.0.0');
+define('MCEMS_VERSION',    '1.1.0');
+define('MCEMS_DB_VERSION', '1.1.0');
 define('MCEMS_PLUGIN_URL',  plugin_dir_url(__FILE__));
 define('MCEMS_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
@@ -32,6 +32,7 @@ $mcems_class_files = [
     'includes/class-mcems-admin-sessioni.php',
     'includes/class-mcems-tutor-gate.php',
     'includes/class-ems-session-id-column.php',
+    'includes/class-mcems-quiz-stats.php',
 ];
 
 foreach ($mcems_class_files as $mcems_file) {
@@ -135,6 +136,7 @@ add_action('plugins_loaded', function () {
             'MCEMS_Settings'        => 'init_admin',
             'MCEMS_Admin_Sessioni'  => 'init',
             'EMS_Session_ID_Column' => 'init',
+            'MCEMS_Quiz_Stats'      => 'init',
         ];
 
         foreach ($mcems_admin_classes as $mcems_class => $mcems_method) {

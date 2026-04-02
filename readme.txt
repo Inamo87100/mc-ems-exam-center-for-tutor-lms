@@ -3,7 +3,7 @@ Contributors: internetamodo
 Tags: exam, booking, tutor lms, exam management, sessions
 Requires at least: 6.0
 Tested up to: 6.9
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0-or-later.html
@@ -117,6 +117,13 @@ All features listed below are fully available without any restrictions, license 
 5. Insert the shortcodes into your site pages
 
 == Changelog ==
+
+= 1.1.0 =
+* Added Quiz Statistics admin page with per-quiz aggregated data (attempts, students, scores, pass/fail rate)
+* Added Recalculate action to rebuild stats from Tutor LMS quiz attempts
+* Added Export CSV for quiz statistics
+* Unified "Allowed proctor roles" checkbox styling in Settings → Role Settings
+* New DB table mcems_quiz_stats (created via dbDelta; removed on uninstall)
 
 = 1.0.0 =
 * Initial stable release
