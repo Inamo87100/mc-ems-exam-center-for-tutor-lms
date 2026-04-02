@@ -1,17 +1,19 @@
 # Changelog
 
-## [1.1.0] - 2026-04-02
+## [1.2.0] - 2026-04-02
 
-### Added
-- **Quiz Statistics** admin page (`MC-EMS → Quiz Statistics`): aggregated statistics per Tutor LMS quiz (total attempts, unique students, average score, pass/fail counts, pass rate, highest and lowest scores). Requires Tutor LMS to be active.
-- **Recalculate** action: rebuilds stats from the live `tutor_quiz_attempts` table via a nonce-protected POST form.
-- **Export CSV** action: downloads all quiz stats as a UTF-8 CSV file (nonce-protected, admin-only).
-- New custom DB table `{prefix}mcems_quiz_stats` created via `dbDelta` on activation/upgrade.
-- Table removed automatically on plugin uninstall.
-
-### Changed
-- Unified the styling of the **Allowed proctor roles** checkbox group in Settings → Role Settings to match the bordered card layout used by the Shortcode Visibility boxes.
-- Bumped plugin version and DB version to `1.1.0`.
+### Changed (structural)
+- **Quiz Statistics page** (`MC-EMS → Quiz Statistics`) completely redesigned to provide **per-question** statistics (error rate / success rate per question, grouped by course):
+  - Added course-filter toolbar (dropdown to select a Tutor LMS course before loading stats).
+  - Per-question table with columns: ID, Question, Options (with correct answer highlighted), Quiz, Total Responses, Correct Answers, Wrong Answers, Error Rate (%), Success Rate (%).
+  - Sortable column headers.
+  - Pagination (25 rows per page).
+  - **Recalculate Stats** button (per selected course).
+  - Three **CSV export** options: all questions, error rate ≥ 50%, error rate ≤ 3%.
+  - Auto-refresh on course selection.
+  - Rich inline CSS matching the reference layout (toolbar, pill badges, table, pagination).
+- New custom DB table `{prefix}mcems_quiz_stats_cache` created via `dbDelta` on activation/upgrade (replaces the previous `{prefix}mcems_quiz_stats` table for per-question granularity).
+- **Admin menu order** updated to: Create sessions → Sessions list → **Quiz statistics** → Settings (previously Quiz Statistics was appended after Settings).
 
 ## [2.5.0] - 2026-03-17
 

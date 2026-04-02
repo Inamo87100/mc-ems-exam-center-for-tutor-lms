@@ -14,6 +14,7 @@ class MCEMS_Upgrader {
 
         // Create / update custom tables.
         self::create_quiz_stats_table();
+        self::create_quiz_stats_cache_table();
 
         // Rename CPT slug from Italian 'slot_esame' to English 'mcems_exam_session'
         // Must run before migrate_legacy_meta() so that meta migration finds the renamed posts.
@@ -68,6 +69,39 @@ class MCEMS_Upgrader {
             lowest_score     decimal(5,2)        NOT NULL DEFAULT '0.00',
             last_updated     datetime            NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (quiz_id)
+        ) {$collate};";
+
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        dbDelta($sql);
+    }
+
+    /**
+     * Create (or silently update) the mcems_quiz_stats_cache table using dbDelta.
+     * Stores per-question error statistics aggregated by course.
+     * Safe to call on every upgrade; dbDelta is idempotent.
+     */
+    private static function create_quiz_stats_cache_table(): void {
+        global $wpdb;
+
+        $table   = $wpdb->prefix . 'mcems_quiz_stats_cache';
+        $collate = $wpdb->has_cap('collation') ? $wpdb->get_charset_collate() : '';
+
+        $sql = "CREATE TABLE {$table} (
+            id                mediumint(9)    NOT NULL AUTO_INCREMENT,
+            question_id       int(11)         NOT NULL,
+            course_id         int(11)         NOT NULL,
+            course_title      varchar(255)    NOT NULL DEFAULT '',
+            question_title    text            NOT NULL,
+            quiz_title        varchar(255)    NOT NULL DEFAULT '',
+            topic_title       varchar(255)    NOT NULL DEFAULT '',
+            total_answers     int(11)         NOT NULL DEFAULT 0,
+            wrong_answers     int(11)         NOT NULL DEFAULT 0,
+            error_percentage  decimal(5,2)    NOT NULL DEFAULT 0.00,
+            last_updated      datetime        NOT NULL DEFAULT '0000-00-00 00:00:00',
+            PRIMARY KEY (id),
+            UNIQUE KEY question_course (question_id, course_id),
+            KEY course_id (course_id),
+            KEY error_percentage (error_percentage)
         ) {$collate};";
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';

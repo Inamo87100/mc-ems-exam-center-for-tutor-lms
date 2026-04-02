@@ -190,7 +190,7 @@ class MCEMS_CPT_Sessioni_Esame {
 
     /**
      * Remove the default "Add New" submenu for this CPT and reorder submenus
-     * so that: Create sessions → Sessions list → Settings.
+     * so that: Create sessions → Sessions list → Quiz statistics → Settings.
      */
     public static function tweak_admin_menu(): void {
         global $submenu;
@@ -200,10 +200,11 @@ class MCEMS_CPT_Sessioni_Esame {
 
         if (empty($submenu[$parent])) return;
 
-        $create   = null; // mcems-manage-sessions
-        $list     = null; // edit.php?post_type=mcems_exam_session  (the CPT "all items" page)
-        $settings = null; // mcems-settings-cpt
-        $others   = [];
+        $create     = null; // mcems-manage-sessions
+        $list       = null; // edit.php?post_type=mcems_exam_session  (the CPT "all items" page)
+        $quiz_stats = null; // mcems-quiz-stats
+        $settings   = null; // mcems-settings-cpt
+        $others     = [];
 
         foreach ($submenu[$parent] as $item) {
             $slug = isset($item[2]) ? (string) $item[2] : '';
@@ -211,6 +212,8 @@ class MCEMS_CPT_Sessioni_Esame {
                 $create = $item;
             } elseif ($slug === $parent) {
                 $list = $item;
+            } elseif ($slug === 'mcems-quiz-stats') {
+                $quiz_stats = $item;
             } elseif ($slug === 'mcems-settings-cpt') {
                 $settings = $item;
             } else {
@@ -219,9 +222,10 @@ class MCEMS_CPT_Sessioni_Esame {
         }
 
         $ordered = [];
-        if ($create)   $ordered[] = $create;
-        if ($list)     $ordered[] = $list;
-        if ($settings) $ordered[] = $settings;
+        if ($create)     $ordered[] = $create;
+        if ($list)       $ordered[] = $list;
+        if ($quiz_stats) $ordered[] = $quiz_stats;
+        if ($settings)   $ordered[] = $settings;
         foreach ($others as $item) {
             $ordered[] = $item;
         }
