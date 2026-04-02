@@ -16,7 +16,7 @@ class MCEMS_Upsell {
 	const FREE_MAX_SEATS_PER_SESSION = 5;
 
 	/** Upgrade destination URL */
-	const UPGRADE_URL = 'https://mambacoding.com/mc-ems-premium/';
+	const UPGRADE_URL = 'https://mambacoding.com/product/exam-center-for-tutor-lms/';
 
 	// -------------------------------------------------------------------------
 	// Bootstrap
