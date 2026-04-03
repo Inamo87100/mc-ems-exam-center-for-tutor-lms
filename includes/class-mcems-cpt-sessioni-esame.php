@@ -28,12 +28,11 @@ class MCEMS_CPT_Sessioni_Esame {
         add_action('init', [__CLASS__, 'register_cpt']);
         // Centralize session creation in "Exam Sessions Management".
         add_action('admin_menu', [__CLASS__, 'tweak_admin_menu'], 99);
-        add_action('admin_head', [__CLASS__, 'tweak_list_screen_ui']);
         add_action('add_meta_boxes', [__CLASS__, 'add_metaboxes']);
         add_action('save_post', [__CLASS__, 'save_metabox'], 10, 2);
         add_action('admin_notices', [__CLASS__, 'admin_notices']);
-        add_action('admin_head', [__CLASS__, 'lock_past_session_ui']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_metabox_scripts']);
+        add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_list_screen_assets']);
         add_action('rest_api_init', [__CLASS__, 'register_rest_routes']);
 
         add_filter('manage_' . self::CPT . '_posts_columns', [__CLASS__, 'columns']);
@@ -52,6 +51,18 @@ class MCEMS_CPT_Sessioni_Esame {
             MCEMS_VERSION
         );
 
+        // Inline CSS: lock publish controls for past sessions.
+        if ($hook === 'post.php') {
+            $post_id = absint($_GET['post'] ?? 0); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only admin URL parameter
+            if ($post_id) {
+                $date = (string) get_post_meta($post_id, self::MK_DATE, true);
+                $time = (string) get_post_meta($post_id, self::MK_TIME, true);
+                if (self::is_past_session($date, $time)) {
+                    wp_add_inline_style('mcems-admin-style', '#publishing-action .button-primary, #save-post, #minor-publishing-actions, .edit-post-post-status{display:none !important;} #submitdiv .misc-pub-section{pointer-events:none;opacity:.7;}');
+                }
+            }
+        }
+
         wp_enqueue_script(
             'mcems-metabox-user-search',
             MCEMS_PLUGIN_URL . 'assets/js/metabox-user-search.js',
@@ -67,6 +78,37 @@ class MCEMS_CPT_Sessioni_Esame {
                 'noResults' => __('No users found.', 'mc-ems-exam-center-for-tutor-lms'),
             ],
         ]);
+
+        // Inline JS: prevent selecting a past time when date is today.
+        $today    = current_time('Y-m-d');
+        $now_time = current_time('H:i');
+        wp_add_inline_script(
+            'mcems-metabox-user-search',
+            '(function(){try{var d=document.getElementById("mcems_date_input");var t=document.getElementById("mcems_time_input");if(!d||!t)return;var today=' . wp_json_encode($today) . ';var now=' . wp_json_encode($now_time) . ';function apply(){if(d.value===today){t.min=now;}else{t.removeAttribute("min");}}d.addEventListener("change",apply);apply();}catch(e){}})();'
+        );
+    }
+
+    public static function enqueue_list_screen_assets(string $hook): void {
+        if ($hook !== 'edit.php') return;
+        $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+        if (!$screen || $screen->id !== 'edit-' . self::CPT) return;
+
+        if (!wp_style_is('mcems-admin-style', 'registered')) {
+            wp_register_style('mcems-admin-style', MCEMS_PLUGIN_URL . 'assets/css/admin.css', [], MCEMS_VERSION);
+        }
+        wp_enqueue_style('mcems-admin-style');
+        wp_add_inline_style('mcems-admin-style', 'a.page-title-action[href*="post-new.php?post_type=' . esc_attr(self::CPT) . '"]{display:none !important;}');
+
+        if (!wp_script_is('mcems-admin', 'registered')) {
+            wp_register_script('mcems-admin', MCEMS_PLUGIN_URL . 'assets/js/admin.js', [], MCEMS_VERSION, true);
+        }
+        wp_enqueue_script('mcems-admin');
+
+        $manage_url = admin_url('edit.php?post_type=' . self::CPT . '&page=mcems-manage-sessions');
+        wp_add_inline_script(
+            'mcems-admin',
+            '(function(){var h1=document.querySelector(".wrap h1");if(!h1)return;var btn=document.createElement("a");btn.className="page-title-action";btn.href=' . wp_json_encode($manage_url) . ';btn.textContent=' . wp_json_encode(__('Add new session', 'mc-ems-exam-center-for-tutor-lms')) . ';h1.appendChild(document.createTextNode(" "));h1.appendChild(btn);})();'
+        );
     }
 
     public static function register_rest_routes(): void {
@@ -236,25 +278,9 @@ class MCEMS_CPT_Sessioni_Esame {
     /**
      * On sessions list screen, hide the standard "Add New" and replace it
      * with a link to the management screen.
+     * Logic moved to enqueue_list_screen_assets() via admin_enqueue_scripts.
      */
-    public static function tweak_list_screen_ui(): void {
-        $screen = function_exists('get_current_screen') ? get_current_screen() : null;
-        if (!$screen) return;
-        if ($screen->id !== 'edit-' . self::CPT) return;
-
-        $manage_url = admin_url('edit.php?post_type=' . self::CPT . '&page=mcems-manage-sessions');
-        echo '<style>a.page-title-action[href*="post-new.php?post_type=' . esc_attr(self::CPT) . '"]{display:none !important;}</style>';
-        echo '<script>(function(){
-            var h1=document.querySelector(".wrap h1");
-            if(!h1) return;
-            var btn=document.createElement("a");
-            btn.className="page-title-action";
-            btn.href=' . json_encode($manage_url) . ';
-            btn.textContent=' . wp_json_encode(__('Add new session', 'mc-ems-exam-center-for-tutor-lms')) . ';
-            h1.appendChild(document.createTextNode(" "));
-            h1.appendChild(btn);
-        })();</script>';
-    }
+    public static function tweak_list_screen_ui(): void {}
 
     public static function register_cpt() {
         $labels = [
@@ -364,10 +390,7 @@ echo '</td></tr>';
         printf('<input type="time" id="mcems_time_input" name="mcems_time" value="%s" %s />', esc_attr($time), esc_attr($disabled));
         echo '</td></tr>';
 
-        // Prevent selecting past time when date is today.
-        $today = current_time('Y-m-d');
-        $now_time = current_time('H:i');
-        echo '<script>(function(){try{var d=document.getElementById("mcems_date_input");var t=document.getElementById("mcems_time_input");if(!d||!t)return;var today="'.esc_js($today).'";var now="'.esc_js($now_time).'";function apply(){if(d.value===today){t.min=now;}else{t.removeAttribute("min");}}d.addEventListener("change",apply);apply();}catch(e){}})();</script>';
+        // Prevent selecting past time when date is today — handled via wp_add_inline_script in enqueue_metabox_scripts().
 
 
         echo '<tr><th><label>' . esc_html__('Max seats', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
@@ -550,14 +573,7 @@ echo '</td></tr>';
 
 
     public static function lock_past_session_ui(): void {
-        $screen = function_exists('get_current_screen') ? get_current_screen() : null;
-        if (!$screen || $screen->post_type !== self::CPT || $screen->base !== 'post') return;
-        $post_id = absint($_GET['post'] ?? 0); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only admin URL parameter, no data modification
-        if (!$post_id) return;
-        $date = (string) get_post_meta($post_id, self::MK_DATE, true);
-        $time = (string) get_post_meta($post_id, self::MK_TIME, true);
-        if (!self::is_past_session($date, $time)) return;
-        echo '<style>#publishing-action .button-primary, #save-post, #minor-publishing-actions, .edit-post-post-status{display:none !important;} #submitdiv .misc-pub-section{pointer-events:none;opacity:.7;}</style>';
+        // Inline CSS handled in enqueue_metabox_scripts() via admin_enqueue_scripts.
     }
 
     private static function is_past_session($date, $time): bool {

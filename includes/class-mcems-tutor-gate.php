@@ -218,18 +218,24 @@ class MCEMS_Tutor_Gate {
      * and inject the block message box in its place using JavaScript.
      */
     private static function inject_sidebar_block(string $title, string $body_html): void {
-        add_action('wp_head', function() {
-            echo '<style>' .
-                esc_html(self::SIDEBAR_SELECTOR) . '{display:none!important}' .
-                esc_html(self::DETAILS_TAB_SELECTOR) . '{display:none!important}' .
-                esc_html(self::CURRICULUM_SELECTOR) . '{display:none!important}' .
-                esc_html(self::LESSON_SELECTOR) . '{display:none!important}' .
-                esc_html(self::QUIZ_SELECTOR) . '{display:none!important}' .
-                '.mcems-locked-exam{max-width:820px;margin:28px auto;padding:18px;border-radius:16px;border:1px solid #fda29b;background:#fffbfa;box-shadow:0 10px 30px rgba(16,24,40,.08);}' .
-                '.mcems-locked-exam__title{font-weight:900;color:#b42318;font-size:18px;margin-bottom:8px;}' .
-                '.mcems-locked-exam__body{color:#7a271a;font-weight:800;font-size:14px;line-height:1.5;}' .
-                '</style>' . "\n";
-        });
+        $css = self::SIDEBAR_SELECTOR . '{display:none!important}'
+            . self::DETAILS_TAB_SELECTOR . '{display:none!important}'
+            . self::CURRICULUM_SELECTOR . '{display:none!important}'
+            . self::LESSON_SELECTOR . '{display:none!important}'
+            . self::QUIZ_SELECTOR . '{display:none!important}'
+            . '.mcems-locked-exam{max-width:820px;margin:28px auto;padding:18px;border-radius:16px;border:1px solid #fda29b;background:#fffbfa;box-shadow:0 10px 30px rgba(16,24,40,.08);}'
+            . '.mcems-locked-exam__title{font-weight:900;color:#b42318;font-size:18px;margin-bottom:8px;}'
+            . '.mcems-locked-exam__body{color:#7a271a;font-weight:800;font-size:14px;line-height:1.5;}';
+
+        add_action('wp_enqueue_scripts', static function () use ($css) {
+            if (!wp_style_is('mcems-style', 'registered')) {
+                $url = defined('MCEMS_PLUGIN_URL') ? MCEMS_PLUGIN_URL : '';
+                $ver = defined('MCEMS_VERSION') ? MCEMS_VERSION : '1.0.0';
+                wp_register_style('mcems-style', $url . 'assets/css/style.css', [], $ver);
+            }
+            wp_enqueue_style('mcems-style');
+            wp_add_inline_style('mcems-style', $css);
+        }, 20);
 
         $allowed_html = [
             'br'     => [],
@@ -240,19 +246,26 @@ class MCEMS_Tutor_Gate {
             ],
         ];
 
-        add_action('wp_footer', function() use ($title, $body_html, $allowed_html) {
-            echo '<script>' .
-                '(function(){' .
-                'var sidebar=document.querySelector(' . wp_json_encode(self::SIDEBAR_SELECTOR) . ');' .
-                'if(!sidebar)return;' .
-                'var box=document.createElement("div");' .
-                'box.className="mcems-locked-exam";' .
-                'box.innerHTML=\'<div class="mcems-locked-exam__title">\'+' . wp_json_encode(esc_html($title)) . '+\'</div>\'' .
-                '+\'<div class="mcems-locked-exam__body">\'+' . wp_json_encode(wp_kses($body_html, $allowed_html)) . '+\'</div>\';' .
-                'sidebar.parentNode.insertBefore(box,sidebar);' .
-                '})();' .
-                '</script>' . "\n";
-        });
+        add_action('wp_enqueue_scripts', static function () use ($title, $body_html, $allowed_html) {
+            if (!wp_script_is('mcems-booking', 'registered')) {
+                $url = defined('MCEMS_PLUGIN_URL') ? MCEMS_PLUGIN_URL : '';
+                $ver = defined('MCEMS_VERSION') ? MCEMS_VERSION : '1.0.0';
+                wp_register_script('mcems-booking', $url . 'assets/js/booking.js', [], $ver, true);
+            }
+            wp_enqueue_script('mcems-booking');
+
+            $sidebar_selector = MCEMS_Tutor_Gate::SIDEBAR_SELECTOR;
+            $js = '(function(){'
+                . 'var sidebar=document.querySelector(' . wp_json_encode($sidebar_selector) . ');'
+                . 'if(!sidebar)return;'
+                . 'var box=document.createElement("div");'
+                . 'box.className="mcems-locked-exam";'
+                . 'box.innerHTML=\'<div class="mcems-locked-exam__title">\'+' . wp_json_encode(esc_html($title)) . '+\'</div>\''
+                . '+\'<div class="mcems-locked-exam__body">\'+' . wp_json_encode(wp_kses($body_html, $allowed_html)) . '+\'</div>\';'
+                . 'sidebar.parentNode.insertBefore(box,sidebar);'
+                . '})();';
+            wp_add_inline_script('mcems-booking', $js);
+        }, 20);
     }
 
     private static function get_manage_booking_url(): string {
