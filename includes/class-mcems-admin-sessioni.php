@@ -74,6 +74,25 @@ class MCEMS_Admin_Sessioni {
         wp_register_style('mcems-admin-style', $url . 'assets/css/admin.css', [], $ver);
         wp_enqueue_style('mcems-admin-style');
 
+        // Calendar date-picker styles used in the session generate form.
+        wp_add_inline_style('mcems-admin-style', '
+            #mcems-calendar{max-width:308px;font-family:inherit;}
+            .mcems-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+            .mcems-cal-header button{background:none;border:1px solid #c3c4c7;border-radius:4px;cursor:pointer;padding:3px 10px;font-size:15px;line-height:1.4;}
+            .mcems-cal-header button:hover{background:#f0f0f1;}
+            .mcems-cal-header span{font-weight:600;font-size:14px;}
+            .mcems-cal-table{border-collapse:collapse;width:100%;}
+            .mcems-cal-table th{text-align:center;font-size:11px;padding:4px 2px;color:#646970;font-weight:600;}
+            .mcems-cal-table td{padding:2px;text-align:center;}
+            .mcems-cal-day{display:inline-block;width:34px;height:34px;line-height:34px;border-radius:50%;font-size:13px;box-sizing:border-box;}
+            .mcems-cal-day[data-date]{cursor:pointer;}
+            .mcems-cal-day[data-date]:hover{background:#e8f0fe;}
+            .mcems-cal-day.mcems-cal-selected{background:#2271b1;color:#fff !important;}
+            .mcems-cal-day.mcems-cal-today{font-weight:700;border:2px solid #2271b1;}
+            .mcems-cal-day.mcems-cal-past{color:#c3c4c7;cursor:default;}
+            .mcems-cal-day.mcems-cal-past:hover{background:none;}
+        ');
+
         wp_register_script('mcems-admin', $url . 'assets/js/admin.js', [], $ver, true);
         wp_enqueue_script('mcems-admin');
 
@@ -82,16 +101,452 @@ class MCEMS_Admin_Sessioni {
             'nonce'            => wp_create_nonce('mcems_admin'),
             'exportNonce'      => wp_create_nonce('mcems_export_csv'),
             'userSearchNonce'  => wp_create_nonce('mcems_user_search'),
+            'freePlan'         => self::is_free_plan(),
+            'monthNames'       => [
+                __('January','mc-ems-exam-center-for-tutor-lms'),
+                __('February','mc-ems-exam-center-for-tutor-lms'),
+                __('March','mc-ems-exam-center-for-tutor-lms'),
+                __('April','mc-ems-exam-center-for-tutor-lms'),
+                __('May','mc-ems-exam-center-for-tutor-lms'),
+                __('June','mc-ems-exam-center-for-tutor-lms'),
+                __('July','mc-ems-exam-center-for-tutor-lms'),
+                __('August','mc-ems-exam-center-for-tutor-lms'),
+                __('September','mc-ems-exam-center-for-tutor-lms'),
+                __('October','mc-ems-exam-center-for-tutor-lms'),
+                __('November','mc-ems-exam-center-for-tutor-lms'),
+                __('December','mc-ems-exam-center-for-tutor-lms'),
+            ],
+            'dayNames'         => [
+                __('Mo','mc-ems-exam-center-for-tutor-lms'),
+                __('Tu','mc-ems-exam-center-for-tutor-lms'),
+                __('We','mc-ems-exam-center-for-tutor-lms'),
+                __('Th','mc-ems-exam-center-for-tutor-lms'),
+                __('Fr','mc-ems-exam-center-for-tutor-lms'),
+                __('Sa','mc-ems-exam-center-for-tutor-lms'),
+                __('Su','mc-ems-exam-center-for-tutor-lms'),
+            ],
             'i18n'             => [
-                'selectAction' => __('Please select an action.', 'mc-ems-exam-center-for-tutor-lms'),
-                'selectItems'  => __('Please select at least one item.', 'mc-ems-exam-center-for-tutor-lms'),
-                'confirmBulk'  => __('Apply action to {count} item(s)?', 'mc-ems-exam-center-for-tutor-lms'),
-                'error'        => __('An error occurred.', 'mc-ems-exam-center-for-tutor-lms'),
-                'networkError' => __('Network error. Please try again.', 'mc-ems-exam-center-for-tutor-lms'),
-                'exporting'    => __('Exporting…', 'mc-ems-exam-center-for-tutor-lms'),
-                'exportCsv'    => __('Export CSV', 'mc-ems-exam-center-for-tutor-lms'),
+                'selectAction'                => __('Please select an action.', 'mc-ems-exam-center-for-tutor-lms'),
+                'selectItems'                 => __('Please select at least one item.', 'mc-ems-exam-center-for-tutor-lms'),
+                'confirmBulk'                 => __('Apply action to {count} item(s)?', 'mc-ems-exam-center-for-tutor-lms'),
+                'error'                       => __('An error occurred.', 'mc-ems-exam-center-for-tutor-lms'),
+                'networkError'                => __('Network error. Please try again.', 'mc-ems-exam-center-for-tutor-lms'),
+                'exporting'                   => __('Exporting…', 'mc-ems-exam-center-for-tutor-lms'),
+                'exportCsv'                   => __('Export CSV', 'mc-ems-exam-center-for-tutor-lms'),
+                'selectExamBeforeGenerating'  => __('Select a Tutor LMS exam before generating sessions.', 'mc-ems-exam-center-for-tutor-lms'),
+                'selectAtLeastOneDate'        => __('Select at least one date from the calendar.', 'mc-ems-exam-center-for-tutor-lms'),
+                'selectValidTime'             => __('Select a valid session time.', 'mc-ems-exam-center-for-tutor-lms'),
+                'enterAtLeastOneTime'         => __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-exam-center-for-tutor-lms'),
+                'selectSpecialDate'           => __('Select a date for the special session.', 'mc-ems-exam-center-for-tutor-lms'),
+                'selectSpecialTime'           => __('Select a time for the special session.', 'mc-ems-exam-center-for-tutor-lms'),
+                'selectSpecialCandidate'      => __('Select the candidate for the special session.', 'mc-ems-exam-center-for-tutor-lms'),
             ],
         ]);
+
+        ob_start();
+        ?>
+        (function(){
+            const cb = document.getElementById('mcems_generate_special');
+            const std = document.getElementById('mcems_gen_standard');
+            const sp  = document.getElementById('mcems_gen_special');
+
+            const specialExam = document.getElementById('mcems_special_exam_id');
+            const specialDate   = document.getElementById('mcems_special_date');
+            const specialTime   = document.getElementById('mcems_special_time');
+            const specialEmail  = document.getElementById('mcems_special_user_email');
+
+            const standardExam = document.getElementById('mcems_exam_id');
+            const standardStart  = document.getElementById('mcems_date_start');
+            const standardEnd    = document.getElementById('mcems_date_end');
+            const standardTimes  = document.getElementById(MCEMS_ADMIN.freePlan ? 'mcems_time_single' : 'mcems_times');
+            const standardCap    = document.getElementById('mcems_capacity');
+
+            if (!cb) return;
+
+            function setDisabled(el, state) {
+                if (el) {
+                    el.disabled = state;
+                }
+            }
+
+            function toggle() {
+                if (cb.checked) {
+                    if (std) std.style.display = 'none';
+                    if (sp) sp.style.display = 'block';
+
+                    setDisabled(specialExam, false);
+                    setDisabled(specialDate, false);
+                    setDisabled(specialTime, false);
+                    setDisabled(specialEmail, false);
+
+                    setDisabled(standardExam, true);
+                    setDisabled(standardStart, true);
+                    setDisabled(standardEnd, true);
+                    setDisabled(standardTimes, true);
+                    setDisabled(standardCap, true);
+                } else {
+                    if (std) std.style.display = 'block';
+                    if (sp) sp.style.display = 'none';
+
+                    setDisabled(specialExam, true);
+                    setDisabled(specialDate, true);
+                    setDisabled(specialTime, true);
+                    setDisabled(specialEmail, true);
+
+                    if (specialTime) {
+                        specialTime.value = '';
+                        specialTime.removeAttribute('min');
+                    }
+
+                    setDisabled(standardExam, false);
+                    setDisabled(standardStart, false);
+                    setDisabled(standardEnd, false);
+                    setDisabled(standardTimes, false);
+                    setDisabled(standardCap, false);
+                }
+            }
+
+            cb.addEventListener('change', toggle);
+            toggle();
+        })();
+
+        (function(){
+            const genForm = document.getElementById('mcems-generate-form');
+            if (!genForm) return;
+
+            genForm.addEventListener('submit', function(e){
+                const special = document.getElementById('mcems_generate_special');
+                const isSpecial = special && special.checked;
+
+                const sel = document.getElementById(isSpecial ? 'mcems_special_exam_id' : 'mcems_exam_id');
+                if (sel && !sel.value) {
+                    e.preventDefault();
+                    alert(MCEMS_ADMIN.i18n.selectExamBeforeGenerating);
+                    sel.focus();
+                    return;
+                }
+
+                if (!isSpecial) {
+                    const calContainer = document.getElementById('mcems-selected-dates');
+                    if (calContainer && calContainer.querySelectorAll('input[name="selected_dates[]"]').length === 0) {
+                        e.preventDefault();
+                        alert(MCEMS_ADMIN.i18n.selectAtLeastOneDate);
+                        return;
+                    }
+
+                    if (MCEMS_ADMIN.freePlan) {
+                        const ti = document.getElementById('mcems_time_single');
+                        if (ti && !ti.value) {
+                            e.preventDefault();
+                            alert(MCEMS_ADMIN.i18n.selectValidTime);
+                            ti.focus();
+                            return;
+                        }
+                    } else {
+                        const ta = document.getElementById('mcems_times');
+                        if (ta) {
+                            const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(function(l){
+                                return /^\s*\d{2}:\d{2}\s*$/.test(l);
+                            });
+
+                            if (!hasTime) {
+                                e.preventDefault();
+                                alert(MCEMS_ADMIN.i18n.enterAtLeastOneTime);
+                                ta.focus();
+                                return;
+                            }
+                        }
+                    }
+                } else {
+                    const sDate = document.getElementById('mcems_special_date');
+                    const sTime = document.getElementById('mcems_special_time');
+                    const sUser = document.getElementById('mcems_special_user_email');
+                    const sUserId = document.getElementById('mcems_special_user_id');
+
+                    if (sDate && !sDate.value) {
+                        e.preventDefault();
+                        alert(MCEMS_ADMIN.i18n.selectSpecialDate);
+                        sDate.focus();
+                        return;
+                    }
+
+                    if (sTime && !sTime.value) {
+                        e.preventDefault();
+                        alert(MCEMS_ADMIN.i18n.selectSpecialTime);
+                        sTime.focus();
+                        return;
+                    }
+
+                    if (!sUserId || !sUserId.value) {
+                        e.preventDefault();
+                        alert(MCEMS_ADMIN.i18n.selectSpecialCandidate);
+                        if (sUser) sUser.focus();
+                        return;
+                    }
+                }
+            });
+        })();
+
+        (function(){
+            const input = document.getElementById('mcems_special_user_email');
+            const hidden = document.getElementById('mcems_special_user_id');
+            const box = document.getElementById('mcems_user_suggest');
+
+            if (!input || !hidden || !box || typeof ajaxurl === 'undefined') return;
+
+            const nonce = (typeof MCEMS_ADMIN !== 'undefined' && MCEMS_ADMIN.userSearchNonce) ? MCEMS_ADMIN.userSearchNonce : '';
+            let timer = null;
+            let last = '';
+
+            function clearSuggest(){
+                box.innerHTML = '';
+                box.style.display = 'none';
+            }
+
+            function escHtml(str){
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+
+            function render(items){
+                if (!items || !items.length) {
+                    clearSuggest();
+                    return;
+                }
+
+                box.innerHTML = '';
+
+                items.forEach(function(u){
+                    const row = document.createElement('div');
+                    row.style.padding = '8px 10px';
+                    row.style.cursor = 'pointer';
+                    row.style.borderTop = '1px solid #f0f0f1';
+                    row.innerHTML = '<strong>' + escHtml(u.name || u.email || '') + '</strong>' + (u.email ? '<div style="font-size:12px; opacity:.85;">' + escHtml(u.email) + '</div>' : '');
+
+                    row.addEventListener('mouseenter', function(){ row.style.background = '#f6f7f7'; });
+                    row.addEventListener('mouseleave', function(){ row.style.background = '#fff'; });
+
+                    row.addEventListener('click', function(){
+                        input.value = (u.name || '') + (u.email ? ' (' + u.email + ')' : '');
+                        hidden.value = u.id || '';
+                        clearSuggest();
+                    });
+
+                    box.appendChild(row);
+                });
+
+                box.style.display = 'block';
+            }
+
+            async function doSearch(q){
+                const fd = new FormData();
+                fd.append('action', 'mcems_user_search');
+                fd.append('nonce', nonce);
+                fd.append('q', q);
+
+                const res = await fetch(ajaxurl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: fd
+                });
+
+                const json = await res.json().catch(() => null);
+                if (json && json.success) {
+                    render(json.data);
+                } else {
+                    clearSuggest();
+                }
+            }
+
+            input.addEventListener('input', function(){
+                const q = (input.value || '').trim();
+                hidden.value = '';
+
+                if (q.length < 3) {
+                    clearSuggest();
+                    return;
+                }
+
+                last = q;
+
+                if (timer) {
+                    clearTimeout(timer);
+                }
+
+                timer = setTimeout(function(){
+                    if (last === q) {
+                        doSearch(q);
+                    }
+                }, 250);
+            });
+
+            document.addEventListener('click', function(e){
+                if (!box.contains(e.target) && e.target !== input) {
+                    clearSuggest();
+                }
+            });
+        })();
+
+        (function(){
+            function pad(n){ return (n < 10 ? '0' : '') + n; }
+
+            function todayYMD(){
+                var d = new Date();
+                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+            }
+
+            function nowHM(){
+                var d = new Date();
+                return pad(d.getHours()) + ':' + pad(d.getMinutes());
+            }
+
+            function setMinDate(id){
+                var el = document.getElementById(id);
+                if (!el) return;
+                el.setAttribute('min', todayYMD());
+            }
+
+            function bindDateTime(dateId, timeId){
+                var dEl = document.getElementById(dateId);
+                var tEl = document.getElementById(timeId);
+                if (!dEl || !tEl) return;
+
+                function update(){
+                    var t = todayYMD();
+                    if (dEl.disabled) {
+                        tEl.removeAttribute('min');
+                        return;
+                    }
+
+                    if (dEl.value === t) {
+                        tEl.setAttribute('min', nowHM());
+
+                        if (tEl.value && tEl.value < tEl.getAttribute('min')) {
+                            tEl.value = '';
+                        }
+                    } else {
+                        tEl.removeAttribute('min');
+                    }
+                }
+
+                dEl.addEventListener('change', update);
+                tEl.addEventListener('focus', update);
+                update();
+            }
+
+            setMinDate('mcems_special_date');
+
+            bindDateTime('mcems_special_date', 'mcems_special_time');
+        })();
+
+        (function(){
+            var selected = {};
+            var currentYear, currentMonth;
+
+            function pad(n){ return (n < 10 ? '0' : '') + n; }
+
+            function todayYMD(){
+                var d = new Date();
+                return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+            }
+
+            var today = todayYMD();
+            var td = new Date();
+            currentYear  = td.getFullYear();
+            currentMonth = td.getMonth(); // 0-indexed
+
+            var monthNames = MCEMS_ADMIN.monthNames;
+            var dayNames = MCEMS_ADMIN.dayNames;
+
+            function updateHidden(){
+                var container = document.getElementById('mcems-selected-dates');
+                if (!container) return;
+                container.innerHTML = '';
+                var keys = Object.keys(selected).sort();
+                keys.forEach(function(d){
+                    var inp = document.createElement('input');
+                    inp.type  = 'hidden';
+                    inp.name  = 'selected_dates[]';
+                    inp.value = d;
+                    container.appendChild(inp);
+                });
+            }
+
+            function render(){
+                var cal = document.getElementById('mcems-calendar');
+                if (!cal) return;
+
+                var firstDay = new Date(currentYear, currentMonth, 1);
+                var totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+                var startDow = (firstDay.getDay() + 6) % 7; // Monday=0
+
+                var html = '<div class="mcems-cal-header">'
+                    + '<button type="button" id="mcems-cal-prev">&#8249;</button>'
+                    + '<span>' + monthNames[currentMonth] + ' ' + currentYear + '</span>'
+                    + '<button type="button" id="mcems-cal-next">&#8250;</button>'
+                    + '</div>'
+                    + '<table class="mcems-cal-table"><thead><tr>';
+
+                dayNames.forEach(function(d){ html += '<th>' + d + '</th>'; });
+                html += '</tr></thead><tbody><tr>';
+
+                var col = 0;
+                for (var i = 0; i < startDow; i++){ html += '<td></td>'; col++; }
+
+                for (var day = 1; day <= totalDays; day++){
+                    if (col === 7){ html += '</tr><tr>'; col = 0; }
+                    var dateStr = currentYear + '-' + pad(currentMonth+1) + '-' + pad(day);
+                    var cls = 'mcems-cal-day';
+                    var isPast = dateStr < today;
+                    if (isPast)             cls += ' mcems-cal-past';
+                    if (selected[dateStr])  cls += ' mcems-cal-selected';
+                    if (dateStr === today)  cls += ' mcems-cal-today';
+                    var attr = isPast ? ' aria-disabled="true"' : ' data-date="' + dateStr + '" role="button" tabindex="0"';
+                    html += '<td><span class="' + cls + '"' + attr + '>' + day + '</span></td>';
+                    col++;
+                }
+                while (col > 0 && col < 7){ html += '<td></td>'; col++; }
+                html += '</tr></tbody></table>';
+
+                cal.innerHTML = html;
+
+                document.getElementById('mcems-cal-prev').addEventListener('click', function(){
+                    currentMonth--;
+                    if (currentMonth < 0){ currentMonth = 11; currentYear--; }
+                    render();
+                });
+                document.getElementById('mcems-cal-next').addEventListener('click', function(){
+                    currentMonth++;
+                    if (currentMonth > 11){ currentMonth = 0; currentYear++; }
+                    render();
+                });
+
+                cal.querySelectorAll('[data-date]').forEach(function(el){
+                    el.addEventListener('click', function(){
+                        var d = el.getAttribute('data-date');
+                        if (selected[d]){
+                            delete selected[d];
+                            el.classList.remove('mcems-cal-selected');
+                        } else {
+                            selected[d] = true;
+                            el.classList.add('mcems-cal-selected');
+                        }
+                        updateHidden();
+                    });
+                    el.addEventListener('keydown', function(e){
+                        if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); el.click(); }
+                    });
+                });
+            }
+
+            render();
+        })();
+        <?php
+        $admin_ui_js = ob_get_clean();
+        wp_add_inline_script('mcems-admin', $admin_ui_js);
     }
 
     public static function menu(): void {
@@ -239,23 +694,6 @@ class MCEMS_Admin_Sessioni {
                                 <th><?php echo esc_html__('Select dates', 'mc-ems-exam-center-for-tutor-lms'); ?></th>
                                 <td>
                                     <div id="mcems-date-picker-wrap">
-                                        <style>
-                                        #mcems-calendar{max-width:308px;font-family:inherit;}
-                                        .mcems-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-                                        .mcems-cal-header button{background:none;border:1px solid #c3c4c7;border-radius:4px;cursor:pointer;padding:3px 10px;font-size:15px;line-height:1.4;}
-                                        .mcems-cal-header button:hover{background:#f0f0f1;}
-                                        .mcems-cal-header span{font-weight:600;font-size:14px;}
-                                        .mcems-cal-table{border-collapse:collapse;width:100%;}
-                                        .mcems-cal-table th{text-align:center;font-size:11px;padding:4px 2px;color:#646970;font-weight:600;}
-                                        .mcems-cal-table td{padding:2px;text-align:center;}
-                                        .mcems-cal-day{display:inline-block;width:34px;height:34px;line-height:34px;border-radius:50%;font-size:13px;box-sizing:border-box;}
-                                        .mcems-cal-day[data-date]{cursor:pointer;}
-                                        .mcems-cal-day[data-date]:hover{background:#e8f0fe;}
-                                        .mcems-cal-day.mcems-cal-selected{background:#2271b1;color:#fff !important;}
-                                        .mcems-cal-day.mcems-cal-today{font-weight:700;border:2px solid #2271b1;}
-                                        .mcems-cal-day.mcems-cal-past{color:#c3c4c7;cursor:default;}
-                                        .mcems-cal-day.mcems-cal-past:hover{background:none;}
-                                        </style>
                                         <div id="mcems-calendar"></div>
                                         <div id="mcems-selected-dates"></div>
                                     </div>
@@ -420,419 +858,6 @@ class MCEMS_Admin_Sessioni {
             <?php endif; ?>
         </div>
 
-        <script>
-        (function(){
-            const cb = document.getElementById('mcems_generate_special');
-            const std = document.getElementById('mcems_gen_standard');
-            const sp  = document.getElementById('mcems_gen_special');
-
-            const specialExam = document.getElementById('mcems_special_exam_id');
-            const specialDate   = document.getElementById('mcems_special_date');
-            const specialTime   = document.getElementById('mcems_special_time');
-            const specialEmail  = document.getElementById('mcems_special_user_email');
-
-            const standardExam = document.getElementById('mcems_exam_id');
-            const standardStart  = document.getElementById('mcems_date_start');
-            const standardEnd    = document.getElementById('mcems_date_end');
-            const standardTimes  = document.getElementById('<?php echo $free_plan ? 'mcems_time_single' : 'mcems_times'; ?>');
-            const standardCap    = document.getElementById('mcems_capacity');
-
-            if (!cb) return;
-
-            function setDisabled(el, state) {
-                if (el) {
-                    el.disabled = state;
-                }
-            }
-
-            function toggle() {
-                if (cb.checked) {
-                    if (std) std.style.display = 'none';
-                    if (sp) sp.style.display = 'block';
-
-                    setDisabled(specialExam, false);
-                    setDisabled(specialDate, false);
-                    setDisabled(specialTime, false);
-                    setDisabled(specialEmail, false);
-
-                    setDisabled(standardExam, true);
-                    setDisabled(standardStart, true);
-                    setDisabled(standardEnd, true);
-                    setDisabled(standardTimes, true);
-                    setDisabled(standardCap, true);
-                } else {
-                    if (std) std.style.display = 'block';
-                    if (sp) sp.style.display = 'none';
-
-                    setDisabled(specialExam, true);
-                    setDisabled(specialDate, true);
-                    setDisabled(specialTime, true);
-                    setDisabled(specialEmail, true);
-
-                    if (specialTime) {
-                        specialTime.value = '';
-                        specialTime.removeAttribute('min');
-                    }
-
-                    setDisabled(standardExam, false);
-                    setDisabled(standardStart, false);
-                    setDisabled(standardEnd, false);
-                    setDisabled(standardTimes, false);
-                    setDisabled(standardCap, false);
-                }
-            }
-
-            cb.addEventListener('change', toggle);
-            toggle();
-        })();
-
-        (function(){
-            const genForm = document.getElementById('mcems-generate-form');
-            if (!genForm) return;
-
-            genForm.addEventListener('submit', function(e){
-                const special = document.getElementById('mcems_generate_special');
-                const isSpecial = special && special.checked;
-
-                const sel = document.getElementById(isSpecial ? 'mcems_special_exam_id' : 'mcems_exam_id');
-                if (sel && !sel.value) {
-                    e.preventDefault();
-                    alert('<?php echo esc_js(__('Select a Tutor LMS exam before generating sessions.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
-                    sel.focus();
-                    return;
-                }
-
-                if (!isSpecial) {
-                    const calContainer = document.getElementById('mcems-selected-dates');
-                    if (calContainer && calContainer.querySelectorAll('input[name="selected_dates[]"]').length === 0) {
-                        e.preventDefault();
-                        alert('<?php echo esc_js(__('Select at least one date from the calendar.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
-                        return;
-                    }
-
-                    <?php if ($free_plan): ?>
-                    const ti = document.getElementById('mcems_time_single');
-                    if (ti && !ti.value) {
-                        e.preventDefault();
-                        alert('<?php echo esc_js(__('Select a valid session time.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
-                        ti.focus();
-                        return;
-                    }
-                    <?php else: ?>
-                    const ta = document.getElementById('mcems_times');
-                    if (ta) {
-                        const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(function(l){
-                            return /^\s*\d{2}:\d{2}\s*$/.test(l);
-                        });
-
-                        if (!hasTime) {
-                            e.preventDefault();
-                            alert('<?php echo esc_js(__('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
-                            ta.focus();
-                            return;
-                        }
-                    }
-                    <?php endif; ?>
-                } else {
-                    const sDate = document.getElementById('mcems_special_date');
-                    const sTime = document.getElementById('mcems_special_time');
-                    const sUser = document.getElementById('mcems_special_user_email');
-                    const sUserId = document.getElementById('mcems_special_user_id');
-
-                    if (sDate && !sDate.value) {
-                        e.preventDefault();
-                        alert('<?php echo esc_js(__('Select a date for the special session.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
-                        sDate.focus();
-                        return;
-                    }
-
-                    if (sTime && !sTime.value) {
-                        e.preventDefault();
-                        alert('<?php echo esc_js(__('Select a time for the special session.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
-                        sTime.focus();
-                        return;
-                    }
-
-                    if (!sUserId || !sUserId.value) {
-                        e.preventDefault();
-                        alert('<?php echo esc_js(__('Select the candidate for the special session.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
-                        if (sUser) sUser.focus();
-                        return;
-                    }
-                }
-            });
-        })();
-
-        (function(){
-            const input = document.getElementById('mcems_special_user_email');
-            const hidden = document.getElementById('mcems_special_user_id');
-            const box = document.getElementById('mcems_user_suggest');
-
-            if (!input || !hidden || !box || typeof ajaxurl === 'undefined') return;
-
-            const nonce = (typeof MCEMS_ADMIN !== 'undefined' && MCEMS_ADMIN.userSearchNonce) ? MCEMS_ADMIN.userSearchNonce : '';
-            let timer = null;
-            let last = '';
-
-            function clearSuggest(){
-                box.innerHTML = '';
-                box.style.display = 'none';
-            }
-
-            function escHtml(str){
-                return String(str)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;');
-            }
-
-            function render(items){
-                if (!items || !items.length) {
-                    clearSuggest();
-                    return;
-                }
-
-                box.innerHTML = '';
-
-                items.forEach(function(u){
-                    const row = document.createElement('div');
-                    row.style.padding = '8px 10px';
-                    row.style.cursor = 'pointer';
-                    row.style.borderTop = '1px solid #f0f0f1';
-                    row.innerHTML = '<strong>' + escHtml(u.name || u.email || '') + '</strong>' + (u.email ? '<div style="font-size:12px; opacity:.85;">' + escHtml(u.email) + '</div>' : '');
-
-                    row.addEventListener('mouseenter', function(){ row.style.background = '#f6f7f7'; });
-                    row.addEventListener('mouseleave', function(){ row.style.background = '#fff'; });
-
-                    row.addEventListener('click', function(){
-                        input.value = (u.name || '') + (u.email ? ' (' + u.email + ')' : '');
-                        hidden.value = u.id || '';
-                        clearSuggest();
-                    });
-
-                    box.appendChild(row);
-                });
-
-                box.style.display = 'block';
-            }
-
-            async function doSearch(q){
-                const fd = new FormData();
-                fd.append('action', 'mcems_user_search');
-                fd.append('nonce', nonce);
-                fd.append('q', q);
-
-                const res = await fetch(ajaxurl, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    body: fd
-                });
-
-                const json = await res.json().catch(() => null);
-                if (json && json.success) {
-                    render(json.data);
-                } else {
-                    clearSuggest();
-                }
-            }
-
-            input.addEventListener('input', function(){
-                const q = (input.value || '').trim();
-                hidden.value = '';
-
-                if (q.length < 3) {
-                    clearSuggest();
-                    return;
-                }
-
-                last = q;
-
-                if (timer) {
-                    clearTimeout(timer);
-                }
-
-                timer = setTimeout(function(){
-                    if (last === q) {
-                        doSearch(q);
-                    }
-                }, 250);
-            });
-
-            document.addEventListener('click', function(e){
-                if (!box.contains(e.target) && e.target !== input) {
-                    clearSuggest();
-                }
-            });
-        })();
-        </script>
-
-        <script>
-        (function(){
-            function pad(n){ return (n < 10 ? '0' : '') + n; }
-
-            function todayYMD(){
-                var d = new Date();
-                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
-            }
-
-            function nowHM(){
-                var d = new Date();
-                return pad(d.getHours()) + ':' + pad(d.getMinutes());
-            }
-
-            function setMinDate(id){
-                var el = document.getElementById(id);
-                if (!el) return;
-                el.setAttribute('min', todayYMD());
-            }
-
-            function bindDateTime(dateId, timeId){
-                var dEl = document.getElementById(dateId);
-                var tEl = document.getElementById(timeId);
-                if (!dEl || !tEl) return;
-
-                function update(){
-                    var t = todayYMD();
-                    if (dEl.disabled) {
-                        tEl.removeAttribute('min');
-                        return;
-                    }
-
-                    if (dEl.value === t) {
-                        tEl.setAttribute('min', nowHM());
-
-                        if (tEl.value && tEl.value < tEl.getAttribute('min')) {
-                            tEl.value = '';
-                        }
-                    } else {
-                        tEl.removeAttribute('min');
-                    }
-                }
-
-                dEl.addEventListener('change', update);
-                tEl.addEventListener('focus', update);
-                update();
-            }
-
-            setMinDate('mcems_special_date');
-
-            bindDateTime('mcems_special_date', 'mcems_special_time');
-        })();
-        </script>
-
-        <script>
-        (function(){
-            var selected = {};
-            var currentYear, currentMonth;
-
-            function pad(n){ return (n < 10 ? '0' : '') + n; }
-
-            function todayYMD(){
-                var d = new Date();
-                return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
-            }
-
-            var today = todayYMD();
-            var td = new Date();
-            currentYear  = td.getFullYear();
-            currentMonth = td.getMonth(); // 0-indexed
-
-            var monthNames = <?php echo wp_json_encode([
-                __('January','mc-ems-exam-center-for-tutor-lms'),__('February','mc-ems-exam-center-for-tutor-lms'),__('March','mc-ems-exam-center-for-tutor-lms'),
-                __('April','mc-ems-exam-center-for-tutor-lms'),__('May','mc-ems-exam-center-for-tutor-lms'),__('June','mc-ems-exam-center-for-tutor-lms'),
-                __('July','mc-ems-exam-center-for-tutor-lms'),__('August','mc-ems-exam-center-for-tutor-lms'),__('September','mc-ems-exam-center-for-tutor-lms'),
-                __('October','mc-ems-exam-center-for-tutor-lms'),__('November','mc-ems-exam-center-for-tutor-lms'),__('December','mc-ems-exam-center-for-tutor-lms'),
-            ]); ?>;
-            var dayNames = <?php echo wp_json_encode([
-                __('Mo','mc-ems-exam-center-for-tutor-lms'),__('Tu','mc-ems-exam-center-for-tutor-lms'),__('We','mc-ems-exam-center-for-tutor-lms'),
-                __('Th','mc-ems-exam-center-for-tutor-lms'),__('Fr','mc-ems-exam-center-for-tutor-lms'),__('Sa','mc-ems-exam-center-for-tutor-lms'),__('Su','mc-ems-exam-center-for-tutor-lms'),
-            ]); ?>;
-
-            function updateHidden(){
-                var container = document.getElementById('mcems-selected-dates');
-                if (!container) return;
-                container.innerHTML = '';
-                var keys = Object.keys(selected).sort();
-                keys.forEach(function(d){
-                    var inp = document.createElement('input');
-                    inp.type  = 'hidden';
-                    inp.name  = 'selected_dates[]';
-                    inp.value = d;
-                    container.appendChild(inp);
-                });
-            }
-
-            function render(){
-                var cal = document.getElementById('mcems-calendar');
-                if (!cal) return;
-
-                var firstDay = new Date(currentYear, currentMonth, 1);
-                var totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
-                var startDow = (firstDay.getDay() + 6) % 7; // Monday=0
-
-                var html = '<div class="mcems-cal-header">'
-                    + '<button type="button" id="mcems-cal-prev">&#8249;</button>'
-                    + '<span>' + monthNames[currentMonth] + ' ' + currentYear + '</span>'
-                    + '<button type="button" id="mcems-cal-next">&#8250;</button>'
-                    + '</div>'
-                    + '<table class="mcems-cal-table"><thead><tr>';
-
-                dayNames.forEach(function(d){ html += '<th>' + d + '</th>'; });
-                html += '</tr></thead><tbody><tr>';
-
-                var col = 0;
-                for (var i = 0; i < startDow; i++){ html += '<td></td>'; col++; }
-
-                for (var day = 1; day <= totalDays; day++){
-                    if (col === 7){ html += '</tr><tr>'; col = 0; }
-                    var dateStr = currentYear + '-' + pad(currentMonth+1) + '-' + pad(day);
-                    var cls = 'mcems-cal-day';
-                    var isPast = dateStr < today;
-                    if (isPast)             cls += ' mcems-cal-past';
-                    if (selected[dateStr])  cls += ' mcems-cal-selected';
-                    if (dateStr === today)  cls += ' mcems-cal-today';
-                    var attr = isPast ? ' aria-disabled="true"' : ' data-date="' + dateStr + '" role="button" tabindex="0"';
-                    html += '<td><span class="' + cls + '"' + attr + '>' + day + '</span></td>';
-                    col++;
-                }
-                while (col > 0 && col < 7){ html += '<td></td>'; col++; }
-                html += '</tr></tbody></table>';
-
-                cal.innerHTML = html;
-
-                document.getElementById('mcems-cal-prev').addEventListener('click', function(){
-                    currentMonth--;
-                    if (currentMonth < 0){ currentMonth = 11; currentYear--; }
-                    render();
-                });
-                document.getElementById('mcems-cal-next').addEventListener('click', function(){
-                    currentMonth++;
-                    if (currentMonth > 11){ currentMonth = 0; currentYear++; }
-                    render();
-                });
-
-                cal.querySelectorAll('[data-date]').forEach(function(el){
-                    el.addEventListener('click', function(){
-                        var d = el.getAttribute('data-date');
-                        if (selected[d]){
-                            delete selected[d];
-                            el.classList.remove('mcems-cal-selected');
-                        } else {
-                            selected[d] = true;
-                            el.classList.add('mcems-cal-selected');
-                        }
-                        updateHidden();
-                    });
-                    el.addEventListener('keydown', function(e){
-                        if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); el.click(); }
-                    });
-                });
-            }
-
-            render();
-        })();
-        </script>
         <?php
     }
 

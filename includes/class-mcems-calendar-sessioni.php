@@ -40,6 +40,54 @@ class MCEMS_Calendar_Sessioni {
         wp_register_style('mcems-style', $url . 'assets/css/style.css', [], $ver);
         wp_enqueue_style('mcems-style');
 
+        wp_add_inline_style('mcems-style', '
+            .calendar-wrapper { text-align:center; font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+            .calendar-nav { display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:10px; }
+            .calendar-nav button { background:none; border:none; font-size:20px; cursor:pointer; padding:5px; border-radius:50%; transition:background .2s; }
+            .calendar-nav button:hover { background:#e0e0e0; }
+            #monthYear { font-weight:700; font-size:18px; text-transform:capitalize; }
+            .calendar-header, #calendar { display:grid; grid-template-columns: repeat(7, 1fr); max-width: 520px; margin: 0 auto; gap:4px; }
+            .calendar-header div { text-align:center; font-weight:700; font-size:13px; padding:4px 0; }
+            .calendar-day { border:1px solid #ddd; padding:8px; aspect-ratio:1; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:10px; margin:0 auto; font-size:13px; transition: transform .12s, box-shadow .12s; }
+            .calendar-day:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.06); }
+            .no-slot { background-color:#eee; color:#777; cursor:not-allowed; }
+            .slot-verde { background-color:#4caf50; color:#fff; }
+            .slot-giallo { background-color:#ffeb3b; color:#000; }
+            .slot-arancione { background-color:#ff9800; color:#fff; }
+            .slot-rosso { background-color:#f44336; color:#fff; }
+            .my-sessions-wrap { margin: 18px auto 0; max-width:520px; text-align:center; }
+            .btns-stack { display:flex; flex-direction:column; gap:10px; align-items:stretch; }
+            .btn-outline { appearance:none; background:#fff; color:#111827; border:1px solid #d1d5db; border-radius:12px; padding:10px 14px; font-weight:700; cursor:pointer; transition: background .2s, transform .06s, border-color .2s; }
+            .btn-outline:hover { background:#f9fafb; transform: translateY(-1px); border-color:#9ca3af; }
+            .btn-outline.small { padding:8px 12px; font-weight:600; }
+            .btn-outline.small.tight { padding:4px 8px; font-size:13px; line-height:1.1; width:auto; min-width:unset; white-space:nowrap; }
+            .filters-row { display:flex; gap:10px; align-items:end; margin: 8px 0 12px; flex-wrap:wrap; }
+            .filters-row label { display:flex; flex-direction:column; font-size:14px; gap:4px; color:#374151; }
+            .filters-row select { padding:6px 8px; border:1px solid #d1d5db; border-radius:8px; }
+            .modal { display:none; position:fixed; z-index:9999; inset:0; background: rgba(0,0,0,.45); }
+            .modal-content { background:#fff; margin: 6% auto; padding:20px; border-radius:12px; width: 92%; max-width: 720px; box-shadow: 0 16px 50px rgba(0,0,0,.25); max-height: 82vh; overflow:auto; }
+            .close { float:right; font-size:24px; cursor:pointer; }
+            #modalSlotInfo .slot-row, #mySessionsBody .slot-row, #allAssignmentsBody .slot-row { display:flex; align-items:center; justify-content:space-between; border:1px solid #eee; border-radius:10px; padding:10px 12px; margin:10px 0; background:#fafafa; gap:12px; }
+            .slot-meta { font-size:14px; }
+            .slot-meta strong { font-size:16px; }
+            .actions { display:flex; flex-direction:column; align-items:stretch; gap:8px; min-width: 180px; }
+            .slot-actions .btn-assegna, .actions .btn-modifica, .actions .btn-elimina { width:100%; }
+            .btn-assegna, .btn-modifica, .btn-elimina { appearance:none; border:1px solid; border-radius:8px; padding:8px 12px; font-weight:700; cursor:pointer; transition: background .2s, transform .06s, opacity .2s, border-color .2s; }
+            .btn-assegna { background:#2563eb; border-color:#2563eb; color:#fff; }
+            .btn-assegna:hover { background:#1d4ed8; transform: translateY(-1px); }
+            .btn-modifica { background:#10b981; border-color:#0ea5a4; color:#fff; }
+            .btn-modifica:hover { background:#059669; transform: translateY(-1px); }
+            .btn-elimina { background:#ef4444; border-color:#dc2626; color:#fff; }
+            .btn-elimina:hover { background:#dc2626; transform: translateY(-1px); }
+            .btn-assegna:disabled, .btn-modifica:disabled, .btn-elimina:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+            .badge-soft { display:inline-block; background:#eff6ff; color:#1d4ed8; border-radius:999px; padding:4px 10px; font-weight:700; font-size:12px; }
+            .muted { color:#6b7280; }
+            .notice { margin:8px 0; font-size:13px; color:#374151; }
+            .scrollable { max-height: 64vh; overflow:auto; }
+            .slot-id { margin-left:8px; font-size:12px; font-weight:700; color:#6b7280; }
+            .nf-es-badge { display:inline-block; border:1px solid #2563eb; color:#2563eb; background:#dbeafe; padding:4px 10px; border-radius:999px; font-weight:900; font-size:12px; line-height:1; margin-left:10px; vertical-align:middle; white-space:nowrap; }
+        ');
+
         wp_register_script('mcems-calendar-sessioni', $url . 'assets/js/calendar-sessioni.js', [], $ver, true);
         wp_enqueue_script('mcems-calendar-sessioni');
 
@@ -97,446 +145,9 @@ class MCEMS_Calendar_Sessioni {
                 'logInToAssign'        => __('Log in to assign yourself', 'mc-ems-exam-center-for-tutor-lms'),
             ],
         ]);
-    }
-
-    private static function cpt(): string {
-        if (class_exists('MCEMS_CPT_Sessioni_Esame') && defined('MCEMS_CPT_Sessioni_Esame::CPT')) {
-            return MCEMS_CPT_Sessioni_Esame::CPT;
-        }
-        return 'mcems_exam_session';
-    }
-
-    private static function mk(string $const, string $fallback) {
-        $full = 'MCEMS_CPT_Sessioni_Esame::' . $const;
-        return defined($full) ? constant($full) : $fallback;
-    }
-
-    /**
-     * Priorità ai meta originali del calendario.
-     * Fallback ai meta MCEMS solo se servono.
-     */
-    private static function meta_keys(string $type): array {
-        $map = [
-            'date' => [
-                'slot_data',
-                self::mk('MK_DATE', 'slot_data'),
-                '_mcems_data',
-                'data',
-                'date',
-            ],
-            'time' => [
-                'slot_orario',
-                self::mk('MK_TIME', 'slot_orario'),
-                '_mcems_orario',
-                'orario',
-                'time',
-            ],
-            'capacity' => [
-                'slot_posti_max',
-                self::mk('MK_CAPACITY', 'slot_posti_max'),
-                '_mcems_capacity',
-                'capacity',
-            ],
-            'occupied' => [
-                'slot_posti_occupati',
-                self::mk('MK_OCCUPATI', 'slot_posti_occupati'),
-                '_mcems_occupati',
-                'occupati',
-            ],
-            'exam_id' => [
-                'slot_corso_id',
-                self::mk('MK_EXAM_ID', 'slot_corso_id'),
-                '_mcems_exam_id',
-                'exam_id',
-            ],
-            'is_special' => [
-                MCEMS_SLOT_ESIGENZE_SPECIALI,
-                self::mk('MK_IS_SPECIAL', MCEMS_SLOT_ESIGENZE_SPECIALI),
-                '_mcems_is_special',
-                'is_special',
-            ],
-            'special_user_id' => [
-                'slot_special_user_id',
-                self::mk('MK_SPECIAL_USER_ID', 'slot_special_user_id'),
-                '_mcems_special_user_id',
-                'special_user_id',
-            ],
-            'assigned' => [
-                'slot_assegnato',
-            ],
-            'assigned_user' => [
-                'slot_assegnato_user',
-            ],
-            'assigned_name' => [
-                'slot_assegnato_nome',
-            ],
-            'assigned_timestamp' => [
-                'slot_assegnato_timestamp',
-            ],
-            'proctor' => [
-                'slot_sorvegliante',
-                '_mcems_proctor_user_id',
-                'mcems_proctor_user_id',
-            ],
-            'warn_sent_for' => [
-                'slot_unassigned_warn_sent_for',
-            ],
-            'warn_sent_legacy' => [
-                'slot_unassigned_warn_sent',
-            ],
-        ];
-
-        return $map[$type] ?? [];
-    }
-
-    private static function get_first_meta(int $post_id, string $type, $default = '') {
-        foreach (self::meta_keys($type) as $key) {
-            $value = get_post_meta($post_id, $key, true);
-            if ($value !== '' && $value !== null) {
-                return $value;
-            }
-        }
-        return $default;
-    }
-
-    private static function update_first_meta(int $post_id, string $type, $value): void {
-        $keys = self::meta_keys($type);
-        if (!empty($keys[0])) {
-            update_post_meta($post_id, $keys[0], $value);
-        }
-    }
-
-    private static function delete_meta_group(int $post_id, string $type): void {
-        foreach (self::meta_keys($type) as $key) {
-            delete_post_meta($post_id, $key);
-        }
-    }
-
-    private static function normalize_time($time): string {
-        $time = (string) $time;
-        if (preg_match('/^(\d{1,2}):(\d{2})(?::\d{2})?$/', $time, $m)) {
-            return str_pad($m[1], 2, '0', STR_PAD_LEFT) . ':' . $m[2];
-        }
-        return $time;
-    }
-
-    private static function current_user_display_name(int $user_id): string {
-        $u = get_userdata($user_id);
-        if (!$u) {
-            return 'user_' . $user_id;
-        }
-
-        $first = get_user_meta($user_id, 'first_name', true);
-        $last  = get_user_meta($user_id, 'last_name', true);
-        $full  = trim(($first ?: '') . ' ' . ($last ?: ''));
-
-        return $full !== '' ? $full : ($u->display_name ?: $u->user_login);
-    }
-
-    private static function get_proctor_user_id(int $slot_id): int {
-        $raw = self::get_first_meta($slot_id, 'proctor', 0);
-        return is_numeric($raw) ? (int) $raw : 0;
-    }
-
-    private static function is_slot_assigned(int $slot_id): bool {
-        return self::get_proctor_user_id($slot_id) > 0;
-    }
-
-    private static function get_slot_assigned_name(int $slot_id): string {
-        $proctor_id = self::get_proctor_user_id($slot_id);
-        if ($proctor_id > 0) {
-            return self::current_user_display_name($proctor_id);
-        }
-        return '';
-    }
-
-    private static function get_calendar_recipients(): array {
-        if (!class_exists('MCEMS_Settings')) {
-            $fallback = sanitize_email((string) get_option('admin_email'));
-            return $fallback ? [$fallback] : [];
-        }
-
-        $raw = trim((string) MCEMS_Settings::get_str('cal_email_notify_to'));
-        if ($raw === '') {
-            $raw = trim((string) MCEMS_Settings::get_str('email_admin_recipients'));
-        }
-        if ($raw === '') {
-            $raw = (string) get_option('admin_email');
-        }
-
-        $emails = array_filter(array_map('trim', preg_split('/[\r\n,;]+/', $raw)));
-        $out = [];
-
-        foreach ($emails as $email) {
-            $email = sanitize_email($email);
-            if ($email && is_email($email)) {
-                $out[] = $email;
-            }
-        }
-
-        return array_values(array_unique($out));
-    }
-
-    private static function get_slot_placeholders(int $slot_id, string $proctor_name = ''): array {
-        $date      = (string) self::get_first_meta($slot_id, 'date', '');
-        $time      = self::normalize_time(self::get_first_meta($slot_id, 'time', ''));
-        $exam_id = (int) self::get_first_meta($slot_id, 'exam_id', 0);
-
-        $exam_title = $exam_id > 0 ? get_the_title($exam_id) : '';
-        if (!$exam_title) {
-            $exam_title = $exam_id > 0 ? ('Exam #' . $exam_id) : '';
-        }
-
-        return [
-            '{site_name}'     => wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES),
-            '{exam_title}'  => $exam_title,
-            '{session_date}'  => $date,
-            '{session_time}'  => $time,
-            '{proctor_name}'  => $proctor_name,
-            '{session_id}'    => (string) $slot_id,
-        ];
-    }
-
-    private static function send_calendar_mail(string $subject_key, string $body_key, array $placeholders = [], ?array $recipients = null): void {
-        if (!class_exists('MCEMS_Settings')) {
-            return;
-        }
-
-        $to = $recipients ?: self::get_calendar_recipients();
-        if (empty($to)) {
-            return;
-        }
-
-        $default_subjects = [
-            'cal_email_subject'          => 'Exam session assigned — {session_date} {session_time}',
-            'cal_email_subject_unassign' => 'Exam session unassigned — {session_date} {session_time}',
-            'cal_email_subject_warning'  => 'Unassigned exam session reminder — {session_date} {session_time}',
-        ];
-
-        $default_bodies = [
-            'cal_email_body' => "An exam session has been assigned.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nProctor: {proctor_name}\nSession ID: {session_id}",
-            'cal_email_body_unassign' => "An exam session assignment has been removed.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nPrevious proctor: {proctor_name}\nSession ID: {session_id}",
-            'cal_email_body_warning' => "The following exam session is scheduled for tomorrow and still has no assigned proctor.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nSession ID: {session_id}",
-        ];
-
-        $subject = MCEMS_Settings::get_email_template($subject_key, $default_subjects[$subject_key] ?? '');
-        $body    = MCEMS_Settings::get_email_template($body_key, $default_bodies[$body_key] ?? '');
-        $headers = MCEMS_Settings::get_mail_headers();
-
-        wp_mail(
-            $to,
-            MCEMS_Settings::render_email_template($subject, $placeholders),
-            MCEMS_Settings::render_email_template($body, $placeholders),
-            $headers
-        );
-    }
-
-    public static function shortcode(): string {
-        if (!MCEMS_Settings::user_can_view_shortcode('mcems_sessions_calendar')) {
-            return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
-        }
-
-        $nonce = wp_create_nonce(self::NONCE_ACTION);
 
         ob_start();
         ?>
-        <div class="calendar-wrapper">
-            <div class="calendar-nav">
-                <button id="prevMonth" aria-label="<?php echo esc_attr__('Previous month', 'mc-ems-exam-center-for-tutor-lms'); ?>">&larr;</button>
-                <span id="monthYear"></span>
-                <button id="nextMonth" aria-label="<?php echo esc_attr__('Next month', 'mc-ems-exam-center-for-tutor-lms'); ?>">&rarr;</button>
-            </div>
-
-            <div class="calendar-header">
-                <div><?php echo esc_html__('Mon', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Tue', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Wed', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Thu', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Fri', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Sat', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Sun', 'mc-ems-exam-center-for-tutor-lms'); ?></div>
-            </div>
-            <div id="calendar"></div>
-
-            <div class="my-sessions-wrap">
-                <div class="btns-stack">
-                    <button id="openMySessions" class="btn-outline"><?php echo esc_html__('View your assigned sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
-                    <button id="openAllAssignments" class="btn-outline"><?php echo esc_html__('View all sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
-                </div>
-            </div>
-        </div>
-
-        <div id="slotModal" class="modal" aria-hidden="true">
-            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-                <span class="close" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-exam-center-for-tutor-lms'); ?>">&times;</span>
-                <h2 id="modalTitle"><?php echo esc_html__('Sessions on', 'mc-ems-exam-center-for-tutor-lms'); ?> <span id="modalData"></span></h2>
-                <div id="modalSlotInfo"></div>
-            </div>
-        </div>
-
-        <div id="mySessionsModal" class="modal" aria-hidden="true">
-            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="mySessionsTitle">
-                <span class="close close-my" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-exam-center-for-tutor-lms'); ?>">&times;</span>
-                <h2 id="mySessionsTitle"><?php echo esc_html__('Your assigned sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
-                <div id="mySessionsBody"></div>
-            </div>
-        </div>
-
-        <div id="allAssignmentsModal" class="modal" aria-hidden="true">
-            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="allAssignmentsTitle">
-                <span class="close close-all" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-exam-center-for-tutor-lms'); ?>">&times;</span>
-                <h2 id="allAssignmentsTitle"><?php echo esc_html__('All sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
-
-                <div class="filters-row">
-                    <label>
-                        <?php echo esc_html__('Month', 'mc-ems-exam-center-for-tutor-lms'); ?>
-                        <select id="allMonth">
-                            <?php
-                            $mesi = [
-                                1  => __('January', 'mc-ems-exam-center-for-tutor-lms'),
-                                2  => __('February', 'mc-ems-exam-center-for-tutor-lms'),
-                                3  => __('March', 'mc-ems-exam-center-for-tutor-lms'),
-                                4  => __('April', 'mc-ems-exam-center-for-tutor-lms'),
-                                5  => __('May', 'mc-ems-exam-center-for-tutor-lms'),
-                                6  => __('June', 'mc-ems-exam-center-for-tutor-lms'),
-                                7  => __('July', 'mc-ems-exam-center-for-tutor-lms'),
-                                8  => __('August', 'mc-ems-exam-center-for-tutor-lms'),
-                                9  => __('September', 'mc-ems-exam-center-for-tutor-lms'),
-                                10 => __('October', 'mc-ems-exam-center-for-tutor-lms'),
-                                11 => __('November', 'mc-ems-exam-center-for-tutor-lms'),
-                                12 => __('December', 'mc-ems-exam-center-for-tutor-lms'),
-                            ];
-                            $curM = (int) wp_date('n');
-                            foreach ($mesi as $num=>$nome) {
-                                printf(
-                                    '<option value="%d"%s>%s</option>',
-                                    (int) $num,
-                                    selected($curM, $num, false),
-                                    esc_html($nome)
-                                );
-                            }
-                            ?>
-                        </select>
-                    </label>
-                    <label>
-                        <?php echo esc_html__('Year', 'mc-ems-exam-center-for-tutor-lms'); ?>
-                        <select id="allYear">
-                            <?php
-                            $curY = (int) wp_date('Y');
-                            for ($y=$curY-2; $y<=$curY+2; $y++) {
-                                printf('<option value="%d"%s>%d</option>', (int) $y, selected($curY,$y,false), (int) $y);
-                            }
-                            ?>
-                        </select>
-                    </label>
-                    <button id="reloadAllAssignments" class="btn-outline small tight"><?php echo esc_html__('Search', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
-                </div>
-
-                <div id="allAssignmentsBody" class="scrollable"></div>
-            </div>
-        </div>
-
-        <style>
-            .calendar-wrapper { text-align:center; font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
-            .calendar-nav { display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:10px; }
-            .calendar-nav button { background:none; border:none; font-size:20px; cursor:pointer; padding:5px; border-radius:50%; transition:background .2s; }
-            .calendar-nav button:hover { background:#e0e0e0; }
-            #monthYear { font-weight:700; font-size:18px; text-transform:capitalize; }
-
-            .calendar-header, #calendar {
-                display:grid; grid-template-columns: repeat(7, 1fr);
-                max-width: 520px; margin: 0 auto; gap:4px;
-            }
-            .calendar-header div { text-align:center; font-weight:700; font-size:13px; padding:4px 0; }
-            .calendar-day {
-                border:1px solid #ddd; padding:8px; aspect-ratio:1;
-                display:flex; align-items:center; justify-content:center;
-                cursor:pointer; border-radius:10px; margin:0 auto; font-size:13px;
-                transition: transform .12s, box-shadow .12s;
-            }
-            .calendar-day:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.06); }
-            .no-slot { background-color:#eee; color:#777; cursor:not-allowed; }
-            .slot-verde { background-color:#4caf50; color:#fff; }
-            .slot-giallo { background-color:#ffeb3b; color:#000; }
-            .slot-arancione { background-color:#ff9800; color:#fff; }
-            .slot-rosso { background-color:#f44336; color:#fff; }
-
-            .my-sessions-wrap { margin: 18px auto 0; max-width:520px; text-align:center; }
-            .btns-stack { display:flex; flex-direction:column; gap:10px; align-items:stretch; }
-            .btn-outline {
-                appearance:none; background:#fff; color:#111827; border:1px solid #d1d5db; border-radius:12px;
-                padding:10px 14px; font-weight:700; cursor:pointer; transition: background .2s, transform .06s, border-color .2s;
-            }
-            .btn-outline:hover { background:#f9fafb; transform: translateY(-1px); border-color:#9ca3af; }
-            .btn-outline.small { padding:8px 12px; font-weight:600; }
-            .btn-outline.small.tight{
-                padding:4px 8px; font-size:13px; line-height:1.1; width:auto; min-width:unset; white-space:nowrap;
-            }
-
-            .filters-row { display:flex; gap:10px; align-items:end; margin: 8px 0 12px; flex-wrap:wrap; }
-            .filters-row label { display:flex; flex-direction:column; font-size:14px; gap:4px; color:#374151; }
-            .filters-row select { padding:6px 8px; border:1px solid #d1d5db; border-radius:8px; }
-
-            .modal { display:none; position:fixed; z-index:9999; inset:0; background: rgba(0,0,0,.45); }
-            .modal-content {
-                background:#fff; margin: 6% auto; padding:20px; border-radius:12px; width: 92%; max-width: 720px;
-                box-shadow: 0 16px 50px rgba(0,0,0,.25); max-height: 82vh; overflow:auto;
-            }
-            .close { float:right; font-size:24px; cursor:pointer; }
-
-            #modalSlotInfo .slot-row,
-            #mySessionsBody .slot-row,
-            #allAssignmentsBody .slot-row {
-                display:flex; align-items:center; justify-content:space-between;
-                border:1px solid #eee; border-radius:10px; padding:10px 12px; margin:10px 0;
-                background:#fafafa;
-                gap:12px;
-            }
-            .slot-meta { font-size:14px; }
-            .slot-meta strong { font-size:16px; }
-
-            .actions { display:flex; flex-direction:column; align-items:stretch; gap:8px; min-width: 180px; }
-            .slot-actions .btn-assegna,
-            .actions .btn-modifica, .actions .btn-elimina { width:100%; }
-
-            .btn-assegna, .btn-modifica, .btn-elimina {
-                appearance:none; border:1px solid; border-radius:8px; padding:8px 12px; font-weight:700; cursor:pointer;
-                transition: background .2s, transform .06s, opacity .2s, border-color .2s;
-            }
-            .btn-assegna { background:#2563eb; border-color:#2563eb; color:#fff; }
-            .btn-assegna:hover { background:#1d4ed8; transform: translateY(-1px); }
-
-            .btn-modifica { background:#10b981; border-color:#0ea5a4; color:#fff; }
-            .btn-modifica:hover { background:#059669; transform: translateY(-1px); }
-
-            .btn-elimina { background:#ef4444; border-color:#dc2626; color:#fff; }
-            .btn-elimina:hover { background:#dc2626; transform: translateY(-1px); }
-
-            .btn-assegna:disabled, .btn-modifica:disabled, .btn-elimina:disabled { opacity:.6; cursor:not-allowed; transform:none; }
-
-            .badge-soft { display:inline-block; background:#eff6ff; color:#1d4ed8; border-radius:999px; padding:4px 10px; font-weight:700; font-size:12px; }
-            .muted { color:#6b7280; }
-            .notice { margin:8px 0; font-size:13px; color:#374151; }
-            .scrollable { max-height: 64vh; overflow:auto; }
-
-            .slot-id{
-                margin-left:8px;
-                font-size:12px;
-                font-weight:700;
-                color:#6b7280;
-            }
-
-            .nf-es-badge{
-                display:inline-block;
-                border:1px solid #2563eb;
-                color:#2563eb;
-                background:#dbeafe;
-                padding:4px 10px;
-                border-radius:999px;
-                font-weight:900;
-                font-size:12px;
-                line-height:1;
-                margin-left:10px;
-                vertical-align:middle;
-                white-space:nowrap;
-            }
-        </style>
-
-        <script>
         document.addEventListener('DOMContentLoaded', function () {
             const calendar = document.getElementById('calendar');
             const modal = document.getElementById('slotModal');
@@ -557,9 +168,9 @@ class MCEMS_Calendar_Sessioni {
             const allYear  = document.getElementById('allYear');
             const reloadAllBtn = document.getElementById('reloadAllAssignments');
 
-            const AJAX_URL = <?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>;
-            const AJAX_NONCE = <?php echo wp_json_encode($nonce); ?>;
-            const IS_LOGGED_IN = <?php echo is_user_logged_in() ? 'true' : 'false'; ?>;
+            const AJAX_URL = MCEMS_CAL.ajaxUrl;
+            const AJAX_NONCE = MCEMS_CAL.nonce;
+            const IS_LOGGED_IN = MCEMS_CAL.isLoggedIn;
 
             let today = new Date();
             let currentMonth = today.getMonth();
@@ -938,16 +549,14 @@ class MCEMS_Calendar_Sessioni {
                             }
 
                             const row2 = document.getElementById(`myslot-${slotId}`);
-                            if (row2) { row2.remove(); if (!myBody.querySelector('.slot-row')) myBody.innerHTML = `<p class="notice">${MCEMS_CAL.i18n.noAssignedSessions}</p>`; }
+                            if (row2) row2.remove();
 
                             const row3 = document.getElementById(`allslot-${slotId}`);
                             if (row3) {
-                                const meta = row3.querySelector('.slot-meta'); row3.innerHTML = '';
-                                row3.appendChild(meta.cloneNode(true));
-                                row3.insertAdjacentHTML('beforeend',
-                                  `<div class="slot-actions">
-                                     <button class="btn-assegna" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.assignSession}</button>
-                                   </div>`);
+                                const actionsWrap = row3.querySelector('.actions');
+                                if (actionsWrap) {
+                                    actionsWrap.outerHTML = `<div class="slot-actions"><button class="btn-assegna" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.assignSession}</button></div>`;
+                                }
                             }
 
                             updateCacheUnassign(slotId, dateISO);
@@ -959,7 +568,340 @@ class MCEMS_Calendar_Sessioni {
                     .catch(() => { alert(MCEMS_CAL.i18n.networkError); btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.removeAssignment; });
             });
         });
-        </script>
+        <?php
+        $calendar_ui_js = ob_get_clean();
+        wp_add_inline_script('mcems-session-calendar', $calendar_ui_js);
+    }
+
+    private static function cpt(): string {
+        if (class_exists('MCEMS_CPT_Sessioni_Esame') && defined('MCEMS_CPT_Sessioni_Esame::CPT')) {
+            return MCEMS_CPT_Sessioni_Esame::CPT;
+        }
+        return 'mcems_exam_session';
+    }
+
+    private static function mk(string $const, string $fallback) {
+        $full = 'MCEMS_CPT_Sessioni_Esame::' . $const;
+        return defined($full) ? constant($full) : $fallback;
+    }
+
+    /**
+     * Priorità ai meta originali del calendario.
+     * Fallback ai meta MCEMS solo se servono.
+     */
+    private static function meta_keys(string $type): array {
+        $map = [
+            'date' => [
+                'slot_data',
+                self::mk('MK_DATE', 'slot_data'),
+                '_mcems_data',
+                'data',
+                'date',
+            ],
+            'time' => [
+                'slot_orario',
+                self::mk('MK_TIME', 'slot_orario'),
+                '_mcems_orario',
+                'orario',
+                'time',
+            ],
+            'capacity' => [
+                'slot_posti_max',
+                self::mk('MK_CAPACITY', 'slot_posti_max'),
+                '_mcems_capacity',
+                'capacity',
+            ],
+            'occupied' => [
+                'slot_posti_occupati',
+                self::mk('MK_OCCUPATI', 'slot_posti_occupati'),
+                '_mcems_occupati',
+                'occupati',
+            ],
+            'exam_id' => [
+                'slot_corso_id',
+                self::mk('MK_EXAM_ID', 'slot_corso_id'),
+                '_mcems_exam_id',
+                'exam_id',
+            ],
+            'is_special' => [
+                MCEMS_SLOT_ESIGENZE_SPECIALI,
+                self::mk('MK_IS_SPECIAL', MCEMS_SLOT_ESIGENZE_SPECIALI),
+                '_mcems_is_special',
+                'is_special',
+            ],
+            'special_user_id' => [
+                'slot_special_user_id',
+                self::mk('MK_SPECIAL_USER_ID', 'slot_special_user_id'),
+                '_mcems_special_user_id',
+                'special_user_id',
+            ],
+            'assigned' => [
+                'slot_assegnato',
+            ],
+            'assigned_user' => [
+                'slot_assegnato_user',
+            ],
+            'assigned_name' => [
+                'slot_assegnato_nome',
+            ],
+            'assigned_timestamp' => [
+                'slot_assegnato_timestamp',
+            ],
+            'proctor' => [
+                'slot_sorvegliante',
+                '_mcems_proctor_user_id',
+                'mcems_proctor_user_id',
+            ],
+            'warn_sent_for' => [
+                'slot_unassigned_warn_sent_for',
+            ],
+            'warn_sent_legacy' => [
+                'slot_unassigned_warn_sent',
+            ],
+        ];
+
+        return $map[$type] ?? [];
+    }
+
+    private static function get_first_meta(int $post_id, string $type, $default = '') {
+        foreach (self::meta_keys($type) as $key) {
+            $value = get_post_meta($post_id, $key, true);
+            if ($value !== '' && $value !== null) {
+                return $value;
+            }
+        }
+        return $default;
+    }
+
+    private static function update_first_meta(int $post_id, string $type, $value): void {
+        $keys = self::meta_keys($type);
+        if (!empty($keys[0])) {
+            update_post_meta($post_id, $keys[0], $value);
+        }
+    }
+
+    private static function delete_meta_group(int $post_id, string $type): void {
+        foreach (self::meta_keys($type) as $key) {
+            delete_post_meta($post_id, $key);
+        }
+    }
+
+    private static function normalize_time($time): string {
+        $time = (string) $time;
+        if (preg_match('/^(\d{1,2}):(\d{2})(?::\d{2})?$/', $time, $m)) {
+            return str_pad($m[1], 2, '0', STR_PAD_LEFT) . ':' . $m[2];
+        }
+        return $time;
+    }
+
+    private static function current_user_display_name(int $user_id): string {
+        $u = get_userdata($user_id);
+        if (!$u) {
+            return 'user_' . $user_id;
+        }
+
+        $first = get_user_meta($user_id, 'first_name', true);
+        $last  = get_user_meta($user_id, 'last_name', true);
+        $full  = trim(($first ?: '') . ' ' . ($last ?: ''));
+
+        return $full !== '' ? $full : ($u->display_name ?: $u->user_login);
+    }
+
+    private static function get_proctor_user_id(int $slot_id): int {
+        $raw = self::get_first_meta($slot_id, 'proctor', 0);
+        return is_numeric($raw) ? (int) $raw : 0;
+    }
+
+    private static function is_slot_assigned(int $slot_id): bool {
+        return self::get_proctor_user_id($slot_id) > 0;
+    }
+
+    private static function get_slot_assigned_name(int $slot_id): string {
+        $proctor_id = self::get_proctor_user_id($slot_id);
+        if ($proctor_id > 0) {
+            return self::current_user_display_name($proctor_id);
+        }
+        return '';
+    }
+
+    private static function get_calendar_recipients(): array {
+        if (!class_exists('MCEMS_Settings')) {
+            $fallback = sanitize_email((string) get_option('admin_email'));
+            return $fallback ? [$fallback] : [];
+        }
+
+        $raw = trim((string) MCEMS_Settings::get_str('cal_email_notify_to'));
+        if ($raw === '') {
+            $raw = trim((string) MCEMS_Settings::get_str('email_admin_recipients'));
+        }
+        if ($raw === '') {
+            $raw = (string) get_option('admin_email');
+        }
+
+        $emails = array_filter(array_map('trim', preg_split('/[\r\n,;]+/', $raw)));
+        $out = [];
+
+        foreach ($emails as $email) {
+            $email = sanitize_email($email);
+            if ($email && is_email($email)) {
+                $out[] = $email;
+            }
+        }
+
+        return array_values(array_unique($out));
+    }
+
+    private static function get_slot_placeholders(int $slot_id, string $proctor_name = ''): array {
+        $date      = (string) self::get_first_meta($slot_id, 'date', '');
+        $time      = self::normalize_time(self::get_first_meta($slot_id, 'time', ''));
+        $exam_id = (int) self::get_first_meta($slot_id, 'exam_id', 0);
+
+        $exam_title = $exam_id > 0 ? get_the_title($exam_id) : '';
+        if (!$exam_title) {
+            $exam_title = $exam_id > 0 ? ('Exam #' . $exam_id) : '';
+        }
+
+        return [
+            '{site_name}'     => wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES),
+            '{exam_title}'  => $exam_title,
+            '{session_date}'  => $date,
+            '{session_time}'  => $time,
+            '{proctor_name}'  => $proctor_name,
+            '{session_id}'    => (string) $slot_id,
+        ];
+    }
+
+    private static function send_calendar_mail(string $subject_key, string $body_key, array $placeholders = [], ?array $recipients = null): void {
+        if (!class_exists('MCEMS_Settings')) {
+            return;
+        }
+
+        $to = $recipients ?: self::get_calendar_recipients();
+        if (empty($to)) {
+            return;
+        }
+
+        $default_subjects = [
+            'cal_email_subject'          => 'Exam session assigned — {session_date} {session_time}',
+            'cal_email_subject_unassign' => 'Exam session unassigned — {session_date} {session_time}',
+            'cal_email_subject_warning'  => 'Unassigned exam session reminder — {session_date} {session_time}',
+        ];
+
+        $default_bodies = [
+            'cal_email_body' => "An exam session has been assigned.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nProctor: {proctor_name}\nSession ID: {session_id}",
+            'cal_email_body_unassign' => "An exam session assignment has been removed.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nPrevious proctor: {proctor_name}\nSession ID: {session_id}",
+            'cal_email_body_warning' => "The following exam session is scheduled for tomorrow and still has no assigned proctor.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nSession ID: {session_id}",
+        ];
+
+        $subject = MCEMS_Settings::get_email_template($subject_key, $default_subjects[$subject_key] ?? '');
+        $body    = MCEMS_Settings::get_email_template($body_key, $default_bodies[$body_key] ?? '');
+        $headers = MCEMS_Settings::get_mail_headers();
+
+        wp_mail(
+            $to,
+            MCEMS_Settings::render_email_template($subject, $placeholders),
+            MCEMS_Settings::render_email_template($body, $placeholders),
+            $headers
+        );
+    }
+
+    public static function shortcode(): string {
+        if (!MCEMS_Settings::user_can_view_shortcode('mcems_sessions_calendar')) {
+            return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
+        }
+
+        ob_start();
+        ?>
+        <div class="calendar-wrapper">
+            <div class="calendar-nav">
+                <button id="prevMonth" aria-label="<?php echo esc_attr__('Previous month', 'mc-ems-exam-center-for-tutor-lms'); ?>">&larr;</button>
+                <span id="monthYear"></span>
+                <button id="nextMonth" aria-label="<?php echo esc_attr__('Next month', 'mc-ems-exam-center-for-tutor-lms'); ?>">&rarr;</button>
+            </div>
+
+            <div class="calendar-header">
+                <div><?php echo esc_html__('Mon', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Tue', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Wed', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Thu', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Fri', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Sat', 'mc-ems-exam-center-for-tutor-lms'); ?></div><div><?php echo esc_html__('Sun', 'mc-ems-exam-center-for-tutor-lms'); ?></div>
+            </div>
+            <div id="calendar"></div>
+
+            <div class="my-sessions-wrap">
+                <div class="btns-stack">
+                    <button id="openMySessions" class="btn-outline"><?php echo esc_html__('View your assigned sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
+                    <button id="openAllAssignments" class="btn-outline"><?php echo esc_html__('View all sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="slotModal" class="modal" aria-hidden="true">
+            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+                <span class="close" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-exam-center-for-tutor-lms'); ?>">&times;</span>
+                <h2 id="modalTitle"><?php echo esc_html__('Sessions on', 'mc-ems-exam-center-for-tutor-lms'); ?> <span id="modalData"></span></h2>
+                <div id="modalSlotInfo"></div>
+            </div>
+        </div>
+
+        <div id="mySessionsModal" class="modal" aria-hidden="true">
+            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="mySessionsTitle">
+                <span class="close close-my" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-exam-center-for-tutor-lms'); ?>">&times;</span>
+                <h2 id="mySessionsTitle"><?php echo esc_html__('Your assigned sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
+                <div id="mySessionsBody"></div>
+            </div>
+        </div>
+
+        <div id="allAssignmentsModal" class="modal" aria-hidden="true">
+            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="allAssignmentsTitle">
+                <span class="close close-all" role="button" aria-label="<?php echo esc_attr__('Close', 'mc-ems-exam-center-for-tutor-lms'); ?>">&times;</span>
+                <h2 id="allAssignmentsTitle"><?php echo esc_html__('All sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
+
+                <div class="filters-row">
+                    <label>
+                        <?php echo esc_html__('Month', 'mc-ems-exam-center-for-tutor-lms'); ?>
+                        <select id="allMonth">
+                            <?php
+                            $mesi = [
+                                1  => __('January', 'mc-ems-exam-center-for-tutor-lms'),
+                                2  => __('February', 'mc-ems-exam-center-for-tutor-lms'),
+                                3  => __('March', 'mc-ems-exam-center-for-tutor-lms'),
+                                4  => __('April', 'mc-ems-exam-center-for-tutor-lms'),
+                                5  => __('May', 'mc-ems-exam-center-for-tutor-lms'),
+                                6  => __('June', 'mc-ems-exam-center-for-tutor-lms'),
+                                7  => __('July', 'mc-ems-exam-center-for-tutor-lms'),
+                                8  => __('August', 'mc-ems-exam-center-for-tutor-lms'),
+                                9  => __('September', 'mc-ems-exam-center-for-tutor-lms'),
+                                10 => __('October', 'mc-ems-exam-center-for-tutor-lms'),
+                                11 => __('November', 'mc-ems-exam-center-for-tutor-lms'),
+                                12 => __('December', 'mc-ems-exam-center-for-tutor-lms'),
+                            ];
+                            $curM = (int) wp_date('n');
+                            foreach ($mesi as $num=>$nome) {
+                                printf(
+                                    '<option value="%d"%s>%s</option>',
+                                    (int) $num,
+                                    selected($curM, $num, false),
+                                    esc_html($nome)
+                                );
+                            }
+                            ?>
+                        </select>
+                    </label>
+                    <label>
+                        <?php echo esc_html__('Year', 'mc-ems-exam-center-for-tutor-lms'); ?>
+                        <select id="allYear">
+                            <?php
+                            $curY = (int) wp_date('Y');
+                            for ($y=$curY-2; $y<=$curY+2; $y++) {
+                                printf('<option value="%d"%s>%d</option>', (int) $y, selected($curY,$y,false), (int) $y);
+                            }
+                            ?>
+                        </select>
+                    </label>
+                    <button id="reloadAllAssignments" class="btn-outline small tight"><?php echo esc_html__('Search', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
+                </div>
+
+                <div id="allAssignmentsBody" class="scrollable"></div>
+            </div>
+        </div>
+
         <?php
         return ob_get_clean();
     }

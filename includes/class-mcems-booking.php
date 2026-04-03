@@ -47,6 +47,24 @@ class MCEMS_Booking {
         );
         wp_enqueue_style('mcems-style');
 
+        wp_add_inline_style('mcems-style', '
+            .mcems-wrap{max-width:980px;margin:0 auto;}
+            .mcems-h3{margin:0 0 10px;font-size:1.25rem;}
+            .mcems-sub{margin:0 0 18px;color:#667085;font-size:.95rem;}
+            .mcems-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+            .mcems-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:14px 14px 12px;box-shadow:0 1px 2px rgba(16,24,40,.06);}
+            .mcems-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+            .mcems-exam{font-weight:800;font-size:1rem;line-height:1.3;}
+            .mcems-meta{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;}
+            .mcems-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f2f4f7;color:#344054;font-size:12px;font-weight:700;}
+            .mcems-pill strong{font-weight:900;}
+            .mcems-actions{margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+            .mcems-btn{appearance:none;border:1px solid #d0d5dd;background:#fff;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;}
+            .mcems-btn:hover{background:#f9fafb;}
+            .mcems-muted{color:#667085;font-size:12px;font-weight:700;}
+            .mcems-note{margin-top:14px;color:#667085;font-size:12px;}
+        ');
+
         wp_register_script(
             'mcems-booking',
             $url . 'assets/js/booking.js',
@@ -57,17 +75,446 @@ class MCEMS_Booking {
         wp_enqueue_script('mcems-booking');
 
         wp_localize_script('mcems-booking', 'MCEMS_BOOKING', [
-            'ajaxUrl'     => admin_url('admin-ajax.php'),
-            'nonce'       => wp_create_nonce('mcems_booking'),
-            'cancelNonce' => wp_create_nonce('mcems_cancel'),
-            'i18n'        => [
-                'errorLoadSessions' => __('Error loading sessions.', 'mc-ems-exam-center-for-tutor-lms'),
-                'bookingFailed'     => __('Exam booking failed.', 'mc-ems-exam-center-for-tutor-lms'),
-                'bookingConfirmed'  => __('Exam booking confirmed!', 'mc-ems-exam-center-for-tutor-lms'),
-                'bookingCancelled'  => __('Exam booking cancelled.', 'mc-ems-exam-center-for-tutor-lms'),
-                'cancellationFailed' => __('Cancellation failed.', 'mc-ems-exam-center-for-tutor-lms'),
+            'ajaxUrl'          => admin_url('admin-ajax.php'),
+            'nonce'            => wp_create_nonce('mcems_booking'),
+            'cancelNonce'      => wp_create_nonce('mcems_cancel'),
+            'manageBookingUrl' => MCEMS_Settings::get_manage_booking_page_url() ?: '',
+            'i18n'             => [
+                'errorLoadSessions'          => __('Error loading sessions.', 'mc-ems-exam-center-for-tutor-lms'),
+                'bookingFailed'              => __('Exam booking failed.', 'mc-ems-exam-center-for-tutor-lms'),
+                'bookingConfirmed'           => __('Exam booking confirmed!', 'mc-ems-exam-center-for-tutor-lms'),
+                'bookingCancelled'           => __('Exam booking cancelled.', 'mc-ems-exam-center-for-tutor-lms'),
+                'cancellationFailed'         => __('Cancellation failed.', 'mc-ems-exam-center-for-tutor-lms'),
+                'alreadyBooked'              => __('You already have an active booking for this exam.', 'mc-ems-exam-center-for-tutor-lms'),
+                'goTo'                       => __('Go to', 'mc-ems-exam-center-for-tutor-lms'),
+                'manageBooking'              => __('Manage exam booking', 'mc-ems-exam-center-for-tutor-lms'),
+                'toCancel'                   => __('to cancel it.', 'mc-ems-exam-center-for-tutor-lms'),
+                'openManageBookingPage'      => __('Please open the Manage exam booking page to cancel it.', 'mc-ems-exam-center-for-tutor-lms'),
+                'selectExamFirst'            => __('Select an exam first.', 'mc-ems-exam-center-for-tutor-lms'),
+                'selectDateFromCalendar'     => __('Select a date from the calendar.', 'mc-ems-exam-center-for-tutor-lms'),
+                'loadingSessions'            => __('Loading available sessions...', 'mc-ems-exam-center-for-tutor-lms'),
+                'noSessionsForExamAndDate'   => __('No sessions available for this exam and date.', 'mc-ems-exam-center-for-tutor-lms'),
+                'errorLoadSessionsRetry'     => __('Error loading sessions. Please try again.', 'mc-ems-exam-center-for-tutor-lms'),
+                'unableToLoadCalendar'       => __('Unable to load calendar availability. Please try again.', 'mc-ems-exam-center-for-tutor-lms'),
+                'selectSlotBeforeConfirming' => __('Select an exam session before confirming.', 'mc-ems-exam-center-for-tutor-lms'),
+                'anErrorOccurred'            => __('An error occurred. Please try again.', 'mc-ems-exam-center-for-tutor-lms'),
+                'confirmCancel'              => __('Confirm exam booking cancellation?', 'mc-ems-exam-center-for-tutor-lms'),
+                'error'                      => __('Error.', 'mc-ems-exam-center-for-tutor-lms'),
+                'networkError'               => __('Network error', 'mc-ems-exam-center-for-tutor-lms'),
             ],
         ]);
+
+        ob_start();
+        ?>
+        document.addEventListener("DOMContentLoaded", function () {
+            const mcemsNonce = MCEMS_BOOKING.nonce;
+            const examSelect = document.getElementById('mcems_exam_select');
+            const dateInput = document.getElementById('data_esame');
+            const slotContainer = document.getElementById('slot-container');
+            const confirmContainer = document.getElementById('confirm-container');
+            const confirmButton = document.getElementById('confirm-button');
+            const calendarWrap = document.getElementById('mcems-booking-calendar-wrap');
+            const calendarEl = document.getElementById('mcems-booking-calendar');
+            const monthYearEl = document.getElementById('mcems-month-year');
+            const prevMonthBtn = document.getElementById('mcems-prev-month');
+            const nextMonthBtn = document.getElementById('mcems-next-month');
+
+            let selectedSlot = null;
+            let currentMonthDate = new Date();
+            currentMonthDate.setDate(1);
+
+            const monthCache = {};
+            const manageBookingUrl = MCEMS_BOOKING.manageBookingUrl;
+
+            function formatDate(date) {
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const d = String(date.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+
+            function resetSlots(msgHtml) {
+                selectedSlot = null;
+                if (confirmContainer) confirmContainer.style.display = 'none';
+                if (slotContainer) slotContainer.innerHTML = msgHtml || '';
+            }
+
+            function showCalendar(show) {
+                if (calendarWrap) {
+                    calendarWrap.style.display = show ? 'block' : 'none';
+                }
+            }
+
+            function showBookingMessage(msg) {
+                const messageEl = document.getElementById('mcems-booking-message');
+                if (messageEl) {
+                    messageEl.innerHTML = msg;
+                    messageEl.style.display = 'block';
+                }
+                showCalendar(false);
+                resetSlots('');
+            }
+
+            function hideBookingMessage() {
+                const messageEl = document.getElementById('mcems-booking-message');
+                if (messageEl) {
+                    messageEl.style.display = 'none';
+                    messageEl.innerHTML = '';
+                }
+            }
+
+            function checkExistingBooking() {
+                const examId = examSelect ? examSelect.value : '';
+                if (!examId) {
+                    hideBookingMessage();
+                    showCalendar(false);
+                    return;
+                }
+
+                const url = MCEMS_BOOKING.ajaxUrl + '?action=mcems_check_active_booking&exam_id='
+                    + encodeURIComponent(examId)
+                    + '&nonce=' + encodeURIComponent(mcemsNonce);
+
+                fetch(url)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data.has_booking) {
+                            let msg = '<p style="text-align:center;">'
+                                + MCEMS_BOOKING.i18n.alreadyBooked
+                                + '<br>';
+                            if (manageBookingUrl) {
+                                msg += MCEMS_BOOKING.i18n.goTo + ' <a href="' + manageBookingUrl + '">'
+                                    + MCEMS_BOOKING.i18n.manageBooking
+                                    + '</a> ' + MCEMS_BOOKING.i18n.toCancel;
+                            } else {
+                                msg += MCEMS_BOOKING.i18n.openManageBookingPage;
+                            }
+                            msg += '</p>';
+                            showBookingMessage(msg);
+                        } else {
+                            hideBookingMessage();
+                            renderBookingCalendar();
+                        }
+                    })
+                    .catch(() => {
+                        hideBookingMessage();
+                        renderBookingCalendar();
+                    });
+            }
+
+            function ensureExamSelected() {
+                if (!examSelect || !examSelect.value) {
+                    if (dateInput) dateInput.value = '';
+                    showCalendar(false);
+                    resetSlots('<p style="color:#888;">' + MCEMS_BOOKING.i18n.selectExamFirst + '</p>');
+                    return false;
+                }
+                showCalendar(true);
+                return true;
+            }
+
+            function calendarDayClass(dayObj) {
+                if (!dayObj || Number(dayObj.totali || 0) === 0) return 'no-slot';
+
+                const total = Number(dayObj.totali || 0);
+                const booked = Number(dayObj.prenotati || 0);
+                const free = Math.max(0, total - booked);
+
+                if (free === total) return 'slot-verde';
+                if (free >= total * 0.5) return 'slot-giallo';
+                if (free > 0) return 'slot-arancione';
+                return 'slot-rosso';
+            }
+
+            function fetchCalendarMonth(year, month) {
+                const key = `${year}-${month}`;
+                if (monthCache[key]) {
+                    return Promise.resolve(monthCache[key]);
+                }
+
+                const url = MCEMS_BOOKING.ajaxUrl + '?action=mcems_get_booking_calendar&year='
+                    + encodeURIComponent(year)
+                    + '&month=' + encodeURIComponent(month + 1)
+                    + '&exam_id=' + encodeURIComponent(examSelect ? examSelect.value : '')
+                    + '&nonce=' + encodeURIComponent(mcemsNonce);
+
+                return fetch(url)
+                    .then(r => r.json())
+                    .then(data => {
+                        monthCache[key] = data || {};
+                        return monthCache[key];
+                    });
+            }
+
+            function loadSlotsForDate(dateValue) {
+                if (!dateValue) {
+                    resetSlots('<p style="color:#888;">' + MCEMS_BOOKING.i18n.selectDateFromCalendar + '</p>');
+                    return;
+                }
+
+                resetSlots('<p style="color:#666;">' + MCEMS_BOOKING.i18n.loadingSessions + '</p>');
+
+                const url = MCEMS_BOOKING.ajaxUrl + '?action=mcems_get_slot_per_data&data='
+                    + encodeURIComponent(dateValue)
+                    + '&exam_id=' + encodeURIComponent(examSelect ? examSelect.value : '')
+                    + '&nonce=' + encodeURIComponent(mcemsNonce);
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.error) {
+                            resetSlots('<p style="color:#f44336; font-weight:bold;">' + data.error + '</p>');
+                            return;
+                        }
+
+                        if (!Array.isArray(data) || !data.length) {
+                            resetSlots('<p style="color:#888;">' + MCEMS_BOOKING.i18n.noSessionsForExamAndDate + '</p>');
+                            return;
+                        }
+
+                        resetSlots('');
+
+                        data.forEach(slot => {
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.textContent = `${slot.orario}`;
+                            btn.style.margin = '5px';
+                            btn.style.padding = '10px 20px';
+                            btn.style.borderRadius = '5px';
+                            btn.style.border = '2px solid #4CAF50';
+                            btn.style.backgroundColor = '#fff';
+                            btn.style.color = '#4CAF50';
+                            btn.style.cursor = 'pointer';
+
+                            if (slot.occupati >= slot.max) {
+                                btn.disabled = true;
+                                btn.style.backgroundColor = '#eee';
+                                btn.style.color = '#999';
+                                btn.style.borderColor = '#ccc';
+                                btn.style.cursor = 'not-allowed';
+                            } else {
+                                btn.addEventListener('click', function () {
+                                    document.querySelectorAll('#slot-container button').forEach(b => {
+                                        b.style.backgroundColor = '#fff';
+                                        b.style.color = '#4CAF50';
+                                        b.style.borderColor = '#4CAF50';
+                                    });
+
+                                    this.style.backgroundColor = '#4CAF50';
+                                    this.style.color = '#fff';
+                                    selectedSlot = slot.id;
+
+                                    if (confirmContainer) {
+                                        confirmContainer.style.display = 'block';
+                                    }
+                                });
+                            }
+
+                            slotContainer.appendChild(btn);
+                        });
+                    })
+                    .catch(() => {
+                        resetSlots('<p style="color:#f44336;">' + MCEMS_BOOKING.i18n.errorLoadSessionsRetry + '</p>');
+                    });
+            }
+
+            function renderBookingCalendar() {
+                if (!ensureExamSelected() || !calendarEl || !monthYearEl) return;
+
+                const year = currentMonthDate.getFullYear();
+                const month = currentMonthDate.getMonth();
+
+                monthYearEl.textContent = new Date(year, month, 1).toLocaleString('en-US', {
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                calendarEl.innerHTML = '';
+
+                const firstDay = new Date(year, month, 1);
+                let startDay = firstDay.getDay();
+                startDay = (startDay === 0) ? 6 : startDay - 1;
+
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                for (let i = 0; i < startDay; i++) {
+                    const spacer = document.createElement('div');
+                    calendarEl.appendChild(spacer);
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayDate = new Date(year, month, day);
+                    const dayEl = document.createElement('button');
+
+                    dayEl.type = 'button';
+                    dayEl.textContent = day;
+                    dayEl.dataset.date = formatDate(dayDate);
+                    dayEl.style.border = '1px solid #ddd';
+                    dayEl.style.padding = '7px';
+                    dayEl.style.aspectRatio = '1';
+                    dayEl.style.display = 'flex';
+                    dayEl.style.alignItems = 'center';
+                    dayEl.style.justifyContent = 'center';
+                    dayEl.style.borderRadius = '9px';
+                    dayEl.style.fontSize = '13px';
+                    dayEl.style.cursor = 'pointer';
+                    dayEl.style.background = '#eee';
+                    dayEl.style.color = '#777';
+
+                    calendarEl.appendChild(dayEl);
+                }
+
+                fetchCalendarMonth(year, month)
+                    .then(data => {
+                        if (data && data.error) {
+                            resetSlots('<p style="color:#f44336;">' + data.error + '</p>');
+                            return;
+                        }
+
+                        calendarEl.querySelectorAll('button[data-date]').forEach(dayEl => {
+                            const dateKey = dayEl.dataset.date;
+                            const dayObj = data && data[dateKey] ? data[dateKey] : null;
+                            const cls = calendarDayClass(dayObj);
+
+                            if (cls === 'no-slot') {
+                                dayEl.style.background = '#eee';
+                                dayEl.style.color = '#777';
+                                dayEl.style.cursor = 'not-allowed';
+                                return;
+                            }
+
+                            if (cls === 'slot-verde') {
+                                dayEl.style.background = '#4caf50';
+                                dayEl.style.color = '#fff';
+                            } else if (cls === 'slot-giallo') {
+                                dayEl.style.background = '#ffeb3b';
+                                dayEl.style.color = '#000';
+                            } else if (cls === 'slot-arancione') {
+                                dayEl.style.background = '#ff9800';
+                                dayEl.style.color = '#fff';
+                            } else if (cls === 'slot-rosso') {
+                                dayEl.style.background = '#f44336';
+                                dayEl.style.color = '#fff';
+                            }
+
+                            dayEl.addEventListener('click', function () {
+                                calendarEl.querySelectorAll('button[data-date]').forEach(btn => {
+                                    btn.style.outline = 'none';
+                                });
+
+                                this.style.outline = '2px solid rgba(0,0,0,.18)';
+
+                                if (dateInput) {
+                                    dateInput.value = dateKey;
+                                }
+
+                                loadSlotsForDate(dateKey);
+                            });
+                        });
+                    })
+                    .catch(() => {
+                        resetSlots('<p style="color:#f44336;">' + MCEMS_BOOKING.i18n.unableToLoadCalendar + '</p>');
+                    });
+            }
+
+            if (examSelect) {
+                examSelect.addEventListener('change', function () {
+                    Object.keys(monthCache).forEach(key => delete monthCache[key]);
+
+                    if (dateInput) {
+                        dateInput.value = '';
+                    }
+
+                    resetSlots('<p style="color:#888;">' + MCEMS_BOOKING.i18n.selectDateFromCalendar + '</p>');
+                    checkExistingBooking();
+                });
+            }
+
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const pre = params.get('exam_id');
+
+                if (pre && examSelect && !examSelect.value) {
+                    const exists = Array.from(examSelect.options).some(o => o.value === pre);
+                    if (exists) {
+                        examSelect.value = pre;
+                    }
+                }
+            } catch (e) {}
+
+            if (prevMonthBtn) {
+                prevMonthBtn.addEventListener('click', function () {
+                    currentMonthDate.setMonth(currentMonthDate.getMonth() - 1);
+                    renderBookingCalendar();
+                });
+            }
+
+            if (nextMonthBtn) {
+                nextMonthBtn.addEventListener('click', function () {
+                    currentMonthDate.setMonth(currentMonthDate.getMonth() + 1);
+                    renderBookingCalendar();
+                });
+            }
+
+            if (confirmButton) {
+                confirmButton.addEventListener('click', function () {
+                    if (!selectedSlot) {
+                        return alert(MCEMS_BOOKING.i18n.selectSlotBeforeConfirming);
+                    }
+
+                    const formData = new FormData();
+                    formData.append('action', 'mcems_conferma_prenotazione_slot');
+                    formData.append('slot_id', selectedSlot);
+
+                    fetch(MCEMS_BOOKING.ajaxUrl, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('prenotazione-esame').innerHTML = html;
+                    })
+                    .catch(() => {
+                        alert(MCEMS_BOOKING.i18n.anErrorOccurred);
+                    });
+                });
+            }
+
+            if (examSelect && examSelect.value) {
+                resetSlots('<p style="color:#888;">' + MCEMS_BOOKING.i18n.selectDateFromCalendar + '</p>');
+                renderBookingCalendar();
+            } else {
+                showCalendar(false);
+                resetSlots('<p style="color:#888;">' + MCEMS_BOOKING.i18n.selectExamFirst + '</p>');
+            }
+        });
+        <?php
+        $booking_ui_js = ob_get_clean();
+        wp_add_inline_script('mcems-booking', $booking_ui_js);
+
+        $cancel_js = '(function(){' .
+            'var msg = document.getElementById("mcems-cancel-msg");' .
+            'var mcemsBooking = (typeof MCEMS_BOOKING !== "undefined") ? MCEMS_BOOKING : {};' .
+            'var cancelNonce = mcemsBooking.cancelNonce || "";' .
+            'var ajaxUrl = mcemsBooking.ajaxUrl || "";' .
+            'document.querySelectorAll(".mcems-cancel").forEach(function(btn){' .
+            'btn.addEventListener("click",function(){' .
+            'if(!confirm(MCEMS_BOOKING.i18n.confirmCancel))return;' .
+            'var fd=new FormData();' .
+            'fd.append("action","mcems_cancel_booking");' .
+            'fd.append("slot_id",this.dataset.slot||"");' .
+            'fd.append("exam_id",this.dataset.exam||"");' .
+            'fd.append("nonce",cancelNonce);' .
+            'fetch(ajaxUrl,{method:"POST",body:fd})' .
+            '.then(function(r){return r.json();})' .
+            '.then(function(j){' .
+            'if(j&&j.success){if(msg)msg.textContent="\u2705 "+MCEMS_BOOKING.i18n.bookingCancelled;location.reload();}' .
+            'else{if(msg)msg.textContent="\u26a0\ufe0f "+((j&&j.data)?j.data:MCEMS_BOOKING.i18n.error);}' .
+            '})' .
+            '.catch(function(){if(msg)msg.textContent="\u26a0\ufe0f "+MCEMS_BOOKING.i18n.networkError;});' .
+            '});});' .
+            '})();';
+        wp_add_inline_script('mcems-booking', $cancel_js);
     }
 
     /* =========================
@@ -334,390 +781,6 @@ class MCEMS_Booking {
                     <button id="confirm-button" style="background-color:#4CAF50; color:#fff; padding:12px 24px; border:none; border-radius:5px; cursor:pointer;"><?php echo esc_html__('Confirm booking', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
                 </div>
 
-                <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    const mcemsNonce = '<?php echo esc_js(wp_create_nonce('mcems_booking')); ?>';
-                    const examSelect = document.getElementById('mcems_exam_select');
-                    const dateInput = document.getElementById('data_esame');
-                    const slotContainer = document.getElementById('slot-container');
-                    const confirmContainer = document.getElementById('confirm-container');
-                    const confirmButton = document.getElementById('confirm-button');
-                    const calendarWrap = document.getElementById('mcems-booking-calendar-wrap');
-                    const calendarEl = document.getElementById('mcems-booking-calendar');
-                    const monthYearEl = document.getElementById('mcems-month-year');
-                    const prevMonthBtn = document.getElementById('mcems-prev-month');
-                    const nextMonthBtn = document.getElementById('mcems-next-month');
-
-                    let selectedSlot = null;
-                    let currentMonthDate = new Date();
-                    currentMonthDate.setDate(1);
-
-                    const monthCache = {};
-                    const manageBookingUrl = <?php echo json_encode(MCEMS_Settings::get_manage_booking_page_url() ?: ''); ?>;
-
-                    function formatDate(date) {
-                        const y = date.getFullYear();
-                        const m = String(date.getMonth() + 1).padStart(2, '0');
-                        const d = String(date.getDate()).padStart(2, '0');
-                        return `${y}-${m}-${d}`;
-                    }
-
-                    function resetSlots(msgHtml) {
-                        selectedSlot = null;
-                        if (confirmContainer) confirmContainer.style.display = 'none';
-                        if (slotContainer) slotContainer.innerHTML = msgHtml || '';
-                    }
-
-                    function showCalendar(show) {
-                        if (calendarWrap) {
-                            calendarWrap.style.display = show ? 'block' : 'none';
-                        }
-                    }
-
-                    function showBookingMessage(msg) {
-                        const messageEl = document.getElementById('mcems-booking-message');
-                        if (messageEl) {
-                            messageEl.innerHTML = msg;
-                            messageEl.style.display = 'block';
-                        }
-                        showCalendar(false);
-                        resetSlots('');
-                    }
-
-                    function hideBookingMessage() {
-                        const messageEl = document.getElementById('mcems-booking-message');
-                        if (messageEl) {
-                            messageEl.style.display = 'none';
-                            messageEl.innerHTML = '';
-                        }
-                    }
-
-                    function checkExistingBooking() {
-                        const examId = examSelect ? examSelect.value : '';
-                        if (!examId) {
-                            hideBookingMessage();
-                            showCalendar(false);
-                            return;
-                        }
-
-                        const url = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>?action=mcems_check_active_booking&exam_id='
-                            + encodeURIComponent(examId)
-                            + '&nonce=' + encodeURIComponent(mcemsNonce);
-
-                        fetch(url)
-                            .then(r => r.json())
-                            .then(data => {
-                                if (data && data.has_booking) {
-                                    let msg = '<p style="text-align:center;">'
-                                        + '<?php echo esc_js(__('You already have an active booking for this exam.', 'mc-ems-exam-center-for-tutor-lms')); ?>'
-                                        + '<br>';
-                                    if (manageBookingUrl) {
-                                        msg += '<?php echo esc_js(__('Go to', 'mc-ems-exam-center-for-tutor-lms')); ?> <a href="' + manageBookingUrl + '">'
-                                            + '<?php echo esc_js(__('Manage exam booking', 'mc-ems-exam-center-for-tutor-lms')); ?>'
-                                            + '</a> <?php echo esc_js(__('to cancel it.', 'mc-ems-exam-center-for-tutor-lms')); ?>';
-                                    } else {
-                                        msg += '<?php echo esc_js(__('Please open the Manage exam booking page to cancel it.', 'mc-ems-exam-center-for-tutor-lms')); ?>';
-                                    }
-                                    msg += '</p>';
-                                    showBookingMessage(msg);
-                                } else {
-                                    hideBookingMessage();
-                                    renderBookingCalendar();
-                                }
-                            })
-                            .catch(() => {
-                                hideBookingMessage();
-                                renderBookingCalendar();
-                            });
-                    }
-
-                    function ensureExamSelected() {
-                        if (!examSelect || !examSelect.value) {
-                            if (dateInput) dateInput.value = '';
-                            showCalendar(false);
-                            resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select an exam first.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
-                            return false;
-                        }
-                        showCalendar(true);
-                        return true;
-                    }
-
-                    function calendarDayClass(dayObj) {
-                        if (!dayObj || Number(dayObj.totali || 0) === 0) return 'no-slot';
-
-                        const total = Number(dayObj.totali || 0);
-                        const booked = Number(dayObj.prenotati || 0);
-                        const free = Math.max(0, total - booked);
-
-                        if (free === total) return 'slot-verde';
-                        if (free >= total * 0.5) return 'slot-giallo';
-                        if (free > 0) return 'slot-arancione';
-                        return 'slot-rosso';
-                    }
-
-                    function fetchCalendarMonth(year, month) {
-                        const key = `${year}-${month}`;
-                        if (monthCache[key]) {
-                            return Promise.resolve(monthCache[key]);
-                        }
-
-                        const url = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>?action=mcems_get_booking_calendar&year='
-                            + encodeURIComponent(year)
-                            + '&month=' + encodeURIComponent(month + 1)
-                            + '&exam_id=' + encodeURIComponent(examSelect ? examSelect.value : '')
-                            + '&nonce=' + encodeURIComponent(mcemsNonce);
-
-                        return fetch(url)
-                            .then(r => r.json())
-                            .then(data => {
-                                monthCache[key] = data || {};
-                                return monthCache[key];
-                            });
-                    }
-
-                    function loadSlotsForDate(dateValue) {
-                        if (!dateValue) {
-                            resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select a date from the calendar.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
-                            return;
-                        }
-
-                        resetSlots('<p style="color:#666;"><?php echo esc_js(__('Loading available sessions...', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
-
-                        const url = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>?action=mcems_get_slot_per_data&data='
-                            + encodeURIComponent(dateValue)
-                            + '&exam_id=' + encodeURIComponent(examSelect ? examSelect.value : '')
-                            + '&nonce=' + encodeURIComponent(mcemsNonce);
-
-                        fetch(url)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data && data.error) {
-                                    resetSlots('<p style="color:#f44336; font-weight:bold;">' + data.error + '</p>');
-                                    return;
-                                }
-
-                                if (!Array.isArray(data) || !data.length) {
-                                    resetSlots('<p style="color:#888;"><?php echo esc_js(__('No sessions available for this exam and date.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
-                                    return;
-                                }
-
-                                resetSlots('');
-
-                                data.forEach(slot => {
-                                    const btn = document.createElement('button');
-                                    btn.type = 'button';
-                                    btn.textContent = `${slot.orario}`;
-                                    btn.style.margin = '5px';
-                                    btn.style.padding = '10px 20px';
-                                    btn.style.borderRadius = '5px';
-                                    btn.style.border = '2px solid #4CAF50';
-                                    btn.style.backgroundColor = '#fff';
-                                    btn.style.color = '#4CAF50';
-                                    btn.style.cursor = 'pointer';
-
-                                    if (slot.occupati >= slot.max) {
-                                        btn.disabled = true;
-                                        btn.style.backgroundColor = '#eee';
-                                        btn.style.color = '#999';
-                                        btn.style.borderColor = '#ccc';
-                                        btn.style.cursor = 'not-allowed';
-                                    } else {
-                                        btn.addEventListener('click', function () {
-                                            document.querySelectorAll('#slot-container button').forEach(b => {
-                                                b.style.backgroundColor = '#fff';
-                                                b.style.color = '#4CAF50';
-                                                b.style.borderColor = '#4CAF50';
-                                            });
-
-                                            this.style.backgroundColor = '#4CAF50';
-                                            this.style.color = '#fff';
-                                            selectedSlot = slot.id;
-
-                                            if (confirmContainer) {
-                                                confirmContainer.style.display = 'block';
-                                            }
-                                        });
-                                    }
-
-                                    slotContainer.appendChild(btn);
-                                });
-                            })
-                            .catch(() => {
-                                resetSlots('<p style="color:#f44336;"><?php echo esc_js(__('Error loading sessions. Please try again.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
-                            });
-                    }
-
-                    function renderBookingCalendar() {
-                        if (!ensureExamSelected() || !calendarEl || !monthYearEl) return;
-
-                        const year = currentMonthDate.getFullYear();
-                        const month = currentMonthDate.getMonth();
-
-                        monthYearEl.textContent = new Date(year, month, 1).toLocaleString('en-US', {
-                            month: 'long',
-                            year: 'numeric'
-                        });
-
-                        calendarEl.innerHTML = '';
-
-                        const firstDay = new Date(year, month, 1);
-                        let startDay = firstDay.getDay();
-                        startDay = (startDay === 0) ? 6 : startDay - 1;
-
-                        const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-                        for (let i = 0; i < startDay; i++) {
-                            const spacer = document.createElement('div');
-                            calendarEl.appendChild(spacer);
-                        }
-
-                        for (let day = 1; day <= daysInMonth; day++) {
-                            const dayDate = new Date(year, month, day);
-                            const dayEl = document.createElement('button');
-
-                            dayEl.type = 'button';
-                            dayEl.textContent = day;
-                            dayEl.dataset.date = formatDate(dayDate);
-                            dayEl.style.border = '1px solid #ddd';
-                            dayEl.style.padding = '7px';
-                            dayEl.style.aspectRatio = '1';
-                            dayEl.style.display = 'flex';
-                            dayEl.style.alignItems = 'center';
-                            dayEl.style.justifyContent = 'center';
-                            dayEl.style.borderRadius = '9px';
-                            dayEl.style.fontSize = '13px';
-                            dayEl.style.cursor = 'pointer';
-                            dayEl.style.background = '#eee';
-                            dayEl.style.color = '#777';
-
-                            calendarEl.appendChild(dayEl);
-                        }
-
-                        fetchCalendarMonth(year, month)
-                            .then(data => {
-                                if (data && data.error) {
-                                    resetSlots('<p style="color:#f44336;">' + data.error + '</p>');
-                                    return;
-                                }
-
-                                calendarEl.querySelectorAll('button[data-date]').forEach(dayEl => {
-                                    const dateKey = dayEl.dataset.date;
-                                    const dayObj = data && data[dateKey] ? data[dateKey] : null;
-                                    const cls = calendarDayClass(dayObj);
-
-                                    if (cls === 'no-slot') {
-                                        dayEl.style.background = '#eee';
-                                        dayEl.style.color = '#777';
-                                        dayEl.style.cursor = 'not-allowed';
-                                        return;
-                                    }
-
-                                    if (cls === 'slot-verde') {
-                                        dayEl.style.background = '#4caf50';
-                                        dayEl.style.color = '#fff';
-                                    } else if (cls === 'slot-giallo') {
-                                        dayEl.style.background = '#ffeb3b';
-                                        dayEl.style.color = '#000';
-                                    } else if (cls === 'slot-arancione') {
-                                        dayEl.style.background = '#ff9800';
-                                        dayEl.style.color = '#fff';
-                                    } else if (cls === 'slot-rosso') {
-                                        dayEl.style.background = '#f44336';
-                                        dayEl.style.color = '#fff';
-                                    }
-
-                                    dayEl.addEventListener('click', function () {
-                                        calendarEl.querySelectorAll('button[data-date]').forEach(btn => {
-                                            btn.style.outline = 'none';
-                                        });
-
-                                        this.style.outline = '2px solid rgba(0,0,0,.18)';
-
-                                        if (dateInput) {
-                                            dateInput.value = dateKey;
-                                        }
-
-                                        loadSlotsForDate(dateKey);
-                                    });
-                                });
-                            })
-                            .catch(() => {
-                                resetSlots('<p style="color:#f44336;"><?php echo esc_js(__('Unable to load calendar availability. Please try again.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
-                            });
-                    }
-
-                    if (examSelect) {
-                        examSelect.addEventListener('change', function () {
-                            Object.keys(monthCache).forEach(key => delete monthCache[key]);
-
-                            if (dateInput) {
-                                dateInput.value = '';
-                            }
-
-                            resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select a date from the calendar.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
-                            checkExistingBooking();
-                        });
-                    }
-
-                    try {
-                        const params = new URLSearchParams(window.location.search);
-                        const pre = params.get('exam_id');
-
-                        if (pre && examSelect && !examSelect.value) {
-                            const exists = Array.from(examSelect.options).some(o => o.value === pre);
-                            if (exists) {
-                                examSelect.value = pre;
-                            }
-                        }
-                    } catch (e) {}
-
-                    if (prevMonthBtn) {
-                        prevMonthBtn.addEventListener('click', function () {
-                            currentMonthDate.setMonth(currentMonthDate.getMonth() - 1);
-                            renderBookingCalendar();
-                        });
-                    }
-
-                    if (nextMonthBtn) {
-                        nextMonthBtn.addEventListener('click', function () {
-                            currentMonthDate.setMonth(currentMonthDate.getMonth() + 1);
-                            renderBookingCalendar();
-                        });
-                    }
-
-                    if (confirmButton) {
-                        confirmButton.addEventListener('click', function () {
-                            if (!selectedSlot) {
-                                return alert('<?php echo esc_js(__('Select an exam session before confirming.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
-                            }
-
-                            const formData = new FormData();
-                            formData.append('action', 'mcems_conferma_prenotazione_slot');
-                            formData.append('slot_id', selectedSlot);
-
-                            fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>', {
-                                method: 'POST',
-                                body: formData
-                            })
-                            .then(response => response.text())
-                            .then(html => {
-                                document.getElementById('prenotazione-esame').innerHTML = html;
-                            })
-                            .catch(() => {
-                                alert('<?php echo esc_js(__('An error occurred. Please try again.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
-                            });
-                        });
-                    }
-
-                    if (examSelect && examSelect.value) {
-                        resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select a date from the calendar.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
-                        renderBookingCalendar();
-                    } else {
-                        showCalendar(false);
-                        resetSlots('<p style="color:#888;"><?php echo esc_js(__('Select an exam first.', 'mc-ems-exam-center-for-tutor-lms')); ?></p>');
-                    }
-                });
-                </script>
             <?php endif; ?>
         </div>
         <?php
@@ -750,23 +813,6 @@ class MCEMS_Booking {
 
         ob_start();
         ?>
-        <style>
-            .mcems-wrap{max-width:980px;margin:0 auto;}
-            .mcems-h3{margin:0 0 10px;font-size:1.25rem;}
-            .mcems-sub{margin:0 0 18px;color:#667085;font-size:.95rem;}
-            .mcems-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
-            .mcems-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:14px 14px 12px;box-shadow:0 1px 2px rgba(16,24,40,.06);}
-            .mcems-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-            .mcems-exam{font-weight:800;font-size:1rem;line-height:1.3;}
-            .mcems-meta{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;}
-            .mcems-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f2f4f7;color:#344054;font-size:12px;font-weight:700;}
-            .mcems-pill strong{font-weight:900;}
-            .mcems-actions{margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-            .mcems-btn{appearance:none;border:1px solid #d0d5dd;background:#fff;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;}
-            .mcems-btn:hover{background:#f9fafb;}
-            .mcems-muted{color:#667085;font-size:12px;font-weight:700;}
-            .mcems-note{margin-top:14px;color:#667085;font-size:12px;}
-        </style>
 
         <div class="mcems-wrap">
             <div style="padding:16px;border:1px solid #e5e7eb;border-radius:16px;background:linear-gradient(180deg,#ffffff 0%, #fbfcff 100%);">
@@ -838,41 +884,6 @@ class MCEMS_Booking {
                 <div id="mcems-cancel-msg" class="mcems-note"></div>
             </div>
         </div>
-
-        <script>
-        (function(){
-            const msg = document.getElementById('mcems-cancel-msg');
-            const mcemsBooking = (typeof MCEMS_BOOKING !== 'undefined') ? MCEMS_BOOKING : {};
-            const cancelNonce = mcemsBooking.cancelNonce || '';
-            const ajaxUrl = mcemsBooking.ajaxUrl || '<?php echo esc_url(admin_url('admin-ajax.php')); ?>';
-
-            document.querySelectorAll('.mcems-cancel').forEach(btn => {
-                btn.addEventListener('click', function(){
-                    if (!confirm('<?php echo esc_js(__('Confirm exam booking cancellation?', 'mc-ems-exam-center-for-tutor-lms')); ?>')) return;
-
-                    const fd = new FormData();
-                    fd.append('action','mcems_cancel_booking');
-                    fd.append('slot_id', this.dataset.slot || '');
-                    fd.append('exam_id', this.dataset.exam || '');
-                    fd.append('nonce', cancelNonce);
-
-                    fetch(ajaxUrl, { method:'POST', body: fd })
-                        .then(r => r.json())
-                        .then(j => {
-                            if (j && j.success) {
-                                msg.textContent = '✅ <?php echo esc_js(__('Exam booking cancelled.', 'mc-ems-exam-center-for-tutor-lms')); ?>';
-                                location.reload();
-                            } else {
-                                msg.textContent = '⚠️ ' + ((j && j.data) ? j.data : '<?php echo esc_js(__('Error.', 'mc-ems-exam-center-for-tutor-lms')); ?>');
-                            }
-                        })
-                        .catch(() => {
-                            msg.textContent='⚠️ <?php echo esc_js(__('Network error', 'mc-ems-exam-center-for-tutor-lms')); ?>';
-                        });
-                });
-            });
-        })();
-        </script>
         <?php
         return ob_get_clean();
     }
