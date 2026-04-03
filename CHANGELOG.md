@@ -2,6 +2,13 @@
 
 ## [1.2.5] - 2026-04-03
 
+### Fixed
+- fix: stable tag allineata, debug log rimossi/protetti, commenti warning query, preparazione SQL
+  - `readme.txt`: `Stable tag` allineata da `1.2.2` a `1.2.5` (fix errore bloccante Plugin Check / WordPress.org).
+  - `class-mcemexce-booking.php`: tutte le chiamate a `error_log()` in `ajax_cancel_booking` protette dietro guard `if (defined('WP_DEBUG') && WP_DEBUG)` per produzione sicura.
+  - `class-mcemexce-booking.php`, `class-mcemexce-bookings-list.php`, `class-mcemexce-calendar-sessioni.php`, `class-mcemexce-admin-sessioni.php`: aggiunti commenti `// TODO: Plugin Check slow-query warning` su `meta_query` e `meta_key` per tracciare e facilitare future ottimizzazioni.
+  - `class-mcemexce-quiz-stats.php`: le query dirette con stringhe literal (`get_posts`, `post_type = 'courses'`) ora usano `$wpdb->prepare` per coerenza con le best practice WordPress e le linee guida Plugin Check.
+
 ### Changed
 - diagnostic: log avanzati e messaggi dettagliati per diagnosi blocco cancellazione booking non admin
   - `ajax_cancel_booking`: aggiunto `error_log` WordPress dettagliato in ogni fase del callback (login, nonce, capability, validità slot, controllo proprietà prenotazione, sessione riservata).

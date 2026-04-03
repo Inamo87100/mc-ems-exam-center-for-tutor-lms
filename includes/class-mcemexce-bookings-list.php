@@ -83,8 +83,11 @@ class MCEMEXCE_Bookings_List_Base {
             'post_status'    => 'publish',
             'posts_per_page' => -1,
             'fields'         => 'ids',
+            // TODO: Plugin Check slow-query warning – meta_query on postmeta is necessary here;
+            // consider a custom table for large-scale deployments.
             'meta_query'     => $meta,
             'orderby'        => 'meta_value',
+            // TODO: Plugin Check – meta_key used for ordering; acceptable with proper index.
             'meta_key'       => MCEMEXCE_CPT_Sessioni_Esame::MK_TIME,
             'order'          => 'ASC',
         ]);

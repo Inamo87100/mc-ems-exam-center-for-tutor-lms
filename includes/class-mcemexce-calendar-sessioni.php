@@ -938,6 +938,7 @@ class MCEMEXCE_Calendar_Sessioni {
             'post_type'      => self::cpt(),
             'posts_per_page' => -1,
             'post_status'    => 'publish',
+            // TODO: Plugin Check – meta_key used for ordering; acceptable with proper index.
             'meta_key'       => self::meta_keys('date')[0],
             'orderby'        => 'meta_value',
             'order'          => 'ASC',
@@ -946,6 +947,8 @@ class MCEMEXCE_Calendar_Sessioni {
         if ($year > 0 && $month >= 1 && $month <= 12) {
             $start = sprintf('%04d-%02d-01', $year, $month);
             $end   = gmdate('Y-m-t', strtotime($start));
+            // TODO: Plugin Check slow-query warning – meta_query on postmeta is necessary here;
+            // consider a custom table for large-scale deployments.
             $args['meta_query'] = [[
                 'key'     => self::meta_keys('date')[0],
                 'value'   => [$start, $end],
