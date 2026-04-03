@@ -18,5 +18,5 @@ $mcemexce_quiz_stats_table = $wpdb->prefix . 'mcemexce_quiz_stats_cache';
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $wpdb->query( "DROP TABLE IF EXISTS {$mcemexce_quiz_stats_table}" );
 
-// NOTE: We intentionally do NOT delete CPT posts (mcemexce_exam_session) automatically,
+// NOTE: We intentionally do NOT delete CPT posts (mcemexce_session) automatically,
 // because they may be business records. If you need a full wipe, do it manually.

@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) exit;
 
 class MCEMEXCE_CPT_Sessioni_Esame {
 
-    const CPT = 'mcemexce_exam_session';
+    const CPT = 'mcemexce_session';
 
     // === Meta keys (COMPAT with your original snippets) ===
     const MK_DATE            = 'slot_data';            // Y-m-d
@@ -104,7 +104,7 @@ class MCEMEXCE_CPT_Sessioni_Esame {
         }
         wp_enqueue_script('mcems-admin');
 
-        $manage_url = admin_url('edit.php?post_type=' . self::CPT . '&page=mcems-manage-sessions');
+        $manage_url = admin_url('edit.php?post_type=' . self::CPT . '&page=mcemexce-manage-sessions');
         wp_add_inline_script(
             'mcems-admin',
             '(function(){var h1=document.querySelector(".wrap h1");if(!h1)return;var btn=document.createElement("a");btn.className="page-title-action";btn.href=' . wp_json_encode($manage_url) . ';btn.textContent=' . wp_json_encode(__('Add new session', 'mc-ems-exam-center-for-tutor-lms')) . ';h1.appendChild(document.createTextNode(" "));h1.appendChild(btn);})();'
@@ -242,21 +242,21 @@ class MCEMEXCE_CPT_Sessioni_Esame {
 
         if (empty($submenu[$parent])) return;
 
-        $create     = null; // mcems-manage-sessions
-        $list       = null; // edit.php?post_type=mcemexce_exam_session  (the CPT "all items" page)
-        $quiz_stats = null; // mcems-quiz-stats
-        $settings   = null; // mcems-settings-cpt
+        $create     = null; // mcemexce-manage-sessions
+        $list       = null; // edit.php?post_type=mcemexce_session  (the CPT "all items" page)
+        $quiz_stats = null; // mcemexce-quiz-stats
+        $settings   = null; // mcemexce-settings-cpt
         $others     = [];
 
         foreach ($submenu[$parent] as $item) {
             $slug = isset($item[2]) ? (string) $item[2] : '';
-            if ($slug === 'mcems-manage-sessions') {
+            if ($slug === 'mcemexce-manage-sessions') {
                 $create = $item;
             } elseif ($slug === $parent) {
                 $list = $item;
-            } elseif ($slug === 'mcems-quiz-stats') {
+            } elseif ($slug === 'mcemexce-quiz-stats') {
                 $quiz_stats = $item;
-            } elseif ($slug === 'mcems-settings-cpt') {
+            } elseif ($slug === 'mcemexce-settings-cpt') {
                 $settings = $item;
             } else {
                 $others[] = $item;

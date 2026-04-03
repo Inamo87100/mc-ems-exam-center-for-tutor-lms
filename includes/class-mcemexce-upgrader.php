@@ -61,12 +61,24 @@ class MCEMEXCE_Upgrader {
             delete_option('mcems_quiz_stats_cache_created');
         }
 
-        // 4. CPT slug: mcems_exam_session → mcemexce_exam_session.
+        // 4. CPT slug: mcems_exam_session → mcemexce_session (canonical slug).
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $wpdb->update(
             $wpdb->posts,
             ['post_type' => MCEMEXCE_CPT_Sessioni_Esame::CPT],
             ['post_type' => 'mcems_exam_session'],
+            ['%s'],
+            ['%s']
+        );
+
+        // 4b. Also migrate any posts that ended up with the invalid 21-char slug
+        //     'mcemexce_exam_session' (used in an intermediate refactor before the
+        //     slug length was corrected to fit WordPress's 20-character limit).
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->update(
+            $wpdb->posts,
+            ['post_type' => MCEMEXCE_CPT_Sessioni_Esame::CPT],
+            ['post_type' => 'mcemexce_exam_session'],
             ['%s'],
             ['%s']
         );

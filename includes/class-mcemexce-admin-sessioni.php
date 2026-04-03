@@ -555,7 +555,7 @@ class MCEMEXCE_Admin_Sessioni {
             __('Create sessions', 'mc-ems-exam-center-for-tutor-lms'),
             __('Create sessions', 'mc-ems-exam-center-for-tutor-lms'),
             'manage_options',
-            'mcems-manage-sessions',
+            'mcemexce-manage-sessions',
             [__CLASS__, 'render']
         );
     }
