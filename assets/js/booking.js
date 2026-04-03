@@ -96,34 +96,39 @@
   });
 
   // Gestisci: cancella
-  $all("[data-mcemexce-manage]").forEach(function (wrap) {
-    const cancelBtn = $(".mcemexce-cancel-btn", wrap);
-    const msgBox = $(".mcemexce-msg", wrap);
+  $all(".mcems-cancel").forEach(function (btn) {
+    const msgEl = document.getElementById("mcems-cancel-msg");
 
     function setMsg(t, isErr) {
-      msgBox.textContent = t || "";
-      msgBox.style.color = isErr ? "crimson" : "";
+      if (msgEl) {
+        msgEl.textContent = t || "";
+        msgEl.style.color = isErr ? "crimson" : "";
+      }
     }
 
-    if (cancelBtn) {
-      cancelBtn.addEventListener("click", function (e) {
-        e.preventDefault();
-        setMsg("");
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      setMsg("");
 
-        if (!confirm("Do you want to cancel the booking?")) return;
+      if (!confirm(i18n('confirmCancel', 'Confirm exam booking cancellation?'))) return;
 
-        cancelBtn.disabled = true;
-        post("mcemexce_cancel_booking", { nonce: MCEMEXCE_BOOKING.cancelNonce || MCEMEXCE_BOOKING.nonce })
-          .then(function (res) {
-            cancelBtn.disabled = false;
-            if (!res || !res.success) {
-              setMsg((res && res.data && res.data.message) ? res.data.message : i18n('cancellationFailed', 'Cancellation failed.'), true);
-              return;
-            }
-            setMsg(i18n('bookingCancelled', 'Exam booking cancelled.'));
-            window.location.reload();
-          });
+      btn.disabled = true;
+      post("mcemexce_cancel_booking", {
+        nonce: MCEMEXCE_BOOKING.cancelNonce,
+        slot_id: btn.dataset.slot || "",
+        exam_id: btn.dataset.exam || ""
+      }).then(function (res) {
+        btn.disabled = false;
+        if (!res || !res.success) {
+          setMsg((res && res.data) ? res.data : i18n('cancellationFailed', 'Cancellation failed.'), true);
+          return;
+        }
+        setMsg(i18n('bookingCancelled', 'Exam booking cancelled.'));
+        window.location.reload();
+      }).catch(function () {
+        btn.disabled = false;
+        setMsg(i18n('networkError', 'Network error'), true);
       });
-    }
+    });
   });
 })();
