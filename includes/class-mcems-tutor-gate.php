@@ -228,6 +228,12 @@ class MCEMS_Tutor_Gate {
             . '.mcems-locked-exam__body{color:#7a271a;font-weight:800;font-size:14px;line-height:1.5;}';
 
         add_action('wp_enqueue_scripts', static function () use ($css) {
+            if (!wp_style_is('mcems-style', 'registered')) {
+                $url = defined('MCEMS_PLUGIN_URL') ? MCEMS_PLUGIN_URL : '';
+                $ver = defined('MCEMS_VERSION') ? MCEMS_VERSION : '1.0.0';
+                wp_register_style('mcems-style', $url . 'assets/css/style.css', [], $ver);
+            }
+            wp_enqueue_style('mcems-style');
             wp_add_inline_style('mcems-style', $css);
         }, 20);
 
@@ -241,6 +247,13 @@ class MCEMS_Tutor_Gate {
         ];
 
         add_action('wp_enqueue_scripts', static function () use ($title, $body_html, $allowed_html) {
+            if (!wp_script_is('mcems-booking', 'registered')) {
+                $url = defined('MCEMS_PLUGIN_URL') ? MCEMS_PLUGIN_URL : '';
+                $ver = defined('MCEMS_VERSION') ? MCEMS_VERSION : '1.0.0';
+                wp_register_script('mcems-booking', $url . 'assets/js/booking.js', [], $ver, true);
+            }
+            wp_enqueue_script('mcems-booking');
+
             $sidebar_selector = MCEMS_Tutor_Gate::SIDEBAR_SELECTOR;
             $js = '(function(){'
                 . 'var sidebar=document.querySelector(' . wp_json_encode($sidebar_selector) . ');'

@@ -492,28 +492,40 @@ class MCEMS_Booking {
         $booking_ui_js = ob_get_clean();
         wp_add_inline_script('mcems-booking', $booking_ui_js);
 
-        $cancel_js = '(function(){' .
-            'var msg = document.getElementById("mcems-cancel-msg");' .
-            'var mcemsBooking = (typeof MCEMS_BOOKING !== "undefined") ? MCEMS_BOOKING : {};' .
-            'var cancelNonce = mcemsBooking.cancelNonce || "";' .
-            'var ajaxUrl = mcemsBooking.ajaxUrl || "";' .
-            'document.querySelectorAll(".mcems-cancel").forEach(function(btn){' .
-            'btn.addEventListener("click",function(){' .
-            'if(!confirm(MCEMS_BOOKING.i18n.confirmCancel))return;' .
-            'var fd=new FormData();' .
-            'fd.append("action","mcems_cancel_booking");' .
-            'fd.append("slot_id",this.dataset.slot||"");' .
-            'fd.append("exam_id",this.dataset.exam||"");' .
-            'fd.append("nonce",cancelNonce);' .
-            'fetch(ajaxUrl,{method:"POST",body:fd})' .
-            '.then(function(r){return r.json();})' .
-            '.then(function(j){' .
-            'if(j&&j.success){if(msg)msg.textContent="\u2705 "+MCEMS_BOOKING.i18n.bookingCancelled;location.reload();}' .
-            'else{if(msg)msg.textContent="\u26a0\ufe0f "+((j&&j.data)?j.data:MCEMS_BOOKING.i18n.error);}' .
-            '})' .
-            '.catch(function(){if(msg)msg.textContent="\u26a0\ufe0f "+MCEMS_BOOKING.i18n.networkError;});' .
-            '});});' .
-            '})();';
+        $cancel_js = '
+(function(){
+    var msg = document.getElementById("mcems-cancel-msg");
+    var mcemsBooking = (typeof MCEMS_BOOKING !== "undefined") ? MCEMS_BOOKING : {};
+    var cancelNonce = mcemsBooking.cancelNonce || "";
+    var ajaxUrl = mcemsBooking.ajaxUrl || "";
+
+    document.querySelectorAll(".mcems-cancel").forEach(function(btn){
+        btn.addEventListener("click", function(){
+            if (!confirm(MCEMS_BOOKING.i18n.confirmCancel)) return;
+
+            var fd = new FormData();
+            fd.append("action", "mcems_cancel_booking");
+            fd.append("slot_id", this.dataset.slot || "");
+            fd.append("exam_id", this.dataset.exam || "");
+            fd.append("nonce", cancelNonce);
+
+            fetch(ajaxUrl, { method: "POST", body: fd })
+                .then(function(r){ return r.json(); })
+                .then(function(j){
+                    if (j && j.success) {
+                        if (msg) msg.textContent = "\u2705 " + MCEMS_BOOKING.i18n.bookingCancelled;
+                        location.reload();
+                    } else {
+                        if (msg) msg.textContent = "\u26a0\ufe0f " + ((j && j.data) ? j.data : MCEMS_BOOKING.i18n.error);
+                    }
+                })
+                .catch(function(){
+                    if (msg) msg.textContent = "\u26a0\ufe0f " + MCEMS_BOOKING.i18n.networkError;
+                });
+        });
+    });
+})();
+';
         wp_add_inline_script('mcems-booking', $cancel_js);
     }
 
