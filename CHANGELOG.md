@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.1] - 2026-04-03
+
+### Fixed
+- fix: improve register_setting() sanitization for role arrays and all fields.
+  - `register_setting()` now uses the explicit `sanitize_callback` array format (with `type` and `description` keys) as documented by WordPress.
+  - Role arrays (`shortcode_roles`, `proctor_roles`): each element is now sanitized with `sanitize_key()` and validated against a whitelist built from `get_editable_roles()` (instead of `wp_roles()->roles`), so only roles the current administrator can actually edit are accepted.
+  - Integer fields (`anticipo_ore_prenotazione`, `annullamento_ore`, `tutor_gate_unlock_lead_minutes`, `tutor_gate_booking_expiry_value`, `booking_page_id`, `manage_booking_page_id`): sanitized with `absint()` / `(int)` with range clamping.
+  - Text fields (email subjects, sender name, capability strings): sanitized with `sanitize_text_field()`.
+  - Textarea fields (email bodies): sanitized with `sanitize_textarea_field()`.
+  - Email fields (`email_sender_email`, `email_admin_recipients`, `cal_email_notify_to`): sanitized with `sanitize_email()` and validated with `is_email()`.
+  - Boolean/toggle fields: cast to `0` or `1` via `!empty()`.
+  - No raw/unfiltered input is passed through to the database.
+
 ## [1.2.0] - 2026-04-02
 
 ### Changed (structural)

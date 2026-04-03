@@ -225,7 +225,11 @@ class MCEMS_Settings {
 
     public static function register(): void {
         add_action('wp_ajax_mcems_search_pages', [__CLASS__, 'ajax_search_pages']);
-        register_setting(self::OPTION_KEY, self::OPTION_KEY, [__CLASS__, 'sanitize']);
+        register_setting(self::OPTION_KEY, self::OPTION_KEY, [
+            'type'              => 'array',
+            'description'       => 'MC-EMS plugin settings. All fields are sanitized: role arrays via sanitize_key() + get_editable_roles() whitelist, integers via absint()/range-clamping, text fields via sanitize_text_field(), email fields via sanitize_email(), and textarea fields via sanitize_textarea_field().',
+            'sanitize_callback' => [__CLASS__, 'sanitize'],
+        ]);
 
         add_settings_section('mcems_section_main', __('Bookings', 'mc-ems-exam-center-for-tutor-lms'), function () {
             echo '<p class="description">Main rules for booking availability and cancellations.</p>';
@@ -637,7 +641,7 @@ class MCEMS_Settings {
         if ($tab === 'role_settings' || isset($input['shortcode_roles'])) {
             $raw_roles = isset($input['shortcode_roles']) && is_array($input['shortcode_roles']) ? $input['shortcode_roles'] : [];
             $valid_shortcodes = array_keys(self::get_access_control_shortcodes());
-            $all_roles        = array_keys(wp_roles()->roles);
+            $all_roles        = array_keys(get_editable_roles()); // only roles the current user may assign
             $cleaned = [];
             foreach ($valid_shortcodes as $sc) {
                 $checked = [];
@@ -656,7 +660,7 @@ class MCEMS_Settings {
 
         if ($tab === 'role_settings' || isset($input['proctor_roles'])) {
             $raw_roles = isset($input['proctor_roles']) && is_array($input['proctor_roles']) ? $input['proctor_roles'] : [];
-            $all_roles = array_keys(wp_roles()->roles);
+            $all_roles = array_keys(get_editable_roles()); // only roles the current user may assign
             $cleaned   = [];
             foreach ($raw_roles as $role) {
                 $role = sanitize_key((string) $role);
