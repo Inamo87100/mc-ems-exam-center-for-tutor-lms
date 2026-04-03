@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.2] - 2026-04-03
+
+### Fixed
+- fix: ripristina avviso stato prenotazione esame nella pagina corso TutorLMS dopo refactor prefix
+  - `inject_sidebar_block()` ora emette il markup dell'avviso direttamente tramite `wp_footer` (fallback PHP affidabile), garantendo che l'avviso sia sempre nel DOM indipendentemente dai selettori CSS/JS.
+  - Il JavaScript ora prova più selettori Tutor LMS in sequenza (`SIDEBAR_SELECTOR`, `DETAILS_TAB_SELECTOR`, `CURRICULUM_SELECTOR`) prima di tentare un wrapper generico della pagina, eliminando il precedente comportamento di uscita silenzioso quando `.tutor-card.tutor-card-md.tutor-sidebar-card` non veniva trovato.
+  - Aggiunto controllo `document.readyState` per una gestione robusta del timing del DOM (gestisce correttamente i casi in cui il DOMContentLoaded sia già scattato quando lo script viene valutato nel footer).
+  - Tutti gli hook PHP, shortcode e nomi di funzioni/metodi già usano il prefisso `mcemexce_`; nessuna regressione trovata.
+
 ## [1.2.1] - 2026-04-03
 
 ### Fixed

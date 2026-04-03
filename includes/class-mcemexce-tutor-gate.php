@@ -216,6 +216,8 @@ class MCEMEXCE_Tutor_Gate {
     /**
      * Instead of replacing the entire page, hide the Tutor LMS sidebar via CSS
      * and inject the block message box in its place using JavaScript.
+     * The notice HTML is also output via wp_footer as a reliable PHP fallback;
+     * JS then moves it to the first matching Tutor LMS anchor and shows it.
      */
     private static function inject_sidebar_block(string $title, string $body_html): void {
         $css = self::SIDEBAR_SELECTOR . '{display:none!important}'
@@ -246,7 +248,18 @@ class MCEMEXCE_Tutor_Gate {
             ],
         ];
 
-        add_action('wp_enqueue_scripts', static function () use ($title, $body_html, $allowed_html) {
+        // PHP fallback: output the notice HTML directly in the footer (hidden).
+        // JavaScript will move it to the correct position and make it visible.
+        // This guarantees the notice markup is always in the DOM.
+        add_action('wp_footer', static function () use ($title, $body_html, $allowed_html) {
+            echo '<div id="mcemexce-gate-notice" class="mcems-locked-exam" style="display:none;">';
+            echo '<div class="mcems-locked-exam__title">' . esc_html($title) . '</div>';
+            echo '<div class="mcems-locked-exam__body">' . wp_kses($body_html, $allowed_html) . '</div>';
+            echo '</div>';
+        }, 20);
+
+        // JS: find the first matching Tutor LMS anchor, move the notice there, show it.
+        add_action('wp_enqueue_scripts', static function () {
             if (!wp_script_is('mcems-booking', 'registered')) {
                 $url = defined('MCEMEXCE_PLUGIN_URL') ? MCEMEXCE_PLUGIN_URL : '';
                 $ver = defined('MCEMEXCE_VERSION') ? MCEMEXCE_VERSION : '1.0.0';
@@ -254,15 +267,33 @@ class MCEMEXCE_Tutor_Gate {
             }
             wp_enqueue_script('mcems-booking');
 
-            $sidebar_selector = MCEMEXCE_Tutor_Gate::SIDEBAR_SELECTOR;
+            $selectors = [
+                MCEMEXCE_Tutor_Gate::SIDEBAR_SELECTOR,
+                MCEMEXCE_Tutor_Gate::DETAILS_TAB_SELECTOR,
+                MCEMEXCE_Tutor_Gate::CURRICULUM_SELECTOR,
+            ];
+
             $js = '(function(){'
-                . 'var sidebar=document.querySelector(' . wp_json_encode($sidebar_selector) . ');'
-                . 'if(!sidebar)return;'
-                . 'var box=document.createElement("div");'
-                . 'box.className="mcems-locked-exam";'
-                . 'box.innerHTML=\'<div class="mcems-locked-exam__title">\'+' . wp_json_encode(esc_html($title)) . '+\'</div>\''
-                . '+\'<div class="mcems-locked-exam__body">\'+' . wp_json_encode(wp_kses($body_html, $allowed_html)) . '+\'</div>\';'
-                . 'sidebar.parentNode.insertBefore(box,sidebar);'
+                . 'function mcemexce_gate_show(){'
+                . 'var notice=document.getElementById("mcemexce-gate-notice");'
+                . 'if(!notice)return;'
+                . 'var selectors=' . wp_json_encode($selectors) . ';'
+                . 'var target=null;'
+                . 'for(var i=0;i<selectors.length;i++){'
+                . 'target=document.querySelector(selectors[i]);'
+                . 'if(target)break;'
+                . '}'
+                . 'if(target&&target.parentNode){'
+                . 'target.parentNode.insertBefore(notice,target);'
+                . '}else{'
+                . 'var wrap=document.querySelector(".tutor-wrap,.tutor-page-wrap,main,.site-main,.entry-content");'
+                . 'if(wrap)wrap.insertBefore(notice,wrap.firstChild);'
+                . '}'
+                . 'notice.style.display="";'
+                . '}'
+                . 'if(document.readyState==="loading"){'
+                . 'document.addEventListener("DOMContentLoaded",mcemexce_gate_show);'
+                . '}else{mcemexce_gate_show();}'
                 . '})();';
             wp_add_inline_script('mcems-booking', $js);
         }, 20);
