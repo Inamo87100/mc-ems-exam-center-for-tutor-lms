@@ -95,10 +95,16 @@
     }
   });
 
-  // Gestisci: cancella
-  $all(".mcems-cancel").forEach(function (btn) {
-    const msgEl = document.getElementById("mcems-cancel-msg");
+  // Gestisci: cancella — event delegation per robustezza con page builder, cache, hook condizionali
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest(".mcemexce-cancel-booking, .mcems-cancel");
+    if (!btn) return;
 
+    console.log("[MC-EMS] Cancel booking click", { slot: btn.dataset.slot, exam: btn.dataset.exam });
+
+    e.preventDefault();
+
+    var msgEl = document.getElementById("mcems-cancel-msg");
     function setMsg(t, isErr) {
       if (msgEl) {
         msgEl.textContent = t || "";
@@ -106,29 +112,26 @@
       }
     }
 
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      setMsg("");
+    setMsg("");
 
-      if (!confirm(i18n('confirmCancel', 'Confirm exam booking cancellation?'))) return;
+    if (!confirm(i18n('confirmCancel', 'Confirm exam booking cancellation?'))) return;
 
-      btn.disabled = true;
-      post("mcemexce_cancel_booking", {
-        nonce: MCEMEXCE_BOOKING.cancelNonce,
-        slot_id: btn.dataset.slot || "",
-        exam_id: btn.dataset.exam || ""
-      }).then(function (res) {
-        btn.disabled = false;
-        if (!res || !res.success) {
-          setMsg((res && res.data) ? res.data : i18n('cancellationFailed', 'Cancellation failed.'), true);
-          return;
-        }
-        setMsg(i18n('bookingCancelled', 'Exam booking cancelled.'));
-        window.location.reload();
-      }).catch(function () {
-        btn.disabled = false;
-        setMsg(i18n('networkError', 'Network error'), true);
-      });
+    btn.disabled = true;
+    post("mcemexce_cancel_booking", {
+      nonce: MCEMEXCE_BOOKING.cancelNonce,
+      slot_id: btn.dataset.slot || "",
+      exam_id: btn.dataset.exam || ""
+    }).then(function (res) {
+      btn.disabled = false;
+      if (!res || !res.success) {
+        setMsg((res && res.data) ? res.data : i18n('cancellationFailed', 'Cancellation failed.'), true);
+        return;
+      }
+      setMsg(i18n('bookingCancelled', 'Exam booking cancelled.'));
+      window.location.reload();
+    }).catch(function () {
+      btn.disabled = false;
+      setMsg(i18n('networkError', 'Network error'), true);
     });
   });
 })();
