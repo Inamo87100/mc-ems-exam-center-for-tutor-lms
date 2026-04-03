@@ -309,6 +309,16 @@ class MCEMEXCE_Tutor_Gate {
         return $mb;
     }
 
+    private static function get_booking_page_url(): string {
+        $url = '';
+
+        if (class_exists('MCEMEXCE_Settings') && method_exists('MCEMEXCE_Settings', 'get_booking_page_url')) {
+            $url = (string) MCEMEXCE_Settings::get_booking_page_url();
+        }
+
+        return $url;
+    }
+
     private static function get_gate_exam_ids(): array {
         $gate_exams = [];
 
@@ -357,9 +367,9 @@ class MCEMEXCE_Tutor_Gate {
         if ($slot_id <= 0) {
             $body = esc_html__('To access, you must first create a booking for an exam session.', 'mc-ems-exam-center-for-tutor-lms');
 
-            $mb = self::get_manage_booking_url();
-            if ($mb) {
-                $body .= '<br><br><a href="' . esc_url($mb) . '" style="display:inline-block;padding:10px 14px;border-radius:10px;background:#1a73e8;color:#fff;text-decoration:none;font-weight:900;">' . esc_html__('Manage exam booking', 'mc-ems-exam-center-for-tutor-lms') . '</a>';
+            $bk = self::get_booking_page_url();
+            if ($bk) {
+                $body .= '<br><br><a href="' . esc_url($bk) . '" style="display:inline-block;padding:10px 14px;border-radius:10px;background:#1a73e8;color:#fff;text-decoration:none;font-weight:900;">' . esc_html__('Book exam', 'mc-ems-exam-center-for-tutor-lms') . '</a>';
             }
 
             self::inject_sidebar_block(
