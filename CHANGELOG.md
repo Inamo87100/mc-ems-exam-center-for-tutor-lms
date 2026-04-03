@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.4] - 2026-04-03
+
+### Fixed
+- fix: bottone cancellazione prenotazione ora funzionante, JS e click handler sempre presenti con debug log
+  - Aggiunta classe univoca `mcemexce-cancel-booking` al bottone generato dallo shortcode `[mcemexce_manage_booking]`.
+  - Il listener click in `booking.js` ora usa **event delegation** sul `document` (invece di `querySelectorAll` al momento del caricamento script), garantendo che il gestore sia attivo anche con page builder, cache, hook condizionali e contenuti caricati via AJAX.
+  - Aggiunto `console.log('[MC-EMS] Cancel booking click', ...)` al click per facilitare il debug.
+  - In `shortcode_gestisci()` viene ora chiamato esplicitamente `wp_enqueue_script('mcems-booking')`, assicurando che lo script sia SEMPRE in coda anche se `wp_enqueue_scripts` era già scattato prima che lo shortcode venisse elaborato.
+
 ## [1.2.3] - 2026-04-03
 
 ### Fixed

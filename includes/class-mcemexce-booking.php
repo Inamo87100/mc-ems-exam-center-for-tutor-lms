@@ -769,6 +769,11 @@ class MCEMEXCE_Booking {
             return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         }
 
+        // Ensure the booking script is always enqueued on this page,
+        // even if wp_enqueue_scripts fired before the shortcode was processed
+        // (e.g. page builders, caching plugins, conditional hooks).
+        wp_enqueue_script('mcems-booking');
+
         $user_id = (int) get_current_user_id();
         if (!$user_id) return '<p>' . esc_html__('You must be logged in.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
 
@@ -836,7 +841,7 @@ class MCEMEXCE_Booking {
                                 <?php endif; ?>
 
                                 <?php if ($can_cancel): ?>
-                                    <button class="mcems-btn mcems-cancel" data-slot="<?php echo (int) $slot_id; ?>" data-exam="<?php echo (int) $exam_id; ?>"><?php echo esc_html__('Cancel exam booking', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
+                                    <button class="mcems-btn mcems-cancel mcemexce-cancel-booking" data-slot="<?php echo (int) $slot_id; ?>" data-exam="<?php echo (int) $exam_id; ?>"><?php echo esc_html__('Cancel exam booking', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
                                     <?php if ($slot_ts > $now_ts): ?>
                                         <span class="mcems-muted"><?php echo esc_html(sprintf(
                                             /* translators: %d: number of hours before the exam session by which cancellation is allowed */
