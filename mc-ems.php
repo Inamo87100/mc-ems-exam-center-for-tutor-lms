@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MC-EMS – Exam Center for Tutor LMS
  * Description: Advanced exam session management system for Tutor LMS with booking calendar, student reservations, and exam access control.
- * Version: 1.1.0
+ * Version: 1.2.2
  * Author: Mamba Coding
  * Author URI: https://mambacoding.com
  * Text Domain: mc-ems-exam-center-for-tutor-lms
@@ -15,7 +15,7 @@
 if (!defined('ABSPATH')) exit;
 
 // Constants
-define('MCEMEXCE_VERSION',    '1.1.0');
+define('MCEMEXCE_VERSION',    '1.2.2');
 define('MCEMEXCE_DB_VERSION', '1.1.0');
 define('MCEMEXCE_PLUGIN_URL',  plugin_dir_url(__FILE__));
 define('MCEMEXCE_PLUGIN_PATH', plugin_dir_path(__FILE__));
