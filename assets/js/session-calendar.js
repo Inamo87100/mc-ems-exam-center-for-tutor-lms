@@ -62,6 +62,21 @@ document.addEventListener('DOMContentLoaded', function () {
         return parts[2] + '-' + parts[1] + '-' + parts[0];
     }
 
+    /**
+     * Escape a string for safe use as an HTML attribute value.
+     *
+     * @param {*} v  Value to escape.
+     * @return {string}
+     */
+    function escAttr(v) {
+        return String(v)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
     function isoFromModal() {
         var el  = document.getElementById('modalData');
         var txt = (el ? el.textContent : '').trim();
@@ -361,8 +376,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         row.insertAdjacentHTML('beforeend',
                             '<div class="actions">'
                             + '<span class="badge-soft">' + MCEMEXCE_CAL.i18n.assignedTo + ' ' + nome + '</span>'
-                            + '<button class="btn-modifica" data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMEXCE_CAL.i18n.reassign + '</button>'
-                            + '<button class="btn-elimina"  data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMEXCE_CAL.i18n.removeAssignment + '</button>'
+                            + '<button class="btn-modifica" data-slot="' + escAttr(slotId) + '" data-data="' + escAttr(dateISO) + '">' + MCEMEXCE_CAL.i18n.reassign + '</button>'
+                            + '<button class="btn-elimina"  data-slot="' + escAttr(slotId) + '" data-data="' + escAttr(dateISO) + '">' + MCEMEXCE_CAL.i18n.removeAssignment + '</button>'
                             + '</div>');
                     }
 
@@ -374,8 +389,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         rowAll.insertAdjacentHTML('beforeend',
                             '<div class="actions">'
                             + '<span class="badge-soft">' + MCEMEXCE_CAL.i18n.assignedTo + ' ' + nome + '</span>'
-                            + '<button class="btn-modifica" data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMEXCE_CAL.i18n.reassign + '</button>'
-                            + '<button class="btn-elimina"  data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMEXCE_CAL.i18n.removeAssignment + '</button>'
+                            + '<button class="btn-modifica" data-slot="' + escAttr(slotId) + '" data-data="' + escAttr(dateISO) + '">' + MCEMEXCE_CAL.i18n.reassign + '</button>'
+                            + '<button class="btn-elimina"  data-slot="' + escAttr(slotId) + '" data-data="' + escAttr(dateISO) + '">' + MCEMEXCE_CAL.i18n.removeAssignment + '</button>'
                             + '</div>');
                     }
 
@@ -472,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         var ac = row1.querySelector('.actions');
                         if (ac) ac.remove();
                         row1.insertAdjacentHTML('beforeend',
-                            '<div class="slot-actions"><button class="btn-assegna" data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMEXCE_CAL.i18n.assignSession + '</button></div>');
+                            '<div class="slot-actions"><button class="btn-assegna" data-slot="' + escAttr(slotId) + '" data-data="' + escAttr(dateISO) + '">' + MCEMEXCE_CAL.i18n.assignSession + '</button></div>');
                     }
 
                     var row2 = document.getElementById('myslot-' + slotId);
@@ -489,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         row3.innerHTML = '';
                         row3.appendChild(meta.cloneNode(true));
                         row3.insertAdjacentHTML('beforeend',
-                            '<div class="slot-actions"><button class="btn-assegna" data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMEXCE_CAL.i18n.assignSession + '</button></div>');
+                            '<div class="slot-actions"><button class="btn-assegna" data-slot="' + escAttr(slotId) + '" data-data="' + escAttr(dateISO) + '">' + MCEMEXCE_CAL.i18n.assignSession + '</button></div>');
                     }
 
                     updateCacheUnassign(slotId, dateISO);
