@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.3] - 2026-04-03
+
+### Fixed
+- fix: bottone avviso senza prenotazione punta a Book exam, non a Manage booking
+  - Quando l'utente non ha alcuna prenotazione esame attiva, il pulsante nell'avviso della pagina corso Tutor LMS ora punta alla pagina "Book exam" (URL della pagina di prenotazione) invece che a "Manage booking".
+  - Aggiunto metodo `get_booking_page_url()` in `MCEMEXCE_Tutor_Gate` per recuperare l'URL della pagina di prenotazione.
+  - Il comportamento del pulsante "Manage exam booking" per la prenotazione scaduta resta invariato.
+
 ## [1.2.2] - 2026-04-03
 
 ### Fixed
