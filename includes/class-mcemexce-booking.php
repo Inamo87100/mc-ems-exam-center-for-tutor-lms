@@ -1144,13 +1144,37 @@ class MCEMEXCE_Booking {
     }
 
     public static function ajax_cancel_booking(): void {
-        $user_id = (int) get_current_user_id();
+        $user_id  = (int) get_current_user_id();
+        $nonce_in = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+        $slot_id  = absint($_POST['slot_id'] ?? 0);
+        $exam_id  = absint($_POST['exam_id'] ?? 0);
+
+        error_log(sprintf(
+            '[MC-EMS] ajax_cancel_booking START — user_id=%d slot_id=%d exam_id=%d nonce_received=%s',
+            $user_id, $slot_id, $exam_id, $nonce_in ? 'yes' : 'no'
+        ));
+
+        // Step 1: user must be logged in
         if (!$user_id) {
-            wp_send_json_error(__('You must be logged in.', 'mc-ems-exam-center-for-tutor-lms'), 401);
+            error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: not_logged_in');
+            wp_send_json_error([
+                'reason'  => 'not_logged_in',
+                'message' => __('You must be logged in.', 'mc-ems-exam-center-for-tutor-lms'),
+            ], 401);
         }
 
-        if (!check_ajax_referer('mcemexce_cancel', 'nonce', false)) {
-            wp_send_json_error(__('Invalid nonce.', 'mc-ems-exam-center-for-tutor-lms'), 403);
+        // Step 2: nonce validation (action: mcemexce_cancel)
+        $nonce_ok = check_ajax_referer('mcemexce_cancel', 'nonce', false);
+        error_log(sprintf(
+            '[MC-EMS] ajax_cancel_booking nonce check — user_id=%d nonce_valid=%s',
+            $user_id, $nonce_ok ? 'yes' : 'no'
+        ));
+        if (!$nonce_ok) {
+            error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: invalid_nonce');
+            wp_send_json_error([
+                'reason'  => 'invalid_nonce',
+                'message' => __('Invalid nonce.', 'mc-ems-exam-center-for-tutor-lms'),
+            ], 403);
         }
 
         /**
@@ -1166,49 +1190,116 @@ class MCEMEXCE_Booking {
         if (empty($capability)) {
             $capability = 'read';
         }
-        if (!current_user_can($capability)) {
-            wp_send_json_error(__('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms'), 403);
+
+        // Step 3: capability check
+        $has_cap = current_user_can($capability);
+        error_log(sprintf(
+            '[MC-EMS] ajax_cancel_booking capability check — user_id=%d capability=%s has_cap=%s',
+            $user_id, $capability, $has_cap ? 'yes' : 'no'
+        ));
+        if (!$has_cap) {
+            error_log(sprintf(
+                '[MC-EMS] ajax_cancel_booking BLOCKED — reason: insufficient_permissions capability=%s',
+                $capability
+            ));
+            wp_send_json_error([
+                'reason'     => 'insufficient_permissions',
+                'capability' => $capability,
+                'message'    => __('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms'),
+            ], 403);
         }
 
+        // Step 4: cancellation globally enabled?
         if (!self::is_annullamento_consentito()) {
-            wp_send_json_error(__('Cancellation is disabled.', 'mc-ems-exam-center-for-tutor-lms'));
+            error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: cancellation_disabled');
+            wp_send_json_error([
+                'reason'  => 'cancellation_disabled',
+                'message' => __('Cancellation is disabled.', 'mc-ems-exam-center-for-tutor-lms'),
+            ]);
         }
 
-        $slot_id = absint($_POST['slot_id'] ?? 0);
-        $exam_id = absint($_POST['exam_id'] ?? 0);
-        if ($slot_id <= 0) wp_send_json_error(__('Invalid exam session.', 'mc-ems-exam-center-for-tutor-lms'));
+        // Step 5: slot_id must be valid
+        if ($slot_id <= 0) {
+            error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: invalid_slot slot_id=0');
+            wp_send_json_error([
+                'reason'  => 'invalid_slot',
+                'message' => __('Invalid exam session.', 'mc-ems-exam-center-for-tutor-lms'),
+            ]);
+        }
 
-        if (get_post_type($slot_id) !== MCEMEXCE_CPT_Sessioni_Esame::CPT) {
+        // Step 6: validate CPT type
+        $post_type = get_post_type($slot_id);
+        error_log(sprintf(
+            '[MC-EMS] ajax_cancel_booking slot post_type check — slot_id=%d post_type=%s expected=%s',
+            $slot_id, (string) $post_type, MCEMEXCE_CPT_Sessioni_Esame::CPT
+        ));
+        if ($post_type !== MCEMEXCE_CPT_Sessioni_Esame::CPT) {
+            error_log(sprintf(
+                '[MC-EMS] ajax_cancel_booking slot not found or wrong type — slot_id=%d post_type=%s — realigning meta and succeeding',
+                $slot_id, (string) $post_type
+            ));
             if ($exam_id > 0) self::remove_active_booking_for_exam($user_id, $exam_id);
             wp_send_json_success(true);
         }
 
-        $data        = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
-        $orario      = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, true);
+        $data      = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
+        $orario    = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, true);
         $slot_exam = (int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID, true);
         if ($exam_id <= 0) $exam_id = $slot_exam;
 
         $slot_ts = strtotime($data . ' ' . $orario);
         $now_ts  = (int) current_time('timestamp');
 
+        // Step 7: cancellation deadline check
         if ($slot_ts > $now_ts) {
-            if (($slot_ts - $now_ts) <= (self::get_annullamento_ore() * HOUR_IN_SECONDS)) {
-                wp_send_json_error(__('Too late to cancel.', 'mc-ems-exam-center-for-tutor-lms'));
+            $diff_secs = $slot_ts - $now_ts;
+            $limit_secs = self::get_annullamento_ore() * HOUR_IN_SECONDS;
+            error_log(sprintf(
+                '[MC-EMS] ajax_cancel_booking deadline check — slot_ts=%d now_ts=%d diff_secs=%d limit_secs=%d',
+                $slot_ts, $now_ts, $diff_secs, $limit_secs
+            ));
+            if ($diff_secs <= $limit_secs) {
+                error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: too_late_to_cancel');
+                wp_send_json_error([
+                    'reason'  => 'too_late_to_cancel',
+                    'message' => __('Too late to cancel.', 'mc-ems-exam-center-for-tutor-lms'),
+                ]);
             }
         }
 
         $occupati = get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, true);
         if (!is_array($occupati)) $occupati = [];
 
-        if (!in_array($user_id, $occupati, true)) {
+        // Step 8: verify the user is actually booked on this slot
+        $is_booked = in_array($user_id, $occupati, true);
+        error_log(sprintf(
+            '[MC-EMS] ajax_cancel_booking ownership check — user_id=%d slot_id=%d is_booked=%s occupati=%s',
+            $user_id, $slot_id, $is_booked ? 'yes' : 'no', implode(',', $occupati)
+        ));
+        if (!$is_booked) {
+            error_log(sprintf(
+                '[MC-EMS] ajax_cancel_booking BLOCKED — reason: not_your_booking user_id=%d slot_id=%d',
+                $user_id, $slot_id
+            ));
             if ($exam_id > 0) self::remove_active_booking_for_exam($user_id, $exam_id);
-            wp_send_json_error(__('You are not booked on this session (meta realigned).', 'mc-ems-exam-center-for-tutor-lms'));
+            wp_send_json_error([
+                'reason'  => 'not_your_booking',
+                'message' => __('You are not booked on this session (meta realigned).', 'mc-ems-exam-center-for-tutor-lms'),
+            ]);
         }
 
+        // Step 9: reserved sessions cannot be cancelled from the front-end
         $is_special = ((int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
         $spec_uid   = (int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, true);
         if ($is_special && $spec_uid > 0) {
-            wp_send_json_error(__('This session is reserved and cannot be cancelled from the front-end.', 'mc-ems-exam-center-for-tutor-lms'));
+            error_log(sprintf(
+                '[MC-EMS] ajax_cancel_booking BLOCKED — reason: reserved_session slot_id=%d spec_uid=%d',
+                $slot_id, $spec_uid
+            ));
+            wp_send_json_error([
+                'reason'  => 'reserved_session',
+                'message' => __('This session is reserved and cannot be cancelled from the front-end.', 'mc-ems-exam-center-for-tutor-lms'),
+            ]);
         }
 
         $occupati = array_values(array_filter(array_map('intval', $occupati), function($id) use ($user_id) {
@@ -1219,6 +1310,11 @@ class MCEMEXCE_Booking {
         if ($exam_id > 0) self::remove_active_booking_for_exam($user_id, $exam_id);
         self::add_history($user_id, $slot_id, 'cancelled');
         if ($exam_id > 0) self::maybe_send_booking_notifications($user_id, $slot_id, $exam_id, 'cancelled');
+
+        error_log(sprintf(
+            '[MC-EMS] ajax_cancel_booking SUCCESS — user_id=%d slot_id=%d exam_id=%d',
+            $user_id, $slot_id, $exam_id
+        ));
 
         wp_send_json_success(true);
     }

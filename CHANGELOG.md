@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.5] - 2026-04-03
+
+### Changed
+- diagnostic: log avanzati e messaggi dettagliati per diagnosi blocco cancellazione booking non admin
+  - `ajax_cancel_booking`: aggiunto `error_log` WordPress dettagliato in ogni fase del callback (login, nonce, capability, validità slot, controllo proprietà prenotazione, sessione riservata).
+  - Ogni punto di blocco ora restituisce sempre un JSON strutturato `{ reason, message }` (e `capability` per il blocco permessi), così il browser mostra il motivo esatto del rifiuto sia nella risposta AJAX che in console.
+  - La capability effettiva usata (default `'read'`, modificabile via filtro `mcemexce_cancel_booking_capability`) viene esplicitata nel log.
+  - `booking.js`: al click, viene loggato lo slot, l'exam e la presenza del nonce (`noncePresent`); alla ricezione della risposta viene loggata la risposta completa; in caso di errore viene loggato `reason` e `message` con `console.warn`; in caso di errore di rete viene usato `console.error`.
+  - Il nonce inviato al backend (`MCEMEXCE_BOOKING.cancelNonce`) continua ad essere generato con action `'mcemexce_cancel'`, consistente con `check_ajax_referer('mcemexce_cancel', ...)` sul backend.
+
 ## [1.2.4] - 2026-04-03
 
 ### Fixed
