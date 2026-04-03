@@ -1,31 +1,31 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-class MCEMS_Booking {
+class MCEMEXCE_Booking {
 
     // New: per-exam active exam bookings map exam_id => booking data
-    const UM_ACTIVE_BOOKINGS = 'mcems_active_bookings'; // array
+    const UM_ACTIVE_BOOKINGS = 'mcemexce_active_bookings'; // array
     // Legacy single booking
-    const UM_ACTIVE_BOOKING  = 'mcems_active_booking';  // array
-    const UM_HISTORY         = 'mcems_storico_prenotazioni_slot';
+    const UM_ACTIVE_BOOKING  = 'mcemexce_active_booking';  // array
+    const UM_HISTORY         = 'mcemexce_storico_prenotazioni_slot';
 
     public static function init(): void {
-        add_shortcode('mcems_book_exam', [__CLASS__, 'shortcode_prenota']);
-        add_shortcode('mcems_manage_booking', [__CLASS__, 'shortcode_gestisci']);
+        add_shortcode('mcemexce_book_exam', [__CLASS__, 'shortcode_prenota']);
+        add_shortcode('mcemexce_manage_booking', [__CLASS__, 'shortcode_gestisci']);
 
         add_action('wp_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
 
-        add_action('wp_ajax_mcems_get_slot_per_data', [__CLASS__, 'ajax_get_slots_by_date']);
-        add_action('wp_ajax_nopriv_mcems_get_slot_per_data', [__CLASS__, 'ajax_get_slots_by_date']);
-        add_action('wp_ajax_mcems_get_booking_calendar', [__CLASS__, 'ajax_get_booking_calendar']);
-        add_action('wp_ajax_nopriv_mcems_get_booking_calendar', [__CLASS__, 'ajax_get_booking_calendar']);
+        add_action('wp_ajax_mcemexce_get_slot_per_data', [__CLASS__, 'ajax_get_slots_by_date']);
+        add_action('wp_ajax_nopriv_mcemexce_get_slot_per_data', [__CLASS__, 'ajax_get_slots_by_date']);
+        add_action('wp_ajax_mcemexce_get_booking_calendar', [__CLASS__, 'ajax_get_booking_calendar']);
+        add_action('wp_ajax_nopriv_mcemexce_get_booking_calendar', [__CLASS__, 'ajax_get_booking_calendar']);
 
-        add_action('wp_ajax_mcems_check_active_booking', [__CLASS__, 'ajax_check_active_booking']);
+        add_action('wp_ajax_mcemexce_check_active_booking', [__CLASS__, 'ajax_check_active_booking']);
 
-        add_action('wp_ajax_mcems_conferma_prenotazione_slot', [__CLASS__, 'ajax_confirm_booking']);
-        add_action('wp_ajax_nopriv_mcems_conferma_prenotazione_slot', [__CLASS__, 'ajax_confirm_booking']);
+        add_action('wp_ajax_mcemexce_conferma_prenotazione_slot', [__CLASS__, 'ajax_confirm_booking']);
+        add_action('wp_ajax_nopriv_mcemexce_conferma_prenotazione_slot', [__CLASS__, 'ajax_confirm_booking']);
 
-        add_action('wp_ajax_mcems_cancel_booking', [__CLASS__, 'ajax_cancel_booking']);
+        add_action('wp_ajax_mcemexce_cancel_booking', [__CLASS__, 'ajax_cancel_booking']);
 
         // Cleanup when a session is deleted from admin
         add_action('before_delete_post', [__CLASS__, 'on_before_delete_post'], 10, 1);
@@ -36,8 +36,8 @@ class MCEMS_Booking {
        Assets
        ========================= */
     public static function enqueue_assets(): void {
-        $ver = defined('MCEMS_VERSION') ? MCEMS_VERSION : '1.0.0';
-        $url = defined('MCEMS_PLUGIN_URL') ? MCEMS_PLUGIN_URL : '';
+        $ver = defined('MCEMEXCE_VERSION') ? MCEMEXCE_VERSION : '1.0.0';
+        $url = defined('MCEMEXCE_PLUGIN_URL') ? MCEMEXCE_PLUGIN_URL : '';
 
         wp_register_style(
             'mcems-style',
@@ -74,11 +74,11 @@ class MCEMS_Booking {
         );
         wp_enqueue_script('mcems-booking');
 
-        wp_localize_script('mcems-booking', 'MCEMS_BOOKING', [
+        wp_localize_script('mcems-booking', 'MCEMEXCE_BOOKING', [
             'ajaxUrl'          => admin_url('admin-ajax.php'),
-            'nonce'            => wp_create_nonce('mcems_booking'),
-            'cancelNonce'      => wp_create_nonce('mcems_cancel'),
-            'manageBookingUrl' => MCEMS_Settings::get_manage_booking_page_url() ?: '',
+            'nonce'            => wp_create_nonce('mcemexce_booking'),
+            'cancelNonce'      => wp_create_nonce('mcemexce_cancel'),
+            'manageBookingUrl' => MCEMEXCE_Settings::get_manage_booking_page_url() ?: '',
             'i18n'             => [
                 'errorLoadSessions'          => __('Error loading sessions.', 'mc-ems-exam-center-for-tutor-lms'),
                 'bookingFailed'              => __('Exam booking failed.', 'mc-ems-exam-center-for-tutor-lms'),
@@ -107,8 +107,8 @@ class MCEMS_Booking {
         ob_start();
         ?>
         document.addEventListener("DOMContentLoaded", function () {
-            const mcemsNonce = MCEMS_BOOKING.nonce;
-            const examSelect = document.getElementById('mcems_exam_select');
+            const mcemsNonce = MCEMEXCE_BOOKING.nonce;
+            const examSelect = document.getElementById('mcemexce_exam_select');
             const dateInput = document.getElementById('data_esame');
             const slotContainer = document.getElementById('slot-container');
             const confirmContainer = document.getElementById('confirm-container');
@@ -124,7 +124,7 @@ class MCEMS_Booking {
             currentMonthDate.setDate(1);
 
             const monthCache = {};
-            const manageBookingUrl = MCEMS_BOOKING.manageBookingUrl;
+            const manageBookingUrl = MCEMEXCE_BOOKING.manageBookingUrl;
 
             function formatDate(date) {
                 const y = date.getFullYear();
@@ -171,7 +171,7 @@ class MCEMS_Booking {
                     return;
                 }
 
-                const url = MCEMS_BOOKING.ajaxUrl + '?action=mcems_check_active_booking&exam_id='
+                const url = MCEMEXCE_BOOKING.ajaxUrl + '?action=mcemexce_check_active_booking&exam_id='
                     + encodeURIComponent(examId)
                     + '&nonce=' + encodeURIComponent(mcemsNonce);
 
@@ -180,14 +180,14 @@ class MCEMS_Booking {
                     .then(data => {
                         if (data && data.has_booking) {
                             let msg = '<p style="text-align:center;">'
-                                + MCEMS_BOOKING.i18n.alreadyBooked
+                                + MCEMEXCE_BOOKING.i18n.alreadyBooked
                                 + '<br>';
                             if (manageBookingUrl) {
-                                msg += MCEMS_BOOKING.i18n.goTo + ' <a href="' + manageBookingUrl + '">'
-                                    + MCEMS_BOOKING.i18n.manageBooking
-                                    + '</a> ' + MCEMS_BOOKING.i18n.toCancel;
+                                msg += MCEMEXCE_BOOKING.i18n.goTo + ' <a href="' + manageBookingUrl + '">'
+                                    + MCEMEXCE_BOOKING.i18n.manageBooking
+                                    + '</a> ' + MCEMEXCE_BOOKING.i18n.toCancel;
                             } else {
-                                msg += MCEMS_BOOKING.i18n.openManageBookingPage;
+                                msg += MCEMEXCE_BOOKING.i18n.openManageBookingPage;
                             }
                             msg += '</p>';
                             showBookingMessage(msg);
@@ -206,7 +206,7 @@ class MCEMS_Booking {
                 if (!examSelect || !examSelect.value) {
                     if (dateInput) dateInput.value = '';
                     showCalendar(false);
-                    resetSlots('<p style="color:#888;">' + MCEMS_BOOKING.i18n.selectExamFirst + '</p>');
+                    resetSlots('<p style="color:#888;">' + MCEMEXCE_BOOKING.i18n.selectExamFirst + '</p>');
                     return false;
                 }
                 showCalendar(true);
@@ -232,7 +232,7 @@ class MCEMS_Booking {
                     return Promise.resolve(monthCache[key]);
                 }
 
-                const url = MCEMS_BOOKING.ajaxUrl + '?action=mcems_get_booking_calendar&year='
+                const url = MCEMEXCE_BOOKING.ajaxUrl + '?action=mcemexce_get_booking_calendar&year='
                     + encodeURIComponent(year)
                     + '&month=' + encodeURIComponent(month + 1)
                     + '&exam_id=' + encodeURIComponent(examSelect ? examSelect.value : '')
@@ -248,13 +248,13 @@ class MCEMS_Booking {
 
             function loadSlotsForDate(dateValue) {
                 if (!dateValue) {
-                    resetSlots('<p style="color:#888;">' + MCEMS_BOOKING.i18n.selectDateFromCalendar + '</p>');
+                    resetSlots('<p style="color:#888;">' + MCEMEXCE_BOOKING.i18n.selectDateFromCalendar + '</p>');
                     return;
                 }
 
-                resetSlots('<p style="color:#666;">' + MCEMS_BOOKING.i18n.loadingSessions + '</p>');
+                resetSlots('<p style="color:#666;">' + MCEMEXCE_BOOKING.i18n.loadingSessions + '</p>');
 
-                const url = MCEMS_BOOKING.ajaxUrl + '?action=mcems_get_slot_per_data&data='
+                const url = MCEMEXCE_BOOKING.ajaxUrl + '?action=mcemexce_get_slot_per_data&data='
                     + encodeURIComponent(dateValue)
                     + '&exam_id=' + encodeURIComponent(examSelect ? examSelect.value : '')
                     + '&nonce=' + encodeURIComponent(mcemsNonce);
@@ -268,7 +268,7 @@ class MCEMS_Booking {
                         }
 
                         if (!Array.isArray(data) || !data.length) {
-                            resetSlots('<p style="color:#888;">' + MCEMS_BOOKING.i18n.noSessionsForExamAndDate + '</p>');
+                            resetSlots('<p style="color:#888;">' + MCEMEXCE_BOOKING.i18n.noSessionsForExamAndDate + '</p>');
                             return;
                         }
 
@@ -314,7 +314,7 @@ class MCEMS_Booking {
                         });
                     })
                     .catch(() => {
-                        resetSlots('<p style="color:#f44336;">' + MCEMS_BOOKING.i18n.errorLoadSessionsRetry + '</p>');
+                        resetSlots('<p style="color:#f44336;">' + MCEMEXCE_BOOKING.i18n.errorLoadSessionsRetry + '</p>');
                     });
             }
 
@@ -413,7 +413,7 @@ class MCEMS_Booking {
                         });
                     })
                     .catch(() => {
-                        resetSlots('<p style="color:#f44336;">' + MCEMS_BOOKING.i18n.unableToLoadCalendar + '</p>');
+                        resetSlots('<p style="color:#f44336;">' + MCEMEXCE_BOOKING.i18n.unableToLoadCalendar + '</p>');
                     });
             }
 
@@ -425,7 +425,7 @@ class MCEMS_Booking {
                         dateInput.value = '';
                     }
 
-                    resetSlots('<p style="color:#888;">' + MCEMS_BOOKING.i18n.selectDateFromCalendar + '</p>');
+                    resetSlots('<p style="color:#888;">' + MCEMEXCE_BOOKING.i18n.selectDateFromCalendar + '</p>');
                     checkExistingBooking();
                 });
             }
@@ -459,14 +459,14 @@ class MCEMS_Booking {
             if (confirmButton) {
                 confirmButton.addEventListener('click', function () {
                     if (!selectedSlot) {
-                        return alert(MCEMS_BOOKING.i18n.selectSlotBeforeConfirming);
+                        return alert(MCEMEXCE_BOOKING.i18n.selectSlotBeforeConfirming);
                     }
 
                     const formData = new FormData();
-                    formData.append('action', 'mcems_conferma_prenotazione_slot');
+                    formData.append('action', 'mcemexce_conferma_prenotazione_slot');
                     formData.append('slot_id', selectedSlot);
 
-                    fetch(MCEMS_BOOKING.ajaxUrl, {
+                    fetch(MCEMEXCE_BOOKING.ajaxUrl, {
                         method: 'POST',
                         body: formData
                     })
@@ -475,17 +475,17 @@ class MCEMS_Booking {
                         document.getElementById('prenotazione-esame').innerHTML = html;
                     })
                     .catch(() => {
-                        alert(MCEMS_BOOKING.i18n.anErrorOccurred);
+                        alert(MCEMEXCE_BOOKING.i18n.anErrorOccurred);
                     });
                 });
             }
 
             if (examSelect && examSelect.value) {
-                resetSlots('<p style="color:#888;">' + MCEMS_BOOKING.i18n.selectDateFromCalendar + '</p>');
+                resetSlots('<p style="color:#888;">' + MCEMEXCE_BOOKING.i18n.selectDateFromCalendar + '</p>');
                 renderBookingCalendar();
             } else {
                 showCalendar(false);
-                resetSlots('<p style="color:#888;">' + MCEMS_BOOKING.i18n.selectExamFirst + '</p>');
+                resetSlots('<p style="color:#888;">' + MCEMEXCE_BOOKING.i18n.selectExamFirst + '</p>');
             }
         });
         <?php
@@ -495,16 +495,16 @@ class MCEMS_Booking {
         $cancel_js = '
 (function(){
     var msg = document.getElementById("mcems-cancel-msg");
-    var mcemsBooking = (typeof MCEMS_BOOKING !== "undefined") ? MCEMS_BOOKING : {};
+    var mcemsBooking = (typeof MCEMEXCE_BOOKING !== "undefined") ? MCEMEXCE_BOOKING : {};
     var cancelNonce = mcemsBooking.cancelNonce || "";
     var ajaxUrl = mcemsBooking.ajaxUrl || "";
 
     document.querySelectorAll(".mcems-cancel").forEach(function(btn){
         btn.addEventListener("click", function(){
-            if (!confirm(MCEMS_BOOKING.i18n.confirmCancel)) return;
+            if (!confirm(MCEMEXCE_BOOKING.i18n.confirmCancel)) return;
 
             var fd = new FormData();
-            fd.append("action", "mcems_cancel_booking");
+            fd.append("action", "mcemexce_cancel_booking");
             fd.append("slot_id", this.dataset.slot || "");
             fd.append("exam_id", this.dataset.exam || "");
             fd.append("nonce", cancelNonce);
@@ -513,14 +513,14 @@ class MCEMS_Booking {
                 .then(function(r){ return r.json(); })
                 .then(function(j){
                     if (j && j.success) {
-                        if (msg) msg.textContent = "\u2705 " + MCEMS_BOOKING.i18n.bookingCancelled;
+                        if (msg) msg.textContent = "\u2705 " + MCEMEXCE_BOOKING.i18n.bookingCancelled;
                         location.reload();
                     } else {
-                        if (msg) msg.textContent = "\u26a0\ufe0f " + ((j && j.data) ? j.data : MCEMS_BOOKING.i18n.error);
+                        if (msg) msg.textContent = "\u26a0\ufe0f " + ((j && j.data) ? j.data : MCEMEXCE_BOOKING.i18n.error);
                     }
                 })
                 .catch(function(){
-                    if (msg) msg.textContent = "\u26a0\ufe0f " + MCEMS_BOOKING.i18n.networkError;
+                    if (msg) msg.textContent = "\u26a0\ufe0f " + MCEMEXCE_BOOKING.i18n.networkError;
                 });
         });
     });
@@ -533,15 +533,15 @@ class MCEMS_Booking {
        Settings
        ========================= */
     private static function get_anticipo_ore(): int {
-        return max(0, MCEMS_Settings::get_int('anticipo_ore_prenotazione'));
+        return max(0, MCEMEXCE_Settings::get_int('anticipo_ore_prenotazione'));
     }
 
     private static function get_annullamento_ore(): int {
-        return max(0, MCEMS_Settings::get_int('annullamento_ore'));
+        return max(0, MCEMEXCE_Settings::get_int('annullamento_ore'));
     }
 
     private static function is_annullamento_consentito(): bool {
-        return MCEMS_Settings::get_int('consenti_annullamento') === 1;
+        return MCEMEXCE_Settings::get_int('consenti_annullamento') === 1;
     }
 
     /**
@@ -549,32 +549,32 @@ class MCEMS_Booking {
      * We intentionally use floating local time (no trailing Z) so Google keeps
      * the same wall-clock time selected by the user/site.
      */
-    private static function mcems_format_gcal_datetime(string $date, string $time = '00:00:00'): string {
+    private static function mcemexce_format_gcal_datetime(string $date, string $time = '00:00:00'): string {
         $dt = trim($date . ' ' . $time);
         $ts = strtotime($dt);
         if (!$ts) return '';
         return gmdate('Ymd\THis', $ts);
     }
 
-    private static function mcems_get_google_calendar_url(int $slot_id, int $exam_id = 0): string {
+    private static function mcemexce_get_google_calendar_url(int $slot_id, int $exam_id = 0): string {
         if ($slot_id <= 0) return '';
 
-        $date = (string) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_DATE, true);
-        $time = (string) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_TIME, true);
+        $date = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
+        $time = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, true);
 
         $exam_id = $exam_id > 0
             ? $exam_id
-            : (int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, true);
+            : (int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID, true);
 
         $exam_title = $exam_id > 0
-            ? MCEMS_Tutor::exam_title($exam_id)
+            ? MCEMEXCE_Tutor::exam_title($exam_id)
             : '';
 
         if (!$exam_title) {
             $exam_title = 'Exam';
         }
 
-        $start = self::mcems_format_gcal_datetime($date, $time ?: '00:00:00');
+        $start = self::mcemexce_format_gcal_datetime($date, $time ?: '00:00:00');
         if (!$start) return '';
 
         // Default event duration: 1 hour
@@ -615,7 +615,7 @@ class MCEMS_Booking {
         $legacy = get_user_meta($user_id, self::UM_ACTIVE_BOOKING, true);
         if (is_array($legacy) && !empty($legacy['slot_id'])) {
             $slot_id = (int) $legacy['slot_id'];
-            $exam_id = (int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, true);
+            $exam_id = (int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID, true);
             if ($exam_id > 0) {
                 $map[$exam_id] = [
                     'slot_id'    => $slot_id,
@@ -632,13 +632,13 @@ class MCEMS_Booking {
         $changed = false;
         foreach ($map as $cid => $b) {
             $sid = isset($b['slot_id']) ? (int) $b['slot_id'] : 0;
-            if ($sid <= 0 || get_post_type($sid) !== MCEMS_CPT_Sessioni_Esame::CPT) {
+            if ($sid <= 0 || get_post_type($sid) !== MCEMEXCE_CPT_Sessioni_Esame::CPT) {
                 unset($map[$cid]);
                 $changed = true;
                 continue;
             }
 
-            $occ = get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, true);
+            $occ = get_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, true);
             $occ = is_array($occ) ? $occ : [];
             if (!in_array($user_id, $occ, true)) {
                 unset($map[$cid]);
@@ -679,9 +679,9 @@ class MCEMS_Booking {
         $storico = get_user_meta($user_id, self::UM_HISTORY, true);
         if (!is_array($storico)) $storico = [];
 
-        $data   = (string) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_DATE, true);
-        $orario = (string) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_TIME, true);
-        $corso  = (int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, true);
+        $data   = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
+        $orario = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, true);
+        $corso  = (int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID, true);
 
         $storico[] = [
             'slot_id'   => $slot_id,
@@ -700,17 +700,17 @@ class MCEMS_Booking {
        ========================= */
 
     public static function shortcode_prenota(): string {
-        if (!MCEMS_Settings::user_can_view_shortcode('mcems_book_exam')) {
+        if (!MCEMEXCE_Settings::user_can_view_shortcode('mcemexce_book_exam')) {
             return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         }
 
         $user_id   = (int) get_current_user_id();
-        $exams   = MCEMS_Tutor::get_exams();
-        $booking_exam_ids = MCEMS_Settings::get_booking_exam_ids();
+        $exams   = MCEMEXCE_Tutor::get_exams();
+        $booking_exam_ids = MCEMEXCE_Settings::get_booking_exam_ids();
         if (!empty($booking_exam_ids)) {
             $exams = array_intersect_key($exams, array_flip($booking_exam_ids));
         }
-        $exam_pt = MCEMS_Tutor::exam_post_type();
+        $exam_pt = MCEMEXCE_Tutor::exam_post_type();
 
         ob_start();
         ?>
@@ -728,13 +728,13 @@ class MCEMS_Booking {
                     ); ?>
                 </p>
 
-                <label for="mcems_exam_select" style="font-weight:bold; display:block; margin-bottom:8px;"><?php echo esc_html__('Choose the exam:', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                <label for="mcemexce_exam_select" style="font-weight:bold; display:block; margin-bottom:8px;"><?php echo esc_html__('Choose the exam:', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                 <?php if (!$exam_pt): ?>
                     <p style="color:#f44336; font-weight:bold;"><?php echo esc_html__('Tutor LMS not detected (exam post type not found).', 'mc-ems-exam-center-for-tutor-lms'); ?></p>
                 <?php elseif (!$exams): ?>
                     <p style="color:#f44336; font-weight:bold;"><?php echo esc_html__('No published Tutor LMS exam found.', 'mc-ems-exam-center-for-tutor-lms'); ?></p>
                 <?php else: ?>
-                    <select id="mcems_exam_select" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc; margin-bottom:20px;">
+                    <select id="mcemexce_exam_select" style="width:100%; padding:10px; border-radius:5px; border:1px solid #ccc; margin-bottom:20px;">
                         <option value=""><?php echo esc_html__('— Select exam —', 'mc-ems-exam-center-for-tutor-lms'); ?></option>
                         <?php foreach ($exams as $cid => $title): ?>
                             <option value="<?php echo (int) $cid; ?>"><?php echo esc_html($title); ?></option>
@@ -800,7 +800,7 @@ class MCEMS_Booking {
     }
 
     public static function shortcode_gestisci(): string {
-        if (!MCEMS_Settings::user_can_view_shortcode('mcems_manage_booking')) {
+        if (!MCEMEXCE_Settings::user_can_view_shortcode('mcemexce_manage_booking')) {
             return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         }
 
@@ -809,7 +809,7 @@ class MCEMS_Booking {
 
         $map = self::get_active_bookings($user_id);
         if (!$map) {
-            $url = MCEMS_Settings::get_booking_page_url();
+            $url = MCEMEXCE_Settings::get_booking_page_url();
             if ($url) {
                 $btn = '<p><a class="button button-primary" href="' . esc_url($url) . '">' . esc_html__('Open exam booking calendar', 'mc-ems-exam-center-for-tutor-lms') . '</a></p>';
                 return '<p>' . esc_html__('No active exam booking.', 'mc-ems-exam-center-for-tutor-lms') . '</p>' . $btn;
@@ -840,8 +840,8 @@ class MCEMS_Booking {
                         <?php
                         $exam_id = (int) $exam_id;
                         $slot_id   = (int) ($b['slot_id'] ?? 0);
-                        $data      = (string) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_DATE, true);
-                        $orario    = (string) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_TIME, true);
+                        $data      = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
+                        $orario    = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, true);
 
                         $slot_ts = strtotime($data . ' ' . $orario);
                         $now_ts  = (int) current_time('timestamp');
@@ -852,11 +852,11 @@ class MCEMS_Booking {
                         );
 
                         $data_h   = $data ? date_i18n('d/m/Y', strtotime($data)) : '';
-                        $gcal_url = self::mcems_get_google_calendar_url($slot_id, $exam_id);
+                        $gcal_url = self::mcemexce_get_google_calendar_url($slot_id, $exam_id);
                         ?>
                         <div class="mcems-card">
                             <div class="mcems-row">
-                                <div class="mcems-exam"><?php echo esc_html(MCEMS_Tutor::exam_title($exam_id)); ?></div>
+                                <div class="mcems-exam"><?php echo esc_html(MCEMEXCE_Tutor::exam_title($exam_id)); ?></div>
                                 <div class="mcems-muted">ID: <?php echo (int) $slot_id; ?></div>
                             </div>
 
@@ -906,7 +906,7 @@ class MCEMS_Booking {
 
     public static function ajax_check_active_booking(): void {
         $nonce = isset($_GET['nonce']) ? sanitize_text_field(wp_unslash($_GET['nonce'])) : '';
-        if (!wp_verify_nonce($nonce, 'mcems_booking')) {
+        if (!wp_verify_nonce($nonce, 'mcemexce_booking')) {
             wp_send_json(['has_booking' => false]);
             return;
         }
@@ -924,7 +924,7 @@ class MCEMS_Booking {
 
     public static function ajax_get_booking_calendar(): void {
         $nonce = isset($_GET['nonce']) ? sanitize_text_field(wp_unslash($_GET['nonce'])) : '';
-        if (!wp_verify_nonce($nonce, 'mcems_booking')) {
+        if (!wp_verify_nonce($nonce, 'mcemexce_booking')) {
             wp_send_json([]);
             return;
         }
@@ -942,24 +942,24 @@ class MCEMS_Booking {
         $end   = gmdate('Y-m-t', strtotime($start));
 
         $slots = get_posts([
-            'post_type'      => MCEMS_CPT_Sessioni_Esame::CPT,
+            'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
             'posts_per_page' => -1,
             'post_status'    => 'publish',
             'meta_query'     => [
                 [
-                    'key'     => MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID,
+                    'key'     => MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID,
                     'value'   => $exam_id,
                     'compare' => '=',
                 ],
                 [
-                    'key'     => MCEMS_CPT_Sessioni_Esame::MK_DATE,
+                    'key'     => MCEMEXCE_CPT_Sessioni_Esame::MK_DATE,
                     'value'   => [$start, $end],
                     'type'    => 'DATE',
                     'compare' => 'BETWEEN',
                 ],
             ],
             'orderby'        => 'meta_value',
-            'meta_key'       => MCEMS_CPT_Sessioni_Esame::MK_DATE,
+            'meta_key'       => MCEMEXCE_CPT_Sessioni_Esame::MK_DATE,
             'order'          => 'ASC',
         ]);
 
@@ -968,17 +968,17 @@ class MCEMS_Booking {
         $anticipo_sec = (int) self::get_anticipo_ore() * HOUR_IN_SECONDS;
 
         foreach ($slots as $slot) {
-            $data      = (string) get_post_meta($slot->ID, MCEMS_CPT_Sessioni_Esame::MK_DATE, true);
-            $orario    = (string) get_post_meta($slot->ID, MCEMS_CPT_Sessioni_Esame::MK_TIME, true);
-            $max_posti = (int) get_post_meta($slot->ID, MCEMS_CPT_Sessioni_Esame::MK_CAPACITY, true);
-            $occupati  = get_post_meta($slot->ID, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, true);
+            $data      = (string) get_post_meta($slot->ID, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
+            $orario    = (string) get_post_meta($slot->ID, MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, true);
+            $max_posti = (int) get_post_meta($slot->ID, MCEMEXCE_CPT_Sessioni_Esame::MK_CAPACITY, true);
+            $occupati  = get_post_meta($slot->ID, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, true);
             $occupati  = is_array($occupati) ? $occupati : [];
 
             $slot_ts = strtotime($data . ' ' . $orario);
             if (($slot_ts - $now_ts) <= $anticipo_sec) continue;
 
-            $is_special = ((int) get_post_meta($slot->ID, MCEMS_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
-            $spec_uid   = (int) get_post_meta($slot->ID, MCEMS_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, true);
+            $is_special = ((int) get_post_meta($slot->ID, MCEMEXCE_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
+            $spec_uid   = (int) get_post_meta($slot->ID, MCEMEXCE_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, true);
 
             if ($is_special && $spec_uid > 0 && $user_id > 0 && $user_id !== $spec_uid) continue;
             if ($is_special && $spec_uid > 0 && $user_id <= 0) continue;
@@ -999,7 +999,7 @@ class MCEMS_Booking {
 
     public static function ajax_get_slots_by_date(): void {
         $nonce = isset($_GET['nonce']) ? sanitize_text_field(wp_unslash($_GET['nonce'])) : '';
-        if (!wp_verify_nonce($nonce, 'mcems_booking')) {
+        if (!wp_verify_nonce($nonce, 'mcemexce_booking')) {
             wp_send_json([]);
             return;
         }
@@ -1014,24 +1014,24 @@ class MCEMS_Booking {
 
         $meta_query = [
             [
-                'key'     => MCEMS_CPT_Sessioni_Esame::MK_DATE,
+                'key'     => MCEMEXCE_CPT_Sessioni_Esame::MK_DATE,
                 'value'   => $data,
                 'compare' => '=',
             ],
             [
-                'key'     => MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID,
+                'key'     => MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID,
                 'value'   => $exam_id,
                 'compare' => '=',
             ],
         ];
 
         $slots = get_posts([
-            'post_type'      => MCEMS_CPT_Sessioni_Esame::CPT,
+            'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
             'posts_per_page' => -1,
             'post_status'    => 'publish',
             'meta_query'     => $meta_query,
             'orderby'        => 'meta_value',
-            'meta_key'       => MCEMS_CPT_Sessioni_Esame::MK_TIME,
+            'meta_key'       => MCEMEXCE_CPT_Sessioni_Esame::MK_TIME,
             'order'          => 'ASC',
         ]);
 
@@ -1040,9 +1040,9 @@ class MCEMS_Booking {
         $anticipo_sec = (int) self::get_anticipo_ore() * HOUR_IN_SECONDS;
 
         foreach ($slots as $slot) {
-            $orario    = (string) get_post_meta($slot->ID, MCEMS_CPT_Sessioni_Esame::MK_TIME, true);
-            $max_posti = (int) get_post_meta($slot->ID, MCEMS_CPT_Sessioni_Esame::MK_CAPACITY, true);
-            $occupati  = get_post_meta($slot->ID, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, true);
+            $orario    = (string) get_post_meta($slot->ID, MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, true);
+            $max_posti = (int) get_post_meta($slot->ID, MCEMEXCE_CPT_Sessioni_Esame::MK_CAPACITY, true);
+            $occupati  = get_post_meta($slot->ID, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, true);
             $occupati  = is_array($occupati) ? $occupati : [];
 
             if (count($occupati) >= $max_posti) continue;
@@ -1050,8 +1050,8 @@ class MCEMS_Booking {
             $slot_ts = strtotime($data . ' ' . $orario);
             if (($slot_ts - $now_ts) <= $anticipo_sec) continue;
 
-            $is_special = ((int) get_post_meta($slot->ID, MCEMS_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
-            $spec_uid   = (int) get_post_meta($slot->ID, MCEMS_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, true);
+            $is_special = ((int) get_post_meta($slot->ID, MCEMEXCE_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
+            $spec_uid   = (int) get_post_meta($slot->ID, MCEMEXCE_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, true);
 
             if ($is_special && $spec_uid > 0 && $user_id > 0 && $user_id !== $spec_uid) continue;
 
@@ -1073,17 +1073,17 @@ class MCEMS_Booking {
         }
 
         $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-        if (!wp_verify_nonce($nonce, 'mcems_booking')) {
+        if (!wp_verify_nonce($nonce, 'mcemexce_booking')) {
             wp_send_json_error(['message' => esc_html__('Invalid nonce.', 'mc-ems-exam-center-for-tutor-lms')], 400);
         }
 
         $slot_id = absint($_POST['slot_id'] ?? 0);
-        if ($slot_id <= 0 || get_post_type($slot_id) !== MCEMS_CPT_Sessioni_Esame::CPT) {
+        if ($slot_id <= 0 || get_post_type($slot_id) !== MCEMEXCE_CPT_Sessioni_Esame::CPT) {
             echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('Invalid exam session.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
             wp_die();
         }
 
-        $exam_id = (int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, true);
+        $exam_id = (int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID, true);
         if ($exam_id <= 0) {
             echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('Exam session is not associated with an exam.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
             wp_die();
@@ -1095,22 +1095,22 @@ class MCEMS_Booking {
             wp_die();
         }
 
-        $lock_key = '_mcems_lock';
+        $lock_key = '_mcemexce_lock';
         if (get_post_meta($slot_id, $lock_key, true)) {
             echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('Exam session is being updated, please try again.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
             wp_die();
         }
         update_post_meta($slot_id, $lock_key, time());
 
-        $data   = (string) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_DATE, true);
-        $orario = (string) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_TIME, true);
-        $max    = (int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_CAPACITY, true);
+        $data   = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
+        $orario = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, true);
+        $max    = (int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_CAPACITY, true);
 
-        $occupati = get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, true);
+        $occupati = get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, true);
         if (!is_array($occupati)) $occupati = [];
 
-        $is_special = ((int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
-        $spec_uid   = (int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, true);
+        $is_special = ((int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
+        $spec_uid   = (int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, true);
         if ($is_special && $spec_uid > 0 && $user_id !== $spec_uid) {
             delete_post_meta($slot_id, $lock_key);
             echo '<p style="color:#f44336; font-weight:bold; text-align:center;">' . esc_html__('This exam session is reserved.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
@@ -1137,7 +1137,7 @@ class MCEMS_Booking {
 
         $occupati[] = $user_id;
         $occupati = array_values(array_unique(array_map('intval', $occupati)));
-        update_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, $occupati);
+        update_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, $occupati);
 
         self::set_active_booking_for_exam($user_id, $exam_id, [
             'slot_id'    => $slot_id,
@@ -1150,7 +1150,7 @@ class MCEMS_Booking {
         delete_post_meta($slot_id, $lock_key);
         self::maybe_send_booking_notifications($user_id, $slot_id, $exam_id, 'booked');
 
-        $exam_title = MCEMS_Tutor::exam_title($exam_id);
+        $exam_title = MCEMEXCE_Tutor::exam_title($exam_id);
 
         echo '<p style="text-align:center; color:#4CAF50; font-weight:bold;">' . esc_html__('Exam booking confirmed!', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         if ($exam_title) {
@@ -1158,14 +1158,14 @@ class MCEMS_Booking {
         }
         echo '<p style="text-align:center;">' . esc_html__('Exam session:', 'mc-ems-exam-center-for-tutor-lms') . ' <strong>' . esc_html(date_i18n('d/m/Y', strtotime($data))) . '</strong> ' . esc_html__('at', 'mc-ems-exam-center-for-tutor-lms') . ' <strong>' . esc_html($orario) . '</strong></p>';
 
-        $gcal_url = self::mcems_get_google_calendar_url($slot_id, $exam_id);
+        $gcal_url = self::mcemexce_get_google_calendar_url($slot_id, $exam_id);
         if ($gcal_url) {
             echo '<p style="text-align:center; margin-top:14px;">';
             echo '<a class="button" target="_blank" rel="noopener noreferrer" href="' . esc_url($gcal_url) . '">' . esc_html__('Add to Google Calendar', 'mc-ems-exam-center-for-tutor-lms') . '</a>';
             echo '</p>';
         }
 
-        $manage_url = MCEMS_Settings::get_manage_booking_page_url();
+        $manage_url = MCEMEXCE_Settings::get_manage_booking_page_url();
         if ($manage_url) {
             $manage_link = add_query_arg(['exam_id' => $exam_id], $manage_url);
             echo '<p style="text-align:center; margin-top:14px;"><a class="button button-primary" href="' . esc_url($manage_link) . '">' . esc_html__('Manage exam booking', 'mc-ems-exam-center-for-tutor-lms') . '</a></p>';
@@ -1178,7 +1178,7 @@ class MCEMS_Booking {
         $user_id = (int) get_current_user_id();
         if (!$user_id) wp_send_json_error(__('You must be logged in.', 'mc-ems-exam-center-for-tutor-lms'));
 
-        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'mcems_cancel')) {
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'mcemexce_cancel')) {
             wp_send_json_error(__('Invalid nonce.', 'mc-ems-exam-center-for-tutor-lms'));
         }
 
@@ -1190,14 +1190,14 @@ class MCEMS_Booking {
         $exam_id = absint($_POST['exam_id'] ?? 0);
         if ($slot_id <= 0) wp_send_json_error(__('Invalid exam session.', 'mc-ems-exam-center-for-tutor-lms'));
 
-        if (get_post_type($slot_id) !== MCEMS_CPT_Sessioni_Esame::CPT) {
+        if (get_post_type($slot_id) !== MCEMEXCE_CPT_Sessioni_Esame::CPT) {
             if ($exam_id > 0) self::remove_active_booking_for_exam($user_id, $exam_id);
             wp_send_json_success(true);
         }
 
-        $data        = (string) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_DATE, true);
-        $orario      = (string) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_TIME, true);
-        $slot_exam = (int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, true);
+        $data        = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
+        $orario      = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, true);
+        $slot_exam = (int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID, true);
         if ($exam_id <= 0) $exam_id = $slot_exam;
 
         $slot_ts = strtotime($data . ' ' . $orario);
@@ -1209,7 +1209,7 @@ class MCEMS_Booking {
             }
         }
 
-        $occupati = get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, true);
+        $occupati = get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, true);
         if (!is_array($occupati)) $occupati = [];
 
         if (!in_array($user_id, $occupati, true)) {
@@ -1217,8 +1217,8 @@ class MCEMS_Booking {
             wp_send_json_error(__('You are not booked on this session (meta realigned).', 'mc-ems-exam-center-for-tutor-lms'));
         }
 
-        $is_special = ((int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
-        $spec_uid   = (int) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, true);
+        $is_special = ((int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
+        $spec_uid   = (int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, true);
         if ($is_special && $spec_uid > 0) {
             wp_send_json_error(__('This session is reserved and cannot be cancelled from the front-end.', 'mc-ems-exam-center-for-tutor-lms'));
         }
@@ -1226,7 +1226,7 @@ class MCEMS_Booking {
         $occupati = array_values(array_filter(array_map('intval', $occupati), function($id) use ($user_id) {
             return (int) $id !== (int) $user_id;
         }));
-        update_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, $occupati);
+        update_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, $occupati);
 
         if ($exam_id > 0) self::remove_active_booking_for_exam($user_id, $exam_id);
         self::add_history($user_id, $slot_id, 'cancelled');
@@ -1236,15 +1236,15 @@ class MCEMS_Booking {
     }
 
     private static function email_placeholders($user, $slot_id, $exam_id): array {
-        $date         = (string) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_DATE, true);
-        $time         = (string) get_post_meta($slot_id, MCEMS_CPT_Sessioni_Esame::MK_TIME, true);
-        $exam_title = MCEMS_Tutor::exam_title($exam_id);
+        $date         = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
+        $time         = (string) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, true);
+        $exam_title = MCEMEXCE_Tutor::exam_title($exam_id);
         $date_label   = $date ? date_i18n('d/m/Y', strtotime($date)) : '';
 
-        $manage_url = MCEMS_Settings::get_manage_booking_page_url();
+        $manage_url = MCEMEXCE_Settings::get_manage_booking_page_url();
         if ($manage_url) $manage_url = add_query_arg(['exam_id' => $exam_id], $manage_url);
 
-        $booking_url = MCEMS_Settings::get_booking_page_url();
+        $booking_url = MCEMEXCE_Settings::get_booking_page_url();
         if ($booking_url) $booking_url = add_query_arg(['exam_id' => $exam_id], $booking_url);
 
         return [
@@ -1263,13 +1263,13 @@ class MCEMS_Booking {
         $user = get_user_by('id', $user_id);
         if (!$user) return;
 
-        $headers = MCEMS_Settings::get_mail_headers();
+        $headers = MCEMEXCE_Settings::get_mail_headers();
         $ph = self::email_placeholders($user, $slot_id, $exam_id);
 
         if ($action === 'booked') {
-            if (MCEMS_Settings::email_enabled('email_send_booking_confirmation', 1) && $user->user_email) {
-                $subject = MCEMS_Settings::get_email_template('email_subject_booking_confirmation', 'Exam booking confirmed — {exam_title}');
-                $body    = MCEMS_Settings::get_email_template('email_body_booking_confirmation', "Hello {candidate_name}
+            if (MCEMEXCE_Settings::email_enabled('email_send_booking_confirmation', 1) && $user->user_email) {
+                $subject = MCEMEXCE_Settings::get_email_template('email_subject_booking_confirmation', 'Exam booking confirmed — {exam_title}');
+                $body    = MCEMEXCE_Settings::get_email_template('email_body_booking_confirmation', "Hello {candidate_name}
 
 Your exam booking has been confirmed.
 Exam: {exam_title}
@@ -1279,17 +1279,17 @@ Manage exam booking: {manage_booking_url}");
 
                 wp_mail(
                     $user->user_email,
-                    MCEMS_Settings::render_email_template($subject, $ph),
-                    MCEMS_Settings::render_email_template($body, $ph),
+                    MCEMEXCE_Settings::render_email_template($subject, $ph),
+                    MCEMEXCE_Settings::render_email_template($body, $ph),
                     $headers
                 );
             }
 
-            if (MCEMS_Settings::email_enabled('email_send_admin_booking', 0)) {
-                $to = MCEMS_Settings::get_admin_recipients();
+            if (MCEMEXCE_Settings::email_enabled('email_send_admin_booking', 0)) {
+                $to = MCEMEXCE_Settings::get_admin_recipients();
                 if ($to) {
-                    $subject = MCEMS_Settings::get_email_template('email_subject_admin_booking', 'New exam booking — {exam_title}');
-                    $body    = MCEMS_Settings::get_email_template('email_body_admin_booking', "A new booking has been created.
+                    $subject = MCEMEXCE_Settings::get_email_template('email_subject_admin_booking', 'New exam booking — {exam_title}');
+                    $body    = MCEMEXCE_Settings::get_email_template('email_body_admin_booking', "A new booking has been created.
 
 Candidate: {candidate_name} <{candidate_email}>
 Exam: {exam_title}
@@ -1299,8 +1299,8 @@ Manage exam booking: {manage_booking_url}");
 
                     wp_mail(
                         $to,
-                        MCEMS_Settings::render_email_template($subject, $ph),
-                        MCEMS_Settings::render_email_template($body, $ph),
+                        MCEMEXCE_Settings::render_email_template($subject, $ph),
+                        MCEMEXCE_Settings::render_email_template($body, $ph),
                         $headers
                     );
                 }
@@ -1308,9 +1308,9 @@ Manage exam booking: {manage_booking_url}");
         }
 
         if ($action === 'cancelled') {
-            if (MCEMS_Settings::email_enabled('email_send_booking_cancellation', 1) && $user->user_email) {
-                $subject = MCEMS_Settings::get_email_template('email_subject_booking_cancellation', 'Exam booking cancelled — {exam_title}');
-                $body    = MCEMS_Settings::get_email_template('email_body_booking_cancellation', "Hello {candidate_name}
+            if (MCEMEXCE_Settings::email_enabled('email_send_booking_cancellation', 1) && $user->user_email) {
+                $subject = MCEMEXCE_Settings::get_email_template('email_subject_booking_cancellation', 'Exam booking cancelled — {exam_title}');
+                $body    = MCEMEXCE_Settings::get_email_template('email_body_booking_cancellation', "Hello {candidate_name}
 
 Your exam booking has been cancelled.
 Exam: {exam_title}
@@ -1319,17 +1319,17 @@ Time: {session_time}");
 
                 wp_mail(
                     $user->user_email,
-                    MCEMS_Settings::render_email_template($subject, $ph),
-                    MCEMS_Settings::render_email_template($body, $ph),
+                    MCEMEXCE_Settings::render_email_template($subject, $ph),
+                    MCEMEXCE_Settings::render_email_template($body, $ph),
                     $headers
                 );
             }
 
-            if (MCEMS_Settings::email_enabled('email_send_admin_cancellation', 0)) {
-                $to = MCEMS_Settings::get_admin_recipients();
+            if (MCEMEXCE_Settings::email_enabled('email_send_admin_cancellation', 0)) {
+                $to = MCEMEXCE_Settings::get_admin_recipients();
                 if ($to) {
-                    $subject = MCEMS_Settings::get_email_template('email_subject_admin_cancellation', 'Exam booking cancelled — {exam_title}');
-                    $body    = MCEMS_Settings::get_email_template('email_body_admin_cancellation', "A booking has been cancelled.
+                    $subject = MCEMEXCE_Settings::get_email_template('email_subject_admin_cancellation', 'Exam booking cancelled — {exam_title}');
+                    $body    = MCEMEXCE_Settings::get_email_template('email_body_admin_cancellation', "A booking has been cancelled.
 
 Candidate: {candidate_name} <{candidate_email}>
 Exam: {exam_title}
@@ -1338,8 +1338,8 @@ Time: {session_time}");
 
                     wp_mail(
                         $to,
-                        MCEMS_Settings::render_email_template($subject, $ph),
-                        MCEMS_Settings::render_email_template($body, $ph),
+                        MCEMEXCE_Settings::render_email_template($subject, $ph),
+                        MCEMEXCE_Settings::render_email_template($body, $ph),
                         $headers
                     );
                 }
@@ -1351,10 +1351,10 @@ Time: {session_time}");
        Deletion cleanup
        ========================= */
     public static function on_before_delete_post(int $post_id): void {
-        if (get_post_type($post_id) !== MCEMS_CPT_Sessioni_Esame::CPT) return;
+        if (get_post_type($post_id) !== MCEMEXCE_CPT_Sessioni_Esame::CPT) return;
 
-        $exam_id = (int) get_post_meta($post_id, MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, true);
-        $occ       = get_post_meta($post_id, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, true);
+        $exam_id = (int) get_post_meta($post_id, MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID, true);
+        $occ       = get_post_meta($post_id, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, true);
         $occ       = is_array($occ) ? $occ : [];
 
         if ($exam_id > 0 && $occ) {

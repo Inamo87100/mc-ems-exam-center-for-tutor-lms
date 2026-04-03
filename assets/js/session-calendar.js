@@ -2,18 +2,18 @@
  * MC-EMS Base – Session Assignment Calendar
  *
  * Handles the interactive session calendar rendered by the
- * [mcems_sessions_calendar] shortcode, including modal slot details,
+ * [mcemexce_sessions_calendar] shortcode, including modal slot details,
  * proctor assignment, and the "all sessions" overview.
  *
- * Depends on: MCEMS_CAL (localised via wp_localize_script)
- *   - MCEMS_CAL.ajaxUrl
- *   - MCEMS_CAL.nonce
- *   - MCEMS_CAL.isLoggedIn
- *   - MCEMS_CAL.i18n.*
+ * Depends on: MCEMEXCE_CAL (localised via wp_localize_script)
+ *   - MCEMEXCE_CAL.ajaxUrl
+ *   - MCEMEXCE_CAL.nonce
+ *   - MCEMEXCE_CAL.isLoggedIn
+ *   - MCEMEXCE_CAL.i18n.*
  */
-/* global MCEMS_CAL */
+/* global MCEMEXCE_CAL */
 document.addEventListener('DOMContentLoaded', function () {
-    if (typeof MCEMS_CAL === 'undefined') return;
+    if (typeof MCEMEXCE_CAL === 'undefined') return;
 
     var calendar       = document.getElementById('calendar');
     var modal          = document.getElementById('slotModal');
@@ -36,9 +36,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!calendar) return;
 
-    var AJAX_URL    = MCEMS_CAL.ajaxUrl;
-    var AJAX_NONCE  = MCEMS_CAL.nonce;
-    var IS_LOGGED_IN = !!MCEMS_CAL.isLoggedIn;
+    var AJAX_URL    = MCEMEXCE_CAL.ajaxUrl;
+    var AJAX_NONCE  = MCEMEXCE_CAL.nonce;
+    var IS_LOGGED_IN = !!MCEMEXCE_CAL.isLoggedIn;
 
     var today        = new Date();
     var currentMonth = today.getMonth();
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function fetchMonthData(year, month) {
         var key = year + '-' + month;
         if (cacheSlots[key]) return Promise.resolve(cacheSlots[key]);
-        return fetch(AJAX_URL + '?action=mcems_get_slot_data&year=' + year + '&month=' + (month + 1) + '&_ajax_nonce=' + encodeURIComponent(AJAX_NONCE))
+        return fetch(AJAX_URL + '?action=mcemexce_get_slot_data&year=' + year + '&month=' + (month + 1) + '&_ajax_nonce=' + encodeURIComponent(AJAX_NONCE))
             .then(function (r) { return r.json(); })
             .then(function (data) { cacheSlots[key] = data || {}; return cacheSlots[key]; });
     }
@@ -156,18 +156,18 @@ document.addEventListener('DOMContentLoaded', function () {
                             .sort(function (a, b) { return (a.ora || '').localeCompare(b.ora || ''); })
                             .map(function (s) {
                                 var assigned = (s.assegnato && s.assegnato_nome)
-                                    ? MCEMS_CAL.i18n.assignedTo + ' ' + s.assegnato_nome
+                                    ? MCEMEXCE_CAL.i18n.assignedTo + ' ' + s.assegnato_nome
                                     : null;
 
                                 var btnAssegna = (!assigned && IS_LOGGED_IN)
-                                    ? '<button class="btn-assegna" data-slot="' + s.id + '" data-data="' + d + '" data-ora="' + s.ora + '">' + MCEMS_CAL.i18n.assignSession + '</button>'
+                                    ? '<button class="btn-assegna" data-slot="' + s.id + '" data-data="' + d + '" data-ora="' + s.ora + '">' + MCEMEXCE_CAL.i18n.assignSession + '</button>'
                                     : '';
 
                                 var buttonsIfAssigned = (assigned && IS_LOGGED_IN)
                                     ? '<div class="actions">'
                                         + '<span class="badge-soft">' + assigned + '</span>'
-                                        + '<button class="btn-modifica" data-slot="' + s.id + '" data-data="' + d + '" data-ora="' + s.ora + '">' + MCEMS_CAL.i18n.reassign + '</button>'
-                                        + '<button class="btn-elimina" data-slot="' + s.id + '" data-data="' + d + '" data-ora="' + s.ora + '">' + MCEMS_CAL.i18n.removeAssignment + '</button>'
+                                        + '<button class="btn-modifica" data-slot="' + s.id + '" data-data="' + d + '" data-ora="' + s.ora + '">' + MCEMEXCE_CAL.i18n.reassign + '</button>'
+                                        + '<button class="btn-elimina" data-slot="' + s.id + '" data-data="' + d + '" data-ora="' + s.ora + '">' + MCEMEXCE_CAL.i18n.removeAssignment + '</button>'
                                         + '</div>'
                                     : '';
 
@@ -182,14 +182,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                 return '<div class="slot-row" id="slot-row-' + s.id + '">'
                                     + '<div class="slot-meta">'
                                     + '<div>' + oraHtml + '</div>'
-                                    + (s.exam_title ? '<div class="muted"><strong>' + MCEMS_CAL.i18n.examLabel + '</strong> ' + s.exam_title + '</div>' : '')
-                                    + '<div class="muted">' + s.prenotati + '/' + s.totali + ' ' + MCEMS_CAL.i18n.seatsOccupied + '</div>'
+                                    + (s.exam_title ? '<div class="muted"><strong>' + MCEMEXCE_CAL.i18n.examLabel + '</strong> ' + s.exam_title + '</div>' : '')
+                                    + '<div class="muted">' + s.prenotati + '/' + s.totali + ' ' + MCEMEXCE_CAL.i18n.seatsOccupied + '</div>'
                                     + '</div>'
                                     + right
                                     + '</div>';
                             }).join('');
 
-                        if (modalSlotInfo) modalSlotInfo.innerHTML = rows || '<p class="notice">' + MCEMS_CAL.i18n.noSessionsOnDate + '</p>';
+                        if (modalSlotInfo) modalSlotInfo.innerHTML = rows || '<p class="notice">' + MCEMEXCE_CAL.i18n.noSessionsOnDate + '</p>';
                         if (modal) { modal.style.display = 'block'; modal.setAttribute('aria-hidden', 'false'); }
                     });
                 } else {
@@ -230,18 +230,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (openMy) {
         openMy.addEventListener('click', function () {
-            if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInView); return; }
-            if (myBody) myBody.innerHTML = '<p class="notice">' + MCEMS_CAL.i18n.loadingDots + '</p>';
-            fetch(AJAX_URL + '?action=mcems_get_user_assigned_slots&_ajax_nonce=' + encodeURIComponent(AJAX_NONCE))
+            if (!IS_LOGGED_IN) { alert(MCEMEXCE_CAL.i18n.mustBeLoggedInView); return; }
+            if (myBody) myBody.innerHTML = '<p class="notice">' + MCEMEXCE_CAL.i18n.loadingDots + '</p>';
+            fetch(AJAX_URL + '?action=mcemexce_get_user_assigned_slots&_ajax_nonce=' + encodeURIComponent(AJAX_NONCE))
                 .then(function (r) { return r.json(); })
                 .then(function (json) {
                     if (!json || !json.success) {
-                        if (myBody) myBody.innerHTML = '<p class="notice">' + ((json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToLoad) + '</p>';
+                        if (myBody) myBody.innerHTML = '<p class="notice">' + ((json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToLoad) + '</p>';
                         return;
                     }
                     var items = json.data || [];
                     if (!items.length) {
-                        if (myBody) myBody.innerHTML = '<p class="notice">' + MCEMS_CAL.i18n.noAssignedSessions + '</p>';
+                        if (myBody) myBody.innerHTML = '<p class="notice">' + MCEMEXCE_CAL.i18n.noAssignedSessions + '</p>';
                         return;
                     }
                     if (myBody) {
@@ -250,15 +250,15 @@ document.addEventListener('DOMContentLoaded', function () {
                                 + '<div class="slot-meta">'
                                 + '<div><strong>' + s.data_it + '</strong></div>'
                                 + '<div><strong>' + s.ora + '</strong> ' + (s.speciale ? specialBadgeHTML(true) : '') + '</div>'
-                                + (s.exam_title ? '<div class="muted"><strong>' + MCEMS_CAL.i18n.examLabel + '</strong> ' + s.exam_title + '</div>' : '')
+                                + (s.exam_title ? '<div class="muted"><strong>' + MCEMEXCE_CAL.i18n.examLabel + '</strong> ' + s.exam_title + '</div>' : '')
                                 + '</div>'
-                                + '<div class="actions"><button class="btn-elimina" data-slot="' + s.id + '" data-data="' + s.data + '">' + MCEMS_CAL.i18n.removeAssignment + '</button></div>'
+                                + '<div class="actions"><button class="btn-elimina" data-slot="' + s.id + '" data-data="' + s.data + '">' + MCEMEXCE_CAL.i18n.removeAssignment + '</button></div>'
                                 + '</div>';
                         }).join('');
                     }
                 })
                 .catch(function () {
-                    if (myBody) myBody.innerHTML = '<p class="notice">' + MCEMS_CAL.i18n.networkError + '</p>';
+                    if (myBody) myBody.innerHTML = '<p class="notice">' + MCEMEXCE_CAL.i18n.networkError + '</p>';
                 });
 
             if (myModal) { myModal.style.display = 'block'; myModal.setAttribute('aria-hidden', 'false'); }
@@ -275,14 +275,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function loadAllAssignments() {
-        if (allBody) allBody.innerHTML = '<p class="notice">' + MCEMS_CAL.i18n.loadingDots + '</p>';
+        if (allBody) allBody.innerHTML = '<p class="notice">' + MCEMEXCE_CAL.i18n.loadingDots + '</p>';
         var y = allYear ? allYear.value : '';
         var m = allMonth ? allMonth.value : '';
-        fetch(AJAX_URL + '?action=mcems_get_all_assigned_slots&year=' + encodeURIComponent(y) + '&month=' + encodeURIComponent(m) + '&_ajax_nonce=' + encodeURIComponent(AJAX_NONCE))
+        fetch(AJAX_URL + '?action=mcemexce_get_all_assigned_slots&year=' + encodeURIComponent(y) + '&month=' + encodeURIComponent(m) + '&_ajax_nonce=' + encodeURIComponent(AJAX_NONCE))
             .then(function (r) { return r.json(); })
             .then(function (json) {
                 if (!json || !json.success) {
-                    if (allBody) allBody.innerHTML = '<p class="notice">' + ((json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToLoad) + '</p>';
+                    if (allBody) allBody.innerHTML = '<p class="notice">' + ((json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToLoad) + '</p>';
                     return;
                 }
                 var items = json.data || [];
@@ -294,17 +294,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     allBody.innerHTML = items.map(function (s) {
                         var actionHTML = s.assegnato
                             ? '<div class="actions">'
-                                + '<span class="badge-soft">' + MCEMS_CAL.i18n.assignedTo + ' ' + s.assegnato_nome + '</span>'
-                                + '<button class="btn-modifica" data-slot="' + s.id + '" data-data="' + s.data + '" data-ora="' + s.ora + '">' + MCEMS_CAL.i18n.reassign + '</button>'
-                                + '<button class="btn-elimina" data-slot="' + s.id + '" data-data="' + s.data + '" data-ora="' + s.ora + '">' + MCEMS_CAL.i18n.removeAssignment + '</button>'
+                                + '<span class="badge-soft">' + MCEMEXCE_CAL.i18n.assignedTo + ' ' + s.assegnato_nome + '</span>'
+                                + '<button class="btn-modifica" data-slot="' + s.id + '" data-data="' + s.data + '" data-ora="' + s.ora + '">' + MCEMEXCE_CAL.i18n.reassign + '</button>'
+                                + '<button class="btn-elimina" data-slot="' + s.id + '" data-data="' + s.data + '" data-ora="' + s.ora + '">' + MCEMEXCE_CAL.i18n.removeAssignment + '</button>'
                                 + '</div>'
-                            : '<div class="slot-actions"><button class="btn-assegna" data-slot="' + s.id + '" data-data="' + s.data + '" data-ora="' + s.ora + '">' + MCEMS_CAL.i18n.assignSession + '</button></div>';
+                            : '<div class="slot-actions"><button class="btn-assegna" data-slot="' + s.id + '" data-data="' + s.data + '" data-ora="' + s.ora + '">' + MCEMEXCE_CAL.i18n.assignSession + '</button></div>';
 
                         return '<div class="slot-row" id="allslot-' + s.id + '">'
                             + '<div class="slot-meta">'
                             + '<div><strong>' + s.data_it + '</strong></div>'
                             + '<div><strong>' + s.ora + '</strong> <span class="slot-id">ID: ' + s.id + '</span> ' + (s.speciale ? specialBadgeHTML(true) : '') + '</div>'
-                            + (s.exam_title ? '<div class="muted"><strong>' + MCEMS_CAL.i18n.examLabel + '</strong> ' + s.exam_title + '</div>' : '')
+                            + (s.exam_title ? '<div class="muted"><strong>' + MCEMEXCE_CAL.i18n.examLabel + '</strong> ' + s.exam_title + '</div>' : '')
                             + '</div>'
                             + actionHTML
                             + '</div>';
@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             })
             .catch(function () {
-                if (allBody) allBody.innerHTML = '<p class="notice">' + MCEMS_CAL.i18n.networkError + '</p>';
+                if (allBody) allBody.innerHTML = '<p class="notice">' + MCEMEXCE_CAL.i18n.networkError + '</p>';
             });
     }
 
@@ -338,12 +338,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!btn) return;
         e.preventDefault();
 
-        if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInAssign); return; }
+        if (!IS_LOGGED_IN) { alert(MCEMEXCE_CAL.i18n.mustBeLoggedInAssign); return; }
         var slotId = btn.getAttribute('data-slot');
 
-        btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.assigning;
+        btn.disabled = true; btn.textContent = MCEMEXCE_CAL.i18n.assigning;
         var form = new FormData();
-        form.append('action', 'mcems_assegna_sessione_slot');
+        form.append('action', 'mcemexce_assegna_sessione_slot');
         form.append('slot_id', slotId);
         form.append('_ajax_nonce', AJAX_NONCE);
 
@@ -360,9 +360,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (sa) sa.remove();
                         row.insertAdjacentHTML('beforeend',
                             '<div class="actions">'
-                            + '<span class="badge-soft">' + MCEMS_CAL.i18n.assignedTo + ' ' + nome + '</span>'
-                            + '<button class="btn-modifica" data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMS_CAL.i18n.reassign + '</button>'
-                            + '<button class="btn-elimina"  data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMS_CAL.i18n.removeAssignment + '</button>'
+                            + '<span class="badge-soft">' + MCEMEXCE_CAL.i18n.assignedTo + ' ' + nome + '</span>'
+                            + '<button class="btn-modifica" data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMEXCE_CAL.i18n.reassign + '</button>'
+                            + '<button class="btn-elimina"  data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMEXCE_CAL.i18n.removeAssignment + '</button>'
                             + '</div>');
                     }
 
@@ -373,21 +373,21 @@ document.addEventListener('DOMContentLoaded', function () {
                         rowAll.appendChild(meta.cloneNode(true));
                         rowAll.insertAdjacentHTML('beforeend',
                             '<div class="actions">'
-                            + '<span class="badge-soft">' + MCEMS_CAL.i18n.assignedTo + ' ' + nome + '</span>'
-                            + '<button class="btn-modifica" data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMS_CAL.i18n.reassign + '</button>'
-                            + '<button class="btn-elimina"  data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMS_CAL.i18n.removeAssignment + '</button>'
+                            + '<span class="badge-soft">' + MCEMEXCE_CAL.i18n.assignedTo + ' ' + nome + '</span>'
+                            + '<button class="btn-modifica" data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMEXCE_CAL.i18n.reassign + '</button>'
+                            + '<button class="btn-elimina"  data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMEXCE_CAL.i18n.removeAssignment + '</button>'
                             + '</div>');
                     }
 
                     updateCacheAssign(slotId, dateISO, nome);
                 } else {
-                    alert((json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToAssign);
-                    btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.assignSession;
+                    alert((json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToAssign);
+                    btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.assignSession;
                 }
             })
             .catch(function () {
-                alert(MCEMS_CAL.i18n.networkError);
-                btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.assignSession;
+                alert(MCEMEXCE_CAL.i18n.networkError);
+                btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.assignSession;
             });
     });
 
@@ -397,13 +397,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!btn) return;
         e.preventDefault();
 
-        if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInModify); return; }
+        if (!IS_LOGGED_IN) { alert(MCEMEXCE_CAL.i18n.mustBeLoggedInModify); return; }
         var slotId = btn.getAttribute('data-slot');
-        if (!confirm(MCEMS_CAL.i18n.confirmReassign)) return;
+        if (!confirm(MCEMEXCE_CAL.i18n.confirmReassign)) return;
 
-        btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.reassigning;
+        btn.disabled = true; btn.textContent = MCEMEXCE_CAL.i18n.reassigning;
         var form = new FormData();
-        form.append('action', 'mcems_modifica_assegnazione_sessione_slot');
+        form.append('action', 'mcemexce_modifica_assegnazione_sessione_slot');
         form.append('slot_id', slotId);
         form.append('_ajax_nonce', AJAX_NONCE);
 
@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         var ac = row.querySelector('.actions');
                         if (ac) {
                             var badge = ac.querySelector('.badge-soft');
-                            if (badge) badge.textContent = MCEMS_CAL.i18n.assignedTo + ' ' + nome;
+                            if (badge) badge.textContent = MCEMEXCE_CAL.i18n.assignedTo + ' ' + nome;
                         }
                     }
 
@@ -428,20 +428,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         var acAll = rowAll.querySelector('.actions');
                         if (acAll) {
                             var badgeAll = acAll.querySelector('.badge-soft');
-                            if (badgeAll) badgeAll.textContent = MCEMS_CAL.i18n.assignedTo + ' ' + nome;
+                            if (badgeAll) badgeAll.textContent = MCEMEXCE_CAL.i18n.assignedTo + ' ' + nome;
                         }
                     }
 
                     updateCacheAssign(slotId, dateISO, nome);
-                    btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.reassign;
+                    btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.reassign;
                 } else {
-                    alert((json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToReassign);
-                    btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.reassign;
+                    alert((json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToReassign);
+                    btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.reassign;
                 }
             })
             .catch(function () {
-                alert(MCEMS_CAL.i18n.networkError);
-                btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.reassign;
+                alert(MCEMEXCE_CAL.i18n.networkError);
+                btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.reassign;
             });
     });
 
@@ -451,13 +451,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!btn) return;
         e.preventDefault();
 
-        if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInRemove); return; }
+        if (!IS_LOGGED_IN) { alert(MCEMEXCE_CAL.i18n.mustBeLoggedInRemove); return; }
         var slotId = btn.getAttribute('data-slot');
-        if (!confirm(MCEMS_CAL.i18n.confirmRemove)) return;
+        if (!confirm(MCEMEXCE_CAL.i18n.confirmRemove)) return;
 
-        btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.removing;
+        btn.disabled = true; btn.textContent = MCEMEXCE_CAL.i18n.removing;
         var form = new FormData();
-        form.append('action', 'mcems_elimina_assegnazione_sessione_slot');
+        form.append('action', 'mcemexce_elimina_assegnazione_sessione_slot');
         form.append('slot_id', slotId);
         form.append('_ajax_nonce', AJAX_NONCE);
 
@@ -472,14 +472,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         var ac = row1.querySelector('.actions');
                         if (ac) ac.remove();
                         row1.insertAdjacentHTML('beforeend',
-                            '<div class="slot-actions"><button class="btn-assegna" data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMS_CAL.i18n.assignSession + '</button></div>');
+                            '<div class="slot-actions"><button class="btn-assegna" data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMEXCE_CAL.i18n.assignSession + '</button></div>');
                     }
 
                     var row2 = document.getElementById('myslot-' + slotId);
                     if (row2) {
                         row2.remove();
                         if (myBody && !myBody.querySelector('.slot-row')) {
-                            myBody.innerHTML = '<p class="notice">' + MCEMS_CAL.i18n.noAssignedSessions + '</p>';
+                            myBody.innerHTML = '<p class="notice">' + MCEMEXCE_CAL.i18n.noAssignedSessions + '</p>';
                         }
                     }
 
@@ -489,18 +489,18 @@ document.addEventListener('DOMContentLoaded', function () {
                         row3.innerHTML = '';
                         row3.appendChild(meta.cloneNode(true));
                         row3.insertAdjacentHTML('beforeend',
-                            '<div class="slot-actions"><button class="btn-assegna" data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMS_CAL.i18n.assignSession + '</button></div>');
+                            '<div class="slot-actions"><button class="btn-assegna" data-slot="' + slotId + '" data-data="' + dateISO + '">' + MCEMEXCE_CAL.i18n.assignSession + '</button></div>');
                     }
 
                     updateCacheUnassign(slotId, dateISO);
                 } else {
-                    alert((json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToRemove);
-                    btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.removeAssignment;
+                    alert((json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToRemove);
+                    btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.removeAssignment;
                 }
             })
             .catch(function () {
-                alert(MCEMS_CAL.i18n.networkError);
-                btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.removeAssignment;
+                alert(MCEMEXCE_CAL.i18n.networkError);
+                btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.removeAssignment;
             });
     });
 });

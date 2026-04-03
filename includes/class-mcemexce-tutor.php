@@ -2,12 +2,12 @@
 if (!defined('ABSPATH')) exit;
 
 /**
- * MCEMS_Tutor
+ * MCEMEXCE_Tutor
  *
  * Helper class for Tutor LMS integration.
  * Provides static helpers for exam/student data and activation checks.
  */
-class MCEMS_Tutor {
+class MCEMEXCE_Tutor {
 
     /**
      * Register hooks (currently a helper-only class; reserved for future hooks).

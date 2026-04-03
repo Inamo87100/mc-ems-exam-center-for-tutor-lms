@@ -1,25 +1,25 @@
 <?php
 /**
- * MCEMS_Quiz_Stats – Admin page and data-layer for per-question quiz statistics.
+ * MCEMEXCE_Quiz_Stats – Admin page and data-layer for per-question quiz statistics.
  *
  * Provides a course-filtered view of question error/success rates computed from
  * Tutor LMS quiz attempt answers, with pagination, sortable columns, and CSV export.
  *
  * Requires Tutor LMS to be active (enforced by the bootstrap in mc-ems.php).
- * Custom table: {$wpdb->prefix}mcems_quiz_stats_cache
+ * Custom table: {$wpdb->prefix}mcemexce_quiz_stats_cache
  *
  * Hooks registered (all admin-only):
  *  - admin_menu                                       → register submenu page
  *  - init                                             → ensure stats table exists
- *  - admin_post_mcems_recalc_quiz_stats               → POST: recalculate stats
- *  - admin_post_mcems_download_quiz_stats_csv         → POST: download CSV
+ *  - admin_post_mcemexce_recalc_quiz_stats               → POST: recalculate stats
+ *  - admin_post_mcemexce_download_quiz_stats_csv         → POST: download CSV
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-class MCEMS_Quiz_Stats {
+class MCEMEXCE_Quiz_Stats {
 
     const ITEMS_PER_PAGE   = 25;
-    const PARENT_POST_TYPE = 'mcems_exam_session';
+    const PARENT_POST_TYPE = 'mcemexce_exam_session';
     const PAGE_SLUG        = 'mcems-quiz-stats';
 
     /** In-request cache for question answer options. */
@@ -33,8 +33,8 @@ class MCEMS_Quiz_Stats {
     public static function init(): void {
         add_action( 'admin_menu', [ __CLASS__, 'menu' ] );
         add_action( 'init',       [ __CLASS__, 'ensure_stats_table' ] );
-        add_action( 'admin_post_mcems_recalc_quiz_stats',       [ __CLASS__, 'handle_recalc' ] );
-        add_action( 'admin_post_mcems_download_quiz_stats_csv', [ __CLASS__, 'handle_csv_download' ] );
+        add_action( 'admin_post_mcemexce_recalc_quiz_stats',       [ __CLASS__, 'handle_recalc' ] );
+        add_action( 'admin_post_mcemexce_download_quiz_stats_csv', [ __CLASS__, 'handle_csv_download' ] );
     }
 
     // -------------------------------------------------------------------------
@@ -49,13 +49,13 @@ class MCEMS_Quiz_Stats {
      * Uses wp_cache_add() to avoid race conditions on first initialization.
      */
     protected static function stats_cache_version(): int {
-        $ver = wp_cache_get( 'mcems_stats_ver', 'mcems' );
+        $ver = wp_cache_get( 'mcemexce_stats_ver', 'mcems' );
         if ( false !== $ver ) {
             return (int) $ver;
         }
         // Only sets the value if the key does not already exist (atomic, avoids race conditions).
-        wp_cache_add( 'mcems_stats_ver', 1, 'mcems', 0 );
-        return (int) wp_cache_get( 'mcems_stats_ver', 'mcems' );
+        wp_cache_add( 'mcemexce_stats_ver', 1, 'mcems', 0 );
+        return (int) wp_cache_get( 'mcemexce_stats_ver', 'mcems' );
     }
 
     /**
@@ -65,7 +65,7 @@ class MCEMS_Quiz_Stats {
     protected static function invalidate_stats_cache(): void {
         // Guarantee the key exists before incrementing.
         self::stats_cache_version();
-        wp_cache_incr( 'mcems_stats_ver', 1, 'mcems' );
+        wp_cache_incr( 'mcemexce_stats_ver', 1, 'mcems' );
     }
 
     // -------------------------------------------------------------------------
@@ -89,7 +89,7 @@ class MCEMS_Quiz_Stats {
 
     public static function table_name(): string {
         global $wpdb;
-        return $wpdb->prefix . 'mcems_quiz_stats_cache';
+        return $wpdb->prefix . 'mcemexce_quiz_stats_cache';
     }
 
     protected static function get_page_url( array $args = [] ): string {
@@ -108,7 +108,7 @@ class MCEMS_Quiz_Stats {
     protected static function get_courses(): array {
         global $wpdb;
 
-        $cache_key = 'mcems_quiz_stats_courses';
+        $cache_key = 'mcemexce_quiz_stats_courses';
         $cached    = wp_cache_get( $cache_key, 'mcems' );
         if ( false !== $cached ) {
             return (array) $cached;
@@ -136,7 +136,7 @@ class MCEMS_Quiz_Stats {
 
         $table = self::table_name();
 
-        if ( get_option( 'mcems_quiz_stats_cache_created' ) === 'yes' ) {
+        if ( get_option( 'mcemexce_quiz_stats_cache_created' ) === 'yes' ) {
             return;
         }
 
@@ -166,7 +166,7 @@ class MCEMS_Quiz_Stats {
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
-            update_option( 'mcems_quiz_stats_cache_created', 'yes' );
+            update_option( 'mcemexce_quiz_stats_cache_created', 'yes' );
         }
     }
 
@@ -179,7 +179,7 @@ class MCEMS_Quiz_Stats {
             wp_die( esc_html__( 'Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms' ), 403 );
         }
 
-        check_admin_referer( 'mcems_recalc_quiz_stats' );
+        check_admin_referer( 'mcemexce_recalc_quiz_stats' );
 
         $course_id = isset( $_POST['course_id'] ) ? absint( $_POST['course_id'] ) : 0;
         self::recalculate_stats( $course_id );
@@ -202,7 +202,7 @@ class MCEMS_Quiz_Stats {
             wp_die( esc_html__( 'Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms' ), 403 );
         }
 
-        check_admin_referer( 'mcems_download_quiz_stats_csv' );
+        check_admin_referer( 'mcemexce_download_quiz_stats_csv' );
 
         $args = [
             'course_id' => isset( $_POST['course_id'] ) ? absint( $_POST['course_id'] ) : 0,
@@ -1161,8 +1161,8 @@ class MCEMS_Quiz_Stats {
             <?php if ( $course_id > 0 ) : ?>
             <div class="mcems-actions-row">
                 <form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post" style="margin:0;display:inline-block;">
-                    <?php wp_nonce_field( 'mcems_recalc_quiz_stats' ); ?>
-                    <input type="hidden" name="action"    value="mcems_recalc_quiz_stats" />
+                    <?php wp_nonce_field( 'mcemexce_recalc_quiz_stats' ); ?>
+                    <input type="hidden" name="action"    value="mcemexce_recalc_quiz_stats" />
                     <input type="hidden" name="course_id" value="<?php echo esc_attr( $course_id ); ?>" />
                     <button class="button button-secondary" type="submit">
                         <?php esc_html_e( 'Recalculate Stats', 'mc-ems-exam-center-for-tutor-lms' ); ?>
@@ -1170,8 +1170,8 @@ class MCEMS_Quiz_Stats {
                 </form>
 
                 <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin:0;display:inline-block;">
-                    <?php wp_nonce_field( 'mcems_download_quiz_stats_csv' ); ?>
-                    <input type="hidden" name="action"    value="mcems_download_quiz_stats_csv" />
+                    <?php wp_nonce_field( 'mcemexce_download_quiz_stats_csv' ); ?>
+                    <input type="hidden" name="action"    value="mcemexce_download_quiz_stats_csv" />
                     <input type="hidden" name="course_id" value="<?php echo esc_attr( $course_id ); ?>" />
                     <button class="button button-small" name="csv_type" value="all"    type="submit">
                         <?php esc_html_e( 'Download all as CSV', 'mc-ems-exam-center-for-tutor-lms' ); ?>

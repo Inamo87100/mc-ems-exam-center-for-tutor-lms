@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * follows WordPress.org plugin guidelines (no global banners, no pop-ups,
  * fully dismissible notices, graceful degradation when Premium is active).
  */
-class MCEMS_Upsell {
+class MCEMEXCE_Upsell {
 
 	/** Free-plan limits */
 	const FREE_MAX_SESSIONS_PER_DAY  = 1;
@@ -35,11 +35,11 @@ class MCEMS_Upsell {
 
 	/**
 	 * Returns true when MC-EMS Premium is installed and active.
-	 * Premium plugins should define the MCEMS_PREMIUM constant or the
-	 * MCEMS_Premium class before this is called.
+	 * Premium plugins should define the MCEMEXCE_PREMIUM constant or the
+	 * MCEMEXCE_Premium class before this is called.
 	 */
 	public static function is_premium(): bool {
-		return defined( 'MCEMS_PREMIUM' ) || class_exists( 'MCEMS_Premium' );
+		return defined( 'MCEMEXCE_PREMIUM' ) || class_exists( 'MCEMEXCE_Premium' );
 	}
 
 	// -------------------------------------------------------------------------
@@ -51,7 +51,7 @@ class MCEMS_Upsell {
 		if ( ! $screen ) {
 			return;
 		}
-		if ( ! self::is_mcems_screen( $screen ) ) {
+		if ( ! self::is_mcemexce_screen( $screen ) ) {
 			return;
 		}
 		?>
@@ -85,10 +85,10 @@ class MCEMS_Upsell {
 	/**
 	 * Returns true when the current screen belongs to the MC-EMS plugin.
 	 */
-	private static function is_mcems_screen( WP_Screen $screen ): bool {
+	private static function is_mcemexce_screen( WP_Screen $screen ): bool {
 		return (
 			strpos( $screen->id, 'mcems' ) !== false ||
-			strpos( $screen->id, MCEMS_CPT_Sessioni_Esame::CPT ) !== false
+			strpos( $screen->id, MCEMEXCE_CPT_Sessioni_Esame::CPT ) !== false
 		);
 	}
 
@@ -251,11 +251,11 @@ class MCEMS_Upsell {
 	}
 }
 
-if ( ! function_exists( 'mcems_is_premium' ) ) {
+if ( ! function_exists( 'mcemexce_is_premium' ) ) {
 	/**
 	 * Returns true when MC-EMS Premium is installed and active.
 	 */
-	function mcems_is_premium(): bool {
-		return MCEMS_Upsell::is_premium();
+	function mcemexce_is_premium(): bool {
+		return MCEMEXCE_Upsell::is_premium();
 	}
 }

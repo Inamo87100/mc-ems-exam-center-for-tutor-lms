@@ -17,34 +17,34 @@
    1. CSS Variables
    ============================================================= */
 :root {
-    --mcems-color-primary:      #2271b1;
-    --mcems-color-success:      #4caf50;
-    --mcems-color-warning:      #ff9800;
-    --mcems-color-danger:       #f44336;
-    --mcems-color-limited:      #ffeb3b;
-    --mcems-color-past:         #c3c4c7;
-    --mcems-color-text:         #1d2327;
-    --mcems-color-muted:        #667085;
-    --mcems-color-border:       #e5e7eb;
-    --mcems-color-bg:           #f9f9f9;
-    --mcems-color-card-bg:      #ffffff;
-    --mcems-color-pill-bg:      #f2f4f7;
-    --mcems-color-pill-text:    #344054;
-    --mcems-radius-sm:          5px;
-    --mcems-radius-md:          10px;
-    --mcems-radius-lg:          14px;
-    --mcems-radius-xl:          16px;
-    --mcems-shadow-card:        0 1px 2px rgba(16, 24, 40, 0.06);
-    --mcems-font-sm:            0.75rem;   /* 12px */
-    --mcems-font-base:          0.9rem;    /* ~14px */
-    --mcems-font-md:            1rem;
-    --mcems-font-lg:            1.25rem;
-    --mcems-font-xl:            1.5rem;
-    --mcems-spacing-xs:         4px;
-    --mcems-spacing-sm:         8px;
-    --mcems-spacing-md:         14px;
-    --mcems-spacing-lg:         20px;
-    --mcems-spacing-xl:         24px;
+    --mcemexce-color-primary:      #2271b1;
+    --mcemexce-color-success:      #4caf50;
+    --mcemexce-color-warning:      #ff9800;
+    --mcemexce-color-danger:       #f44336;
+    --mcemexce-color-limited:      #ffeb3b;
+    --mcemexce-color-past:         #c3c4c7;
+    --mcemexce-color-text:         #1d2327;
+    --mcemexce-color-muted:        #667085;
+    --mcemexce-color-border:       #e5e7eb;
+    --mcemexce-color-bg:           #f9f9f9;
+    --mcemexce-color-card-bg:      #ffffff;
+    --mcemexce-color-pill-bg:      #f2f4f7;
+    --mcemexce-color-pill-text:    #344054;
+    --mcemexce-radius-sm:          5px;
+    --mcemexce-radius-md:          10px;
+    --mcemexce-radius-lg:          14px;
+    --mcemexce-radius-xl:          16px;
+    --mcemexce-shadow-card:        0 1px 2px rgba(16, 24, 40, 0.06);
+    --mcemexce-font-sm:            0.75rem;   /* 12px */
+    --mcemexce-font-base:          0.9rem;    /* ~14px */
+    --mcemexce-font-md:            1rem;
+    --mcemexce-font-lg:            1.25rem;
+    --mcemexce-font-xl:            1.5rem;
+    --mcemexce-spacing-xs:         4px;
+    --mcemexce-spacing-sm:         8px;
+    --mcemexce-spacing-md:         14px;
+    --mcemexce-spacing-lg:         20px;
+    --mcemexce-spacing-xl:         24px;
 }
 
 /* =============================================================
@@ -53,36 +53,36 @@
 #prenotazione-esame {
     max-width: 640px;
     margin: 0 auto;
-    padding: var(--mcems-spacing-lg);
-    border: 1px solid var(--mcems-color-border);
-    border-radius: var(--mcems-radius-md);
-    background-color: var(--mcems-color-bg);
+    padding: var(--mcemexce-spacing-lg);
+    border: 1px solid var(--mcemexce-color-border);
+    border-radius: var(--mcemexce-radius-md);
+    background-color: var(--mcemexce-color-bg);
     box-sizing: border-box;
 }
 
 #prenotazione-esame h2 {
     text-align: center;
-    font-size: var(--mcems-font-xl);
-    margin-bottom: var(--mcems-spacing-sm);
+    font-size: var(--mcemexce-font-xl);
+    margin-bottom: var(--mcemexce-spacing-sm);
 }
 
-#prenotazione-esame .mcems-login-required {
+#prenotazione-esame .mcemexce-login-required {
     text-align: center;
-    color: var(--mcems-color-danger);
+    color: var(--mcemexce-color-danger);
     font-weight: bold;
 }
 
-#prenotazione-esame .mcems-lead {
+#prenotazione-esame .mcemexce-lead {
     text-align: center;
-    margin: 0 0 var(--mcems-spacing-md);
-    font-size: var(--mcems-font-base);
-    color: var(--mcems-color-muted);
+    margin: 0 0 var(--mcemexce-spacing-md);
+    font-size: var(--mcemexce-font-base);
+    color: var(--mcemexce-color-muted);
 }
 
 #prenotazione-esame label {
     font-weight: bold;
     display: block;
-    margin-bottom: var(--mcems-spacing-sm);
+    margin-bottom: var(--mcemexce-spacing-sm);
 }
 
 #prenotazione-esame select,
@@ -91,29 +91,29 @@
 #prenotazione-esame input[type="email"] {
     width: 100%;
     padding: 10px;
-    border-radius: var(--mcems-radius-sm);
+    border-radius: var(--mcemexce-radius-sm);
     border: 1px solid #ccc;
-    margin-bottom: var(--mcems-spacing-lg);
-    font-size: var(--mcems-font-base);
+    margin-bottom: var(--mcemexce-spacing-lg);
+    font-size: var(--mcemexce-font-base);
     box-sizing: border-box;
 }
 
 #prenotazione-esame select:focus,
 #prenotazione-esame input:focus {
-    outline: 2px solid var(--mcems-color-primary);
+    outline: 2px solid var(--mcemexce-color-primary);
     outline-offset: 1px;
-    border-color: var(--mcems-color-primary);
+    border-color: var(--mcemexce-color-primary);
 }
 
 /* Confirm booking button */
 #confirm-button {
-    background-color: var(--mcems-color-success);
+    background-color: var(--mcemexce-color-success);
     color: #fff;
     padding: 12px 24px;
     border: none;
-    border-radius: var(--mcems-radius-sm);
+    border-radius: var(--mcemexce-radius-sm);
     cursor: pointer;
-    font-size: var(--mcems-font-md);
+    font-size: var(--mcemexce-font-md);
     font-weight: bold;
     transition: background-color 0.2s ease;
 }
@@ -129,7 +129,7 @@
 
 #confirm-container {
     text-align: center;
-    margin-top: var(--mcems-spacing-lg);
+    margin-top: var(--mcemexce-spacing-lg);
 }
 
 /* Slot container */
@@ -141,48 +141,48 @@
 }
 
 /* Individual exam slot buttons */
-.mcems-slot {
+.mcemexce-slot {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 90px;
-    padding: var(--mcems-spacing-sm) var(--mcems-spacing-md);
-    border: 2px solid var(--mcems-color-border);
-    border-radius: var(--mcems-radius-md);
+    padding: var(--mcemexce-spacing-sm) var(--mcemexce-spacing-md);
+    border: 2px solid var(--mcemexce-color-border);
+    border-radius: var(--mcemexce-radius-md);
     cursor: pointer;
     font-weight: 700;
-    font-size: var(--mcems-font-sm);
-    background: var(--mcems-color-card-bg);
+    font-size: var(--mcemexce-font-sm);
+    background: var(--mcemexce-color-card-bg);
     transition: border-color 0.15s, background 0.15s;
 }
 
-.mcems-slot:hover {
-    border-color: var(--mcems-color-primary);
+.mcemexce-slot:hover {
+    border-color: var(--mcemexce-color-primary);
     background: #e8f0fe;
 }
 
-.mcems-slot.selected {
-    border-color: var(--mcems-color-primary);
-    background: var(--mcems-color-primary);
+.mcemexce-slot.selected {
+    border-color: var(--mcemexce-color-primary);
+    background: var(--mcemexce-color-primary);
     color: #fff;
 }
 
-.mcems-slot.full {
+.mcemexce-slot.full {
     opacity: 0.45;
     cursor: not-allowed;
-    border-color: var(--mcems-color-danger);
-    color: var(--mcems-color-danger);
+    border-color: var(--mcemexce-color-danger);
+    color: var(--mcemexce-color-danger);
 }
 
 /* =============================================================
    3. Booking Calendar
    ============================================================= */
-#mcems-booking-calendar-wrap {
-    margin-bottom: var(--mcems-spacing-lg);
+#mcemexce-booking-calendar-wrap {
+    margin-bottom: var(--mcemexce-spacing-lg);
 }
 
 /* Calendar header nav */
-.mcems-cal-nav {
+.mcemexce-cal-nav {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -190,8 +190,8 @@
     margin-bottom: 10px;
 }
 
-#mcems-prev-month,
-#mcems-next-month {
+#mcemexce-prev-month,
+#mcemexce-next-month {
     background: none;
     border: none;
     font-size: 18px;
@@ -201,28 +201,28 @@
     transition: background 0.15s;
 }
 
-#mcems-prev-month:hover,
-#mcems-next-month:hover {
+#mcemexce-prev-month:hover,
+#mcemexce-next-month:hover {
     background: #e8f0fe;
 }
 
-#mcems-month-year {
+#mcemexce-month-year {
     font-weight: 700;
     font-size: 17px;
     text-transform: capitalize;
 }
 
 /* Calendar grid */
-#mcems-booking-calendar {
+#mcemexce-booking-calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     max-width: 360px;
     margin: 0 auto;
-    gap: var(--mcems-spacing-xs);
+    gap: var(--mcemexce-spacing-xs);
 }
 
 /* Day cells */
-.mcems-cal-day-cell {
+.mcemexce-cal-day-cell {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -237,74 +237,74 @@
     box-sizing: border-box;
 }
 
-.mcems-cal-day-cell:hover {
+.mcemexce-cal-day-cell:hover {
     transform: scale(1.1);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 /* Color coding for availability */
-.mcems-cal-available {
-    background: var(--mcems-color-success);
+.mcemexce-cal-available {
+    background: var(--mcemexce-color-success);
     color: #fff;
 }
 
-.mcems-cal-limited {
-    background: var(--mcems-color-limited);
+.mcemexce-cal-limited {
+    background: var(--mcemexce-color-limited);
     color: #555;
     border-color: #d4c600;
 }
 
-.mcems-cal-low {
-    background: var(--mcems-color-warning);
+.mcemexce-cal-low {
+    background: var(--mcemexce-color-warning);
     color: #fff;
 }
 
-.mcems-cal-full {
-    background: var(--mcems-color-danger);
+.mcemexce-cal-full {
+    background: var(--mcemexce-color-danger);
     color: #fff;
     cursor: not-allowed;
 }
 
-.mcems-cal-full:hover {
+.mcemexce-cal-full:hover {
     transform: none;
     box-shadow: none;
 }
 
-.mcems-cal-past {
-    background: var(--mcems-color-past);
+.mcemexce-cal-past {
+    background: var(--mcemexce-color-past);
     color: #888;
     cursor: default;
 }
 
-.mcems-cal-past:hover {
+.mcemexce-cal-past:hover {
     transform: none;
     box-shadow: none;
 }
 
-.mcems-cal-selected {
-    border-color: var(--mcems-color-primary) !important;
+.mcemexce-cal-selected {
+    border-color: var(--mcemexce-color-primary) !important;
     box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.35);
 }
 
 /* Calendar weekday header row */
-.mcems-cal-weekdays {
+.mcemexce-cal-weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     max-width: 360px;
-    margin: 0 auto var(--mcems-spacing-xs);
-    gap: var(--mcems-spacing-xs);
+    margin: 0 auto var(--mcemexce-spacing-xs);
+    gap: var(--mcemexce-spacing-xs);
 }
 
-.mcems-cal-weekday {
+.mcemexce-cal-weekday {
     text-align: center;
     font-weight: 700;
     font-size: 12px;
     padding: 3px 0;
-    color: var(--mcems-color-muted);
+    color: var(--mcemexce-color-muted);
 }
 
 /* Legend */
-.mcems-cal-legend {
+.mcemexce-cal-legend {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -315,13 +315,13 @@
     max-width: 420px;
 }
 
-.mcems-cal-legend-item {
+.mcemexce-cal-legend-item {
     display: inline-flex;
     align-items: center;
     gap: 5px;
 }
 
-.mcems-cal-legend-dot {
+.mcemexce-cal-legend-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -330,75 +330,75 @@
 }
 
 /* =============================================================
-   4. Manage Booking (shortcode_gestisci) – .mcems-* classes
+   4. Manage Booking (shortcode_gestisci) – .mcemexce-* classes
    ============================================================= */
-.mcems-wrap {
+.mcemexce-wrap {
     max-width: 980px;
     margin: 0 auto;
 }
 
-.mcems-h3 {
+.mcemexce-h3 {
     margin: 0 0 10px;
-    font-size: var(--mcems-font-lg);
+    font-size: var(--mcemexce-font-lg);
 }
 
-.mcems-sub {
+.mcemexce-sub {
     margin: 0 0 18px;
-    color: var(--mcems-color-muted);
-    font-size: var(--mcems-font-base);
+    color: var(--mcemexce-color-muted);
+    font-size: var(--mcemexce-font-base);
 }
 
-.mcems-grid {
+.mcemexce-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--mcems-spacing-md);
+    gap: var(--mcemexce-spacing-md);
 }
 
-.mcems-card {
-    background: var(--mcems-color-card-bg);
-    border: 1px solid var(--mcems-color-border);
-    border-radius: var(--mcems-radius-lg);
-    padding: var(--mcems-spacing-md) var(--mcems-spacing-md) 12px;
-    box-shadow: var(--mcems-shadow-card);
+.mcemexce-card {
+    background: var(--mcemexce-color-card-bg);
+    border: 1px solid var(--mcemexce-color-border);
+    border-radius: var(--mcemexce-radius-lg);
+    padding: var(--mcemexce-spacing-md) var(--mcemexce-spacing-md) 12px;
+    box-shadow: var(--mcemexce-shadow-card);
 }
 
-.mcems-row {
+.mcemexce-row {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
 }
 
-.mcems-exam {
+.mcemexce-exam {
     font-weight: 800;
-    font-size: var(--mcems-font-md);
+    font-size: var(--mcemexce-font-md);
     line-height: 1.3;
 }
 
-.mcems-meta {
+.mcemexce-meta {
     margin-top: 10px;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--mcems-spacing-sm);
+    gap: var(--mcemexce-spacing-sm);
 }
 
-.mcems-pill {
+.mcemexce-pill {
     display: inline-flex;
     align-items: center;
-    gap: var(--mcems-spacing-sm);
+    gap: var(--mcemexce-spacing-sm);
     padding: 6px 10px;
     border-radius: 999px;
-    background: var(--mcems-color-pill-bg);
-    color: var(--mcems-color-pill-text);
-    font-size: var(--mcems-font-sm);
+    background: var(--mcemexce-color-pill-bg);
+    color: var(--mcemexce-color-pill-text);
+    font-size: var(--mcemexce-font-sm);
     font-weight: 700;
 }
 
-.mcems-pill strong {
+.mcemexce-pill strong {
     font-weight: 900;
 }
 
-.mcems-actions {
+.mcemexce-actions {
     margin-top: 12px;
     display: flex;
     gap: 10px;
@@ -406,103 +406,103 @@
     flex-wrap: wrap;
 }
 
-.mcems-btn {
+.mcemexce-btn {
     appearance: none;
     border: 1px solid #d0d5dd;
-    background: var(--mcems-color-card-bg);
-    border-radius: var(--mcems-radius-md);
-    padding: var(--mcems-spacing-sm) 12px;
+    background: var(--mcemexce-color-card-bg);
+    border-radius: var(--mcemexce-radius-md);
+    padding: var(--mcemexce-spacing-sm) 12px;
     font-weight: 800;
     cursor: pointer;
     text-decoration: none;
     display: inline-block;
-    font-size: var(--mcems-font-base);
+    font-size: var(--mcemexce-font-base);
     transition: background 0.15s;
-    color: var(--mcems-color-text);
+    color: var(--mcemexce-color-text);
 }
 
-.mcems-btn:hover {
+.mcemexce-btn:hover {
     background: #f9fafb;
 }
 
-.mcems-btn:focus {
-    outline: 2px solid var(--mcems-color-primary);
+.mcemexce-btn:focus {
+    outline: 2px solid var(--mcemexce-color-primary);
     outline-offset: 2px;
 }
 
-.mcems-muted {
-    color: var(--mcems-color-muted);
-    font-size: var(--mcems-font-sm);
+.mcemexce-muted {
+    color: var(--mcemexce-color-muted);
+    font-size: var(--mcemexce-font-sm);
     font-weight: 700;
 }
 
-.mcems-note {
-    margin-top: var(--mcems-spacing-md);
-    color: var(--mcems-color-muted);
-    font-size: var(--mcems-font-sm);
+.mcemexce-note {
+    margin-top: var(--mcemexce-spacing-md);
+    color: var(--mcemexce-color-muted);
+    font-size: var(--mcemexce-font-sm);
 }
 
 /* =============================================================
-   5. Bookings List table (.mcems-bookings-*)
+   5. Bookings List table (.mcemexce-bookings-*)
    ============================================================= */
-.mcems-bookings-wrap {
+.mcemexce-bookings-wrap {
     max-width: 1100px;
     margin: 0 auto;
     overflow-x: auto;
 }
 
-.mcems-bookings-filter-bar {
+.mcemexce-bookings-filter-bar {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--mcems-spacing-sm);
+    gap: var(--mcemexce-spacing-sm);
     align-items: flex-end;
-    margin-bottom: var(--mcems-spacing-md);
+    margin-bottom: var(--mcemexce-spacing-md);
 }
 
-.mcems-bookings-filter-bar label {
+.mcemexce-bookings-filter-bar label {
     font-weight: 600;
-    font-size: var(--mcems-font-sm);
-    color: var(--mcems-color-muted);
+    font-size: var(--mcemexce-font-sm);
+    color: var(--mcemexce-color-muted);
     display: block;
     margin-bottom: 3px;
 }
 
-.mcems-bookings-filter-bar input,
-.mcems-bookings-filter-bar select {
+.mcemexce-bookings-filter-bar input,
+.mcemexce-bookings-filter-bar select {
     padding: 6px 10px;
     border: 1px solid #ccc;
-    border-radius: var(--mcems-radius-sm);
-    font-size: var(--mcems-font-base);
+    border-radius: var(--mcemexce-radius-sm);
+    font-size: var(--mcemexce-font-base);
 }
 
-.mcems-bookings-table {
+.mcemexce-bookings-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: var(--mcems-font-base);
+    font-size: var(--mcemexce-font-base);
 }
 
-.mcems-bookings-table th {
+.mcemexce-bookings-table th {
     text-align: left;
-    padding: var(--mcems-spacing-sm) 12px;
+    padding: var(--mcemexce-spacing-sm) 12px;
     background: #f0f0f1;
-    border-bottom: 2px solid var(--mcems-color-border);
-    font-size: var(--mcems-font-sm);
+    border-bottom: 2px solid var(--mcemexce-color-border);
+    font-size: var(--mcemexce-font-sm);
     font-weight: 700;
     color: #3c434a;
     white-space: nowrap;
 }
 
-.mcems-bookings-table td {
-    padding: var(--mcems-spacing-sm) 12px;
-    border-bottom: 1px solid var(--mcems-color-border);
+.mcemexce-bookings-table td {
+    padding: var(--mcemexce-spacing-sm) 12px;
+    border-bottom: 1px solid var(--mcemexce-color-border);
     vertical-align: middle;
 }
 
-.mcems-bookings-table tr:nth-child(even) td {
+.mcemexce-bookings-table tr:nth-child(even) td {
     background: #f9fafb;
 }
 
-.mcems-bookings-table tr:hover td {
+.mcemexce-bookings-table tr:hover td {
     background: #eef2f7;
 }
 
@@ -511,43 +511,43 @@
    ============================================================= */
 
 /* Loading spinner */
-.mcems-spinner {
+.mcemexce-spinner {
     display: inline-block;
     width: 18px;
     height: 18px;
     border: 3px solid rgba(34, 113, 177, 0.25);
-    border-top-color: var(--mcems-color-primary);
+    border-top-color: var(--mcemexce-color-primary);
     border-radius: 50%;
-    animation: mcems-spin 0.7s linear infinite;
+    animation: mcemexce-spin 0.7s linear infinite;
     vertical-align: middle;
     margin-right: 6px;
 }
 
-@keyframes mcems-spin {
+@keyframes mcemexce-spin {
     to { transform: rotate(360deg); }
 }
 
 /* Status / feedback messages */
-.mcems-msg {
+.mcemexce-msg {
     padding: 10px 14px;
-    border-radius: var(--mcems-radius-sm);
-    font-size: var(--mcems-font-base);
+    border-radius: var(--mcemexce-radius-sm);
+    font-size: var(--mcemexce-font-base);
     margin: 10px 0;
 }
 
-.mcems-msg-success {
+.mcemexce-msg-success {
     background: #ecfdf3;
     color: #065f46;
     border: 1px solid #a7f3d0;
 }
 
-.mcems-msg-error {
+.mcemexce-msg-error {
     background: #fef2f2;
     color: #991b1b;
     border: 1px solid #fecaca;
 }
 
-.mcems-msg-info {
+.mcemexce-msg-info {
     background: #eff6ff;
     color: #1e40af;
     border: 1px solid #bfdbfe;
@@ -557,24 +557,24 @@
    7. Accessibility
    ============================================================= */
 *:focus-visible {
-    outline: 2px solid var(--mcems-color-primary);
+    outline: 2px solid var(--mcemexce-color-primary);
     outline-offset: 2px;
 }
 
 /* Skip link (if added) */
-.mcems-skip-link {
+.mcemexce-skip-link {
     position: absolute;
     top: -40px;
     left: 0;
-    background: var(--mcems-color-primary);
+    background: var(--mcemexce-color-primary);
     color: #fff;
     padding: 6px 14px;
     z-index: 9999;
     transition: top 0.15s;
-    border-radius: 0 0 var(--mcems-radius-sm) 0;
+    border-radius: 0 0 var(--mcemexce-radius-sm) 0;
 }
 
-.mcems-skip-link:focus {
+.mcemexce-skip-link:focus {
     top: 0;
 }
 
@@ -583,18 +583,18 @@
    ============================================================= */
 @media print {
     #prenotazione-esame,
-    .mcems-actions,
-    .mcems-bookings-filter-bar,
+    .mcemexce-actions,
+    .mcemexce-bookings-filter-bar,
     #confirm-container {
         display: none !important;
     }
 
-    .mcems-bookings-table,
-    .mcems-card {
+    .mcemexce-bookings-table,
+    .mcemexce-card {
         page-break-inside: avoid;
     }
 
-    .mcems-bookings-table {
+    .mcemexce-bookings-table {
         font-size: 10pt;
     }
 }
@@ -604,54 +604,54 @@
    ============================================================= */
 @media (max-width: 640px) {
     #prenotazione-esame {
-        padding: var(--mcems-spacing-md);
+        padding: var(--mcemexce-spacing-md);
     }
 
-    .mcems-grid {
+    .mcemexce-grid {
         grid-template-columns: 1fr;
     }
 
-    #mcems-booking-calendar {
+    #mcemexce-booking-calendar {
         max-width: 100%;
     }
 
-    .mcems-cal-weekdays {
+    .mcemexce-cal-weekdays {
         max-width: 100%;
     }
 
-    .mcems-bookings-wrap {
+    .mcemexce-bookings-wrap {
         overflow-x: auto;
     }
 
-    .mcems-bookings-filter-bar {
+    .mcemexce-bookings-filter-bar {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .mcems-cal-legend {
+    .mcemexce-cal-legend {
         flex-direction: column;
         align-items: center;
     }
 }
 
 @media (max-width: 480px) {
-    .mcems-btn {
+    .mcemexce-btn {
         width: 100%;
         text-align: center;
     }
 
-    .mcems-actions {
+    .mcemexce-actions {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .mcems-pill {
+    .mcemexce-pill {
         font-size: 11px;
     }
 }
 
 /* =============================================================
-   10. Session Assignment Calendar (mcems_sessions_calendar shortcode)
+   10. Session Assignment Calendar (mcemexce_sessions_calendar shortcode)
    ============================================================= */
 .calendar-wrapper {
     text-align: center;
@@ -985,7 +985,7 @@
 .tutor-course-lesson { display: none !important; }
 .tutor-course-quiz { display: none !important; }
 
-.mcems-locked-exam {
+.mcemexce-locked-exam {
     max-width: 820px;
     margin: 28px auto;
     padding: 18px;
@@ -995,14 +995,14 @@
     box-shadow: 0 10px 30px rgba(16, 24, 40, .08);
 }
 
-.mcems-locked-exam__title {
+.mcemexce-locked-exam__title {
     font-weight: 900;
     color: #b42318;
     font-size: 18px;
     margin-bottom: 8px;
 }
 
-.mcems-locked-exam__body {
+.mcemexce-locked-exam__body {
     color: #7a271a;
     font-weight: 800;
     font-size: 14px;

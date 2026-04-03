@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-class MCEMS_CPT_Sessioni_Esame {
+class MCEMEXCE_CPT_Sessioni_Esame {
 
-    const CPT = 'mcems_exam_session';
+    const CPT = 'mcemexce_exam_session';
 
     // === Meta keys (COMPAT with your original snippets) ===
     const MK_DATE            = 'slot_data';            // Y-m-d
@@ -16,13 +16,13 @@ class MCEMS_CPT_Sessioni_Esame {
     const MK_EXAM_ID      = 'slot_corso_id'; // int Tutor LMS exam ID
 
     // === Legacy meta keys from previous NF-EMS builds (auto-migrated) ===
-    const L_MK_DATE            = '_mcems_slot_date';
-    const L_MK_TIME            = '_mcems_slot_time';
-    const L_MK_CAPACITY        = '_mcems_slot_capacity';
-    const L_MK_PROCTOR_USER_ID = '_mcems_proctor_user_id';
-    const L_MK_IS_SPECIAL      = '_mcems_is_special';
-    const L_MK_SPECIAL_USER_ID = '_mcems_special_user_id';
-    const L_MK_BOOKINGS        = '_mcems_bookings';
+    const L_MK_DATE            = '_mcemexce_slot_date';
+    const L_MK_TIME            = '_mcemexce_slot_time';
+    const L_MK_CAPACITY        = '_mcemexce_slot_capacity';
+    const L_MK_PROCTOR_USER_ID = '_mcemexce_proctor_user_id';
+    const L_MK_IS_SPECIAL      = '_mcemexce_is_special';
+    const L_MK_SPECIAL_USER_ID = '_mcemexce_special_user_id';
+    const L_MK_BOOKINGS        = '_mcemexce_bookings';
 
     public static function init() {
         add_action('init', [__CLASS__, 'register_cpt']);
@@ -46,9 +46,9 @@ class MCEMS_CPT_Sessioni_Esame {
 
         wp_enqueue_style(
             'mcems-admin-style',
-            MCEMS_PLUGIN_URL . 'assets/css/admin.css',
+            MCEMEXCE_PLUGIN_URL . 'assets/css/admin.css',
             [],
-            MCEMS_VERSION
+            MCEMEXCE_VERSION
         );
 
         // Inline CSS: lock publish controls for past sessions.
@@ -65,14 +65,14 @@ class MCEMS_CPT_Sessioni_Esame {
 
         wp_enqueue_script(
             'mcems-metabox-user-search',
-            MCEMS_PLUGIN_URL . 'assets/js/metabox-user-search.js',
+            MCEMEXCE_PLUGIN_URL . 'assets/js/metabox-user-search.js',
             [],
-            MCEMS_VERSION,
+            MCEMEXCE_VERSION,
             true
         );
 
-        wp_localize_script('mcems-metabox-user-search', 'MCEMS_USER_SEARCH', [
-            'restUrl' => esc_url_raw(rest_url('mcems/v1/')),
+        wp_localize_script('mcems-metabox-user-search', 'MCEMEXCE_USER_SEARCH', [
+            'restUrl' => esc_url_raw(rest_url('mcemexce/v1/')),
             'nonce'   => wp_create_nonce('wp_rest'),
             'i18n'    => [
                 'noResults' => __('No users found.', 'mc-ems-exam-center-for-tutor-lms'),
@@ -84,7 +84,7 @@ class MCEMS_CPT_Sessioni_Esame {
         $now_time = current_time('H:i');
         wp_add_inline_script(
             'mcems-metabox-user-search',
-            '(function(){try{var d=document.getElementById("mcems_date_input");var t=document.getElementById("mcems_time_input");if(!d||!t)return;var today=' . wp_json_encode($today) . ';var now=' . wp_json_encode($now_time) . ';function apply(){if(d.value===today){t.min=now;}else{t.removeAttribute("min");}}d.addEventListener("change",apply);apply();}catch(e){}})();'
+            '(function(){try{var d=document.getElementById("mcemexce_date_input");var t=document.getElementById("mcemexce_time_input");if(!d||!t)return;var today=' . wp_json_encode($today) . ';var now=' . wp_json_encode($now_time) . ';function apply(){if(d.value===today){t.min=now;}else{t.removeAttribute("min");}}d.addEventListener("change",apply);apply();}catch(e){}})();'
         );
     }
 
@@ -94,13 +94,13 @@ class MCEMS_CPT_Sessioni_Esame {
         if (!$screen || $screen->id !== 'edit-' . self::CPT) return;
 
         if (!wp_style_is('mcems-admin-style', 'registered')) {
-            wp_register_style('mcems-admin-style', MCEMS_PLUGIN_URL . 'assets/css/admin.css', [], MCEMS_VERSION);
+            wp_register_style('mcems-admin-style', MCEMEXCE_PLUGIN_URL . 'assets/css/admin.css', [], MCEMEXCE_VERSION);
         }
         wp_enqueue_style('mcems-admin-style');
         wp_add_inline_style('mcems-admin-style', 'a.page-title-action[href*="post-new.php?post_type=' . esc_attr(self::CPT) . '"]{display:none !important;}');
 
         if (!wp_script_is('mcems-admin', 'registered')) {
-            wp_register_script('mcems-admin', MCEMS_PLUGIN_URL . 'assets/js/admin.js', [], MCEMS_VERSION, true);
+            wp_register_script('mcems-admin', MCEMEXCE_PLUGIN_URL . 'assets/js/admin.js', [], MCEMEXCE_VERSION, true);
         }
         wp_enqueue_script('mcems-admin');
 
@@ -112,7 +112,7 @@ class MCEMS_CPT_Sessioni_Esame {
     }
 
     public static function register_rest_routes(): void {
-        register_rest_route('mcems/v1', '/search-proctors', [
+        register_rest_route('mcemexce/v1', '/search-proctors', [
             'methods'             => \WP_REST_Server::READABLE,
             'callback'            => [__CLASS__, 'rest_search_proctors'],
             'permission_callback' => function () {
@@ -126,7 +126,7 @@ class MCEMS_CPT_Sessioni_Esame {
             ],
         ]);
 
-        register_rest_route('mcems/v1', '/search-candidates', [
+        register_rest_route('mcemexce/v1', '/search-candidates', [
             'methods'             => \WP_REST_Server::READABLE,
             'callback'            => [__CLASS__, 'rest_search_candidates'],
             'permission_callback' => function () {
@@ -243,7 +243,7 @@ class MCEMS_CPT_Sessioni_Esame {
         if (empty($submenu[$parent])) return;
 
         $create     = null; // mcems-manage-sessions
-        $list       = null; // edit.php?post_type=mcems_exam_session  (the CPT "all items" page)
+        $list       = null; // edit.php?post_type=mcemexce_exam_session  (the CPT "all items" page)
         $quiz_stats = null; // mcems-quiz-stats
         $settings   = null; // mcems-settings-cpt
         $others     = [];
@@ -312,7 +312,7 @@ class MCEMS_CPT_Sessioni_Esame {
 
     public static function add_metaboxes() {
         add_meta_box(
-            'mcems_session_details',
+            'mcemexce_session_details',
             __('Session details (MC-EMS)', 'mc-ems-exam-center-for-tutor-lms'),
             [__CLASS__, 'metabox_html'],
             self::CPT,
@@ -322,7 +322,7 @@ class MCEMS_CPT_Sessioni_Esame {
     }
 
     public static function metabox_html($post) {
-        wp_nonce_field('mcems_session_save', 'mcems_session_nonce');
+        wp_nonce_field('mcemexce_session_save', 'mcemexce_session_nonce');
 
         // Prefer canonical keys, fallback legacy
         $date     = (string) get_post_meta($post->ID, self::MK_DATE, true);
@@ -352,8 +352,8 @@ class MCEMS_CPT_Sessioni_Esame {
         $proctor_user   = $proctor   ? get_user_by('id', $proctor)   : null;
         $candidate_user = $spec_uid  ? get_user_by('id', $spec_uid)  : null;
 
-        $exams = MCEMS_Tutor::get_exams();
-        $exam_pt = MCEMS_Tutor::exam_post_type();
+        $exams = MCEMEXCE_Tutor::get_exams();
+        $exam_pt = MCEMEXCE_Tutor::exam_post_type();
         $exam_id = (int) get_post_meta($post->ID, self::MK_EXAM_ID, true);
         $is_past = self::is_past_session($date, $time);
 
@@ -369,7 +369,7 @@ class MCEMS_CPT_Sessioni_Esame {
 if (!$exam_pt) {
     echo '<em>' . esc_html__('Tutor LMS not detected (exam post type not found: courses / tutor_course).', 'mc-ems-exam-center-for-tutor-lms') . '</em>';
 } else {
-    echo '<select name="mcems_exam_id" required ' . esc_attr($disabled) . '><option value="0">' . esc_html__('— Select exam —', 'mc-ems-exam-center-for-tutor-lms') . '</option>';
+    echo '<select name="mcemexce_exam_id" required ' . esc_attr($disabled) . '><option value="0">' . esc_html__('— Select exam —', 'mc-ems-exam-center-for-tutor-lms') . '</option>';
     foreach ($exams as $cid => $title) {
         printf('<option value="%d" %s>%s</option>',
             (int)$cid,
@@ -383,18 +383,18 @@ echo '<p class="description">' . esc_html__('This session will be bookable only 
 echo '</td></tr>';
 
         echo '<tr><th><label>' . esc_html__('Date', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
-        printf('<input type="date" id="mcems_date_input" name="mcems_date" value="%s" min="%s" %s />', esc_attr($date), esc_attr(current_time('Y-m-d')), esc_attr($disabled));
+        printf('<input type="date" id="mcemexce_date_input" name="mcemexce_date" value="%s" min="%s" %s />', esc_attr($date), esc_attr(current_time('Y-m-d')), esc_attr($disabled));
         echo '</td></tr>';
 
         echo '<tr><th><label>' . esc_html__('Time', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
-        printf('<input type="time" id="mcems_time_input" name="mcems_time" value="%s" %s />', esc_attr($time), esc_attr($disabled));
+        printf('<input type="time" id="mcemexce_time_input" name="mcemexce_time" value="%s" %s />', esc_attr($time), esc_attr($disabled));
         echo '</td></tr>';
 
         // Prevent selecting past time when date is today — handled via wp_add_inline_script in enqueue_metabox_scripts().
 
 
         echo '<tr><th><label>' . esc_html__('Max seats', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
-        printf('<input type="number" min="1" max="500" name="mcems_capacity" value="%d" %s %s />',
+        printf('<input type="number" min="1" max="500" name="mcemexce_capacity" value="%d" %s %s />',
             (int) $capacity,
             ($is_spec ? 'readonly' : ''),
             esc_attr($disabled)
@@ -411,15 +411,15 @@ echo '</td></tr>';
 
         echo '<tr><th><label>' . esc_html__('Proctor', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
         echo '<div class="mcems-user-search-wrap">';
-        printf('<input type="hidden" name="mcems_proctor_user_id" id="mcems_proctor_user_id" value="%d" />', (int) $proctor);
+        printf('<input type="hidden" name="mcemexce_proctor_user_id" id="mcemexce_proctor_user_id" value="%d" />', (int) $proctor);
         if (!$is_past) {
             printf(
-                '<input type="text" id="mcems_proctor_search" placeholder="%s" autocomplete="off" />',
+                '<input type="text" id="mcemexce_proctor_search" placeholder="%s" autocomplete="off" />',
                 esc_attr__('Search by name or email…', 'mc-ems-exam-center-for-tutor-lms')
             );
-            echo '<div id="mcems_proctor_results" class="mcems-user-search-results"></div>';
+            echo '<div id="mcemexce_proctor_results" class="mcems-user-search-results"></div>';
         }
-        echo '<div id="mcems_proctor_selected" class="mcems-user-selected">';
+        echo '<div id="mcemexce_proctor_selected" class="mcems-user-selected">';
         if ($proctor_user) {
             printf(
                 '<span class="mcems-user-selected-name">%s</span> <span class="mcems-user-selected-email">(%s)</span>',
@@ -430,7 +430,7 @@ echo '</td></tr>';
         echo '</div>';
         if (!$is_past) {
             printf(
-                '<button type="button" id="mcems_proctor_clear" class="mcems-user-search-clear" style="%s">%s</button>',
+                '<button type="button" id="mcemexce_proctor_clear" class="mcems-user-search-clear" style="%s">%s</button>',
                 $proctor ? '' : 'display:none',
                 esc_html__('Clear', 'mc-ems-exam-center-for-tutor-lms')
             );
@@ -439,7 +439,7 @@ echo '</td></tr>';
         echo '</td></tr>';
 
         echo '<tr><th><label>' . esc_html__('Special requirements', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
-        printf('<label><input type="checkbox" name="mcems_is_special" value="1" %s %s /> ♿ %s</label>',
+        printf('<label><input type="checkbox" name="mcemexce_is_special" value="1" %s %s /> ♿ %s</label>',
             checked($is_spec, 1, false),
             esc_attr($disabled),
             esc_html__('Session for special requirements', 'mc-ems-exam-center-for-tutor-lms')
@@ -448,15 +448,15 @@ echo '</td></tr>';
 
         echo '<tr><th><label>' . esc_html__('Associated candidate (only ♿)', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
         echo '<div class="mcems-user-search-wrap">';
-        printf('<input type="hidden" name="mcems_special_user_id" id="mcems_special_user_id" value="%d" />', (int) $spec_uid);
+        printf('<input type="hidden" name="mcemexce_special_user_id" id="mcemexce_special_user_id" value="%d" />', (int) $spec_uid);
         if (!$is_past) {
             printf(
-                '<input type="text" id="mcems_candidate_search" placeholder="%s" autocomplete="off" />',
+                '<input type="text" id="mcemexce_candidate_search" placeholder="%s" autocomplete="off" />',
                 esc_attr__('Search by name or email…', 'mc-ems-exam-center-for-tutor-lms')
             );
-            echo '<div id="mcems_candidate_results" class="mcems-user-search-results"></div>';
+            echo '<div id="mcemexce_candidate_results" class="mcems-user-search-results"></div>';
         }
-        echo '<div id="mcems_candidate_selected" class="mcems-user-selected">';
+        echo '<div id="mcemexce_candidate_selected" class="mcems-user-selected">';
         if ($candidate_user) {
             printf(
                 '<span class="mcems-user-selected-name">%s</span> <span class="mcems-user-selected-email">(%s)</span>',
@@ -467,7 +467,7 @@ echo '</td></tr>';
         echo '</div>';
         if (!$is_past) {
             printf(
-                '<button type="button" id="mcems_candidate_clear" class="mcems-user-search-clear" style="%s">%s</button>',
+                '<button type="button" id="mcemexce_candidate_clear" class="mcems-user-search-clear" style="%s">%s</button>',
                 $spec_uid ? '' : 'display:none',
                 esc_html__('Clear', 'mc-ems-exam-center-for-tutor-lms')
             );
@@ -482,18 +482,18 @@ echo '</td></tr>';
     public static function save_metabox($post_id, $post) {
         if ($post->post_type !== self::CPT) return;
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-        if (!isset($_POST['mcems_session_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['mcems_session_nonce'])), 'mcems_session_save')) return;
+        if (!isset($_POST['mcemexce_session_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['mcemexce_session_nonce'])), 'mcemexce_session_save')) return;
         if (!current_user_can('edit_post', $post_id)) return;
 
         $existing_date = (string) get_post_meta($post_id, self::MK_DATE, true);
         $existing_time = (string) get_post_meta($post_id, self::MK_TIME, true);
         if (self::is_past_session($existing_date, $existing_time)) {
-            set_transient('mcems_past_session_readonly_notice', 1, 30);
+            set_transient('mcemexce_past_session_readonly_notice', 1, 30);
             return;
         }
 
-        $date = isset($_POST['mcems_date']) ? sanitize_text_field(wp_unslash($_POST['mcems_date'])) : '';
-        $time = isset($_POST['mcems_time']) ? sanitize_text_field(wp_unslash($_POST['mcems_time'])) : '';
+        $date = isset($_POST['mcemexce_date']) ? sanitize_text_field(wp_unslash($_POST['mcemexce_date'])) : '';
+        $time = isset($_POST['mcemexce_time']) ? sanitize_text_field(wp_unslash($_POST['mcemexce_time'])) : '';
 
         // Block past sessions (date + time).
         if ($date && $time && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && preg_match('/^\d{2}:\d{2}$/', $time)) {
@@ -503,7 +503,7 @@ echo '</td></tr>';
                 $now = new \DateTimeImmutable('now', $tz);
                 if ($session_dt < $now) {
                     // Save as draft and show notice.
-                    set_transient('mcems_past_session_notice', 1, 30);
+                    set_transient('mcemexce_past_session_notice', 1, 30);
                     remove_action('save_post', [__CLASS__, 'save_metabox'], 10);
                     wp_update_post([
                         'ID'          => $post_id,
@@ -517,13 +517,13 @@ echo '</td></tr>';
             }
         }
 
-        $proctor  = isset($_POST['mcems_proctor_user_id']) ? absint(wp_unslash($_POST['mcems_proctor_user_id'])) : 0;
-        $is_spec  = !empty($_POST['mcems_is_special']) ? 1 : 0;
-        $spec_uid = isset($_POST['mcems_special_user_id']) ? absint(wp_unslash($_POST['mcems_special_user_id'])) : 0;
+        $proctor  = isset($_POST['mcemexce_proctor_user_id']) ? absint(wp_unslash($_POST['mcemexce_proctor_user_id'])) : 0;
+        $is_spec  = !empty($_POST['mcemexce_is_special']) ? 1 : 0;
+        $spec_uid = isset($_POST['mcemexce_special_user_id']) ? absint(wp_unslash($_POST['mcemexce_special_user_id'])) : 0;
 
-        $exam_id = isset($_POST['mcems_exam_id']) ? absint(wp_unslash($_POST['mcems_exam_id'])) : 0;
+        $exam_id = isset($_POST['mcemexce_exam_id']) ? absint(wp_unslash($_POST['mcemexce_exam_id'])) : 0;
 
-        $capacity = isset($_POST['mcems_capacity']) ? absint(wp_unslash($_POST['mcems_capacity'])) : 10;
+        $capacity = isset($_POST['mcemexce_capacity']) ? absint(wp_unslash($_POST['mcemexce_capacity'])) : 10;
         if ($capacity < 1) $capacity = 1;
 
         // In modalità ♿: capienza sempre 1
@@ -560,12 +560,12 @@ echo '</td></tr>';
     }
 
     public static function admin_notices(): void {
-        if (get_transient('mcems_past_session_notice')) {
-            delete_transient('mcems_past_session_notice');
+        if (get_transient('mcemexce_past_session_notice')) {
+            delete_transient('mcemexce_past_session_notice');
             echo '<div class="notice notice-error"><p>' . esc_html__('Past sessions cannot be created. Please choose a future date and time.', 'mc-ems-exam-center-for-tutor-lms') . '</p></div>';
         }
-        if (get_transient('mcems_past_session_readonly_notice')) {
-            delete_transient('mcems_past_session_readonly_notice');
+        if (get_transient('mcemexce_past_session_readonly_notice')) {
+            delete_transient('mcemexce_past_session_readonly_notice');
             echo '<div class="notice notice-warning"><p>' . esc_html__('Past exam sessions are read-only and cannot be modified from the backend.', 'mc-ems-exam-center-for-tutor-lms') . '</p></div>';
         }
     }
@@ -594,23 +594,23 @@ echo '</td></tr>';
         $new['cb'] = $cols['cb'] ?? '';
         $new['title'] = __('Session', 'mc-ems-exam-center-for-tutor-lms');
         // Subito dopo __('Session', 'mc-ems-exam-center-for-tutor-lms')
-        $new['mcems_exam'] = __('Exam', 'mc-ems-exam-center-for-tutor-lms');
-        $new['mcems_date'] = __('Date', 'mc-ems-exam-center-for-tutor-lms');
-        $new['mcems_time'] = __('Time', 'mc-ems-exam-center-for-tutor-lms');
-        $new['mcems_cap']  = __('Seats', 'mc-ems-exam-center-for-tutor-lms');
-        $new['mcems_book'] = __('Booked', 'mc-ems-exam-center-for-tutor-lms');
+        $new['mcemexce_exam'] = __('Exam', 'mc-ems-exam-center-for-tutor-lms');
+        $new['mcemexce_date'] = __('Date', 'mc-ems-exam-center-for-tutor-lms');
+        $new['mcemexce_time'] = __('Time', 'mc-ems-exam-center-for-tutor-lms');
+        $new['mcemexce_cap']  = __('Seats', 'mc-ems-exam-center-for-tutor-lms');
+        $new['mcemexce_book'] = __('Booked', 'mc-ems-exam-center-for-tutor-lms');
         // Niente colonna data di pubblicazione
         return $new;
     }
 
     public static function column_render($col, $post_id) {
-        if ($col === 'mcems_exam') {
+        if ($col === 'mcemexce_exam') {
             $exam_id = (int) get_post_meta($post_id, self::MK_EXAM_ID, true);
             echo $exam_id ? esc_html(get_the_title($exam_id)) : '—';
             return;
         }
 
-        if ($col === 'mcems_date') {
+        if ($col === 'mcemexce_date') {
             $raw = (string) get_post_meta($post_id, self::MK_DATE, true);
             $raw = trim($raw);
 
@@ -637,17 +637,17 @@ echo '</td></tr>';
             return;
         }
 
-        if ($col === 'mcems_time') {
+        if ($col === 'mcemexce_time') {
             echo esc_html(get_post_meta($post_id, self::MK_TIME, true));
             return;
         }
 
-        if ($col === 'mcems_cap')  {
+        if ($col === 'mcemexce_cap')  {
             echo (int) get_post_meta($post_id, self::MK_CAPACITY, true);
             return;
         }
 
-        if ($col === 'mcems_book') {
+        if ($col === 'mcemexce_book') {
             $occ = get_post_meta($post_id, self::MK_OCCUPATI, true);
             echo is_array($occ) ? count($occ) : 0;
             return;

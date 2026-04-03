@@ -9,21 +9,21 @@
  * (one for display_name, one for user_email), merge and deduplicate results,
  * and return up to 20 matches as JSON: [{id, name, email}, ...].
  *
- * Depends on: MCEMS_USER_SEARCH (localised via wp_localize_script)
- *   - MCEMS_USER_SEARCH.restUrl  – base REST URL, e.g. /wp-json/mcems/v1/
- *   - MCEMS_USER_SEARCH.nonce    – WP REST nonce (X-WP-Nonce header)
- *   - MCEMS_USER_SEARCH.i18n.*   – translatable strings
+ * Depends on: MCEMEXCE_USER_SEARCH (localised via wp_localize_script)
+ *   - MCEMEXCE_USER_SEARCH.restUrl  – base REST URL, e.g. /wp-json/mcemexce/v1/
+ *   - MCEMEXCE_USER_SEARCH.nonce    – WP REST nonce (X-WP-Nonce header)
+ *   - MCEMEXCE_USER_SEARCH.i18n.*   – translatable strings
  *     - i18n.noResults           – shown when no users match the query
  */
-/* global MCEMS_USER_SEARCH */
+/* global MCEMEXCE_USER_SEARCH */
 (function () {
     'use strict';
 
-    if (typeof MCEMS_USER_SEARCH === 'undefined') return;
+    if (typeof MCEMEXCE_USER_SEARCH === 'undefined') return;
 
-    var restUrl  = MCEMS_USER_SEARCH.restUrl  || '';
-    var nonce    = MCEMS_USER_SEARCH.nonce    || '';
-    var i18nData = MCEMS_USER_SEARCH.i18n     || {};
+    var restUrl  = MCEMEXCE_USER_SEARCH.restUrl  || '';
+    var nonce    = MCEMEXCE_USER_SEARCH.nonce    || '';
+    var i18nData = MCEMEXCE_USER_SEARCH.i18n     || {};
 
     function i18n(key, fallback) {
         return i18nData[key] || fallback || key;
@@ -76,8 +76,8 @@
             hidden.value = id || 0;
             if (id && id !== '0') {
                 selected.innerHTML =
-                    '<span class="mcems-user-selected-name">' + escHtml(name) + '</span>' +
-                    ' <span class="mcems-user-selected-email">(' + escHtml(email) + ')</span>';
+                    '<span class="mcemexce-user-selected-name">' + escHtml(name) + '</span>' +
+                    ' <span class="mcemexce-user-selected-email">(' + escHtml(email) + ')</span>';
                 if (clearBtn) clearBtn.style.display = 'inline-block';
             } else {
                 selected.innerHTML = '';
@@ -96,7 +96,7 @@
             results.innerHTML = '';
             if (!users || !users.length) {
                 var noRes = document.createElement('div');
-                noRes.className = 'mcems-user-item mcems-user-item-empty';
+                noRes.className = 'mcemexce-user-item mcemexce-user-item-empty';
                 noRes.textContent = i18n('noResults', 'No users found.');
                 results.appendChild(noRes);
                 results.style.display = 'block';
@@ -104,13 +104,13 @@
             }
             users.forEach(function (u) {
                 var item = document.createElement('div');
-                item.className = 'mcems-user-item';
+                item.className = 'mcemexce-user-item';
                 item.setAttribute('data-id', u.id);
                 item.setAttribute('data-name', u.name);
                 item.setAttribute('data-email', u.email);
                 item.innerHTML =
                     '<strong>' + escHtml(u.name) + '</strong>' +
-                    ' <span class="mcems-user-item-email">' + escHtml(u.email) + '</span>';
+                    ' <span class="mcemexce-user-item-email">' + escHtml(u.email) + '</span>';
                 item.addEventListener('mousedown', function (e) {
                     e.preventDefault(); // prevent input blur before click fires
                     showSelected(u.id, u.name, u.email);
@@ -156,10 +156,10 @@
 
         // Keyboard navigation
         input.addEventListener('keydown', function (e) {
-            var items = Array.from(results.querySelectorAll('.mcems-user-item:not(.mcems-user-item-empty)'));
+            var items = Array.from(results.querySelectorAll('.mcemexce-user-item:not(.mcemexce-user-item-empty)'));
             if (!items.length) return;
 
-            var focused = results.querySelector('.mcems-user-item.focused');
+            var focused = results.querySelector('.mcemexce-user-item.focused');
             var idx = items.indexOf(focused);
 
             if (e.key === 'ArrowDown') {
@@ -198,24 +198,24 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        var cfg = MCEMS_USER_SEARCH;
+        var cfg = MCEMEXCE_USER_SEARCH;
 
         initSearch({
-            inputId:   'mcems_proctor_search',
-            hiddenId:  'mcems_proctor_user_id',
-            resultsId: 'mcems_proctor_results',
-            selectedId: 'mcems_proctor_selected',
-            clearId:   'mcems_proctor_clear',
+            inputId:   'mcemexce_proctor_search',
+            hiddenId:  'mcemexce_proctor_user_id',
+            resultsId: 'mcemexce_proctor_results',
+            selectedId: 'mcemexce_proctor_selected',
+            clearId:   'mcemexce_proctor_clear',
             endpoint:  restUrl + 'search-proctors',
             disabled:  cfg.disabled
         });
 
         initSearch({
-            inputId:   'mcems_candidate_search',
-            hiddenId:  'mcems_special_user_id',
-            resultsId: 'mcems_candidate_results',
-            selectedId: 'mcems_candidate_selected',
-            clearId:   'mcems_candidate_clear',
+            inputId:   'mcemexce_candidate_search',
+            hiddenId:  'mcemexce_special_user_id',
+            resultsId: 'mcemexce_candidate_results',
+            selectedId: 'mcemexce_candidate_selected',
+            clearId:   'mcemexce_candidate_clear',
             endpoint:  restUrl + 'search-candidates',
             disabled:  cfg.disabled
         });

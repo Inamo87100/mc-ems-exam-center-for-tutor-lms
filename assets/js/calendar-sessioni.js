@@ -5,12 +5,12 @@
  * visualise exam sessions, colour-coded by status, with a popup showing
  * booked candidates when a session cell is clicked.
  *
- * Depends on: MCEMS_CAL (localised via wp_localize_script)
- *   - MCEMS_CAL.ajaxUrl
- *   - MCEMS_CAL.nonce
- *   - MCEMS_CAL.i18n.*
+ * Depends on: MCEMEXCE_CAL (localised via wp_localize_script)
+ *   - MCEMEXCE_CAL.ajaxUrl
+ *   - MCEMEXCE_CAL.nonce
+ *   - MCEMEXCE_CAL.i18n.*
  */
-/* global MCEMS_CAL */
+/* global MCEMEXCE_CAL */
 (function () {
     'use strict';
 
@@ -22,20 +22,20 @@
     }
 
     function i18n(key, fallback) {
-        if (typeof MCEMS_CAL !== 'undefined' && MCEMS_CAL.i18n && MCEMS_CAL.i18n[key]) {
-            return MCEMS_CAL.i18n[key];
+        if (typeof MCEMEXCE_CAL !== 'undefined' && MCEMEXCE_CAL.i18n && MCEMEXCE_CAL.i18n[key]) {
+            return MCEMEXCE_CAL.i18n[key];
         }
         return fallback || key;
     }
 
     function ajaxGet(params) {
-        if (typeof MCEMS_CAL === 'undefined') {
-            return Promise.reject(new Error('MCEMS_CAL not defined'));
+        if (typeof MCEMEXCE_CAL === 'undefined') {
+            return Promise.reject(new Error('MCEMEXCE_CAL not defined'));
         }
         var qs_str = new URLSearchParams(
-            Object.assign({ _ajax_nonce: MCEMS_CAL.nonce }, params)
+            Object.assign({ _ajax_nonce: MCEMEXCE_CAL.nonce }, params)
         ).toString();
-        return fetch(MCEMS_CAL.ajaxUrl + '?' + qs_str, { credentials: 'same-origin' })
+        return fetch(MCEMEXCE_CAL.ajaxUrl + '?' + qs_str, { credentials: 'same-origin' })
             .then(function (r) { return r.json(); });
     }
 
@@ -105,10 +105,10 @@
 
         // Header: weekdays
         var header = document.createElement('div');
-        header.className = 'mcems-cal-weekdays';
+        header.className = 'mcemexce-cal-weekdays';
         WEEKDAYS.forEach(function (day) {
             var cell = document.createElement('div');
-            cell.className = 'mcems-cal-weekday';
+            cell.className = 'mcemexce-cal-weekday';
             cell.textContent = day;
             header.appendChild(cell);
         });
@@ -116,7 +116,7 @@
 
         // Grid
         var grid = document.createElement('div');
-        grid.className = 'mcems-cal-grid';
+        grid.className = 'mcemexce-cal-grid';
         grid.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:420px;margin:0 auto;';
 
         var firstDay = new Date(state.year, state.month - 1, 1).getDay(); // 0=Sun
@@ -139,11 +139,11 @@
             var status = dayStatus(dayData);
 
             var cell = document.createElement('div');
-            cell.className = 'mcems-cal-day-cell';
+            cell.className = 'mcemexce-cal-day-cell';
             cell.textContent = d;
 
             if (status) {
-                cell.classList.add('mcems-cal-' + (STATUS_CLASS[status] || status));
+                cell.classList.add('mcemexce-cal-' + (STATUS_CLASS[status] || status));
             }
 
             if (key === todayKey) {
@@ -173,8 +173,8 @@
        Popup (session detail)
        ---------------------------------------------------------- */
     function openPopup(sessions) {
-        var overlay = qs('#mcems-cal-popup-overlay');
-        var body    = qs('#mcems-cal-popup-body');
+        var overlay = qs('#mcemexce-cal-popup-overlay');
+        var body    = qs('#mcemexce-cal-popup-body');
         if (!overlay || !body) return;
 
         body.innerHTML = '';
@@ -230,14 +230,14 @@
        Popup close
        ---------------------------------------------------------- */
     function initPopup() {
-        var overlay = qs('#mcems-cal-popup-overlay');
+        var overlay = qs('#mcemexce-cal-popup-overlay');
         if (!overlay) return;
 
         overlay.addEventListener('click', function (e) {
             if (e.target === overlay) overlay.classList.remove('open');
         });
 
-        var closeBtn = qs('.mcems-cal-popup-close', overlay);
+        var closeBtn = qs('.mcemexce-cal-popup-close', overlay);
         if (closeBtn) {
             closeBtn.addEventListener('click', function () {
                 overlay.classList.remove('open');
@@ -253,9 +253,9 @@
        Filters
        ---------------------------------------------------------- */
     function initFilters(onFilter) {
-        var examSelect  = qs('#mcems-cal-filter-exam');
-        var statusSelect  = qs('#mcems-cal-filter-status');
-        var proctorSelect = qs('#mcems-cal-filter-proctor');
+        var examSelect  = qs('#mcemexce-cal-filter-exam');
+        var statusSelect  = qs('#mcemexce-cal-filter-status');
+        var proctorSelect = qs('#mcemexce-cal-filter-proctor');
 
         function applyFilter() {
             state.filters.exam  = examSelect  ? examSelect.value  : '';
@@ -268,7 +268,7 @@
             if (el) el.addEventListener('change', applyFilter);
         });
 
-        var clearBtn = qs('#mcems-cal-filter-clear');
+        var clearBtn = qs('#mcemexce-cal-filter-clear');
         if (clearBtn) {
             clearBtn.addEventListener('click', function () {
                 if (examSelect)  examSelect.selectedIndex  = 0;
@@ -296,14 +296,14 @@
        Navigation
        ---------------------------------------------------------- */
     function initNav(onNavChange) {
-        var prevBtn     = qs('#mcems-sessioni-prev');
-        var nextBtn     = qs('#mcems-sessioni-next');
-        var monthLabel  = qs('#mcems-sessioni-month-year');
+        var prevBtn     = qs('#mcemexce-sessioni-prev');
+        var nextBtn     = qs('#mcemexce-sessioni-next');
+        var monthLabel  = qs('#mcemexce-sessioni-month-year');
 
         function updateLabel() {
             if (!monthLabel) return;
             var d = new Date(state.year, state.month - 1, 1);
-            var locale = (typeof MCEMS_CAL !== 'undefined' && MCEMS_CAL.locale) ? MCEMS_CAL.locale : undefined;
+            var locale = (typeof MCEMEXCE_CAL !== 'undefined' && MCEMEXCE_CAL.locale) ? MCEMEXCE_CAL.locale : undefined;
             monthLabel.textContent = d.toLocaleDateString(
                 locale || undefined,
                 { month: 'long', year: 'numeric' }
@@ -335,10 +335,10 @@
        Load data and refresh
        ---------------------------------------------------------- */
     function loadAndRender(container) {
-        container.innerHTML = '<div style="text-align:center;padding:20px;"><span class="mcems-spinner"></span> ' + i18n('loading', 'Loading…') + '</div>';
+        container.innerHTML = '<div style="text-align:center;padding:20px;"><span class="mcemexce-spinner"></span> ' + i18n('loading', 'Loading…') + '</div>';
 
         ajaxGet({
-            action: 'mcems_get_all_assigned_slots',
+            action: 'mcemexce_get_all_assigned_slots',
             year:   state.year,
             month:  state.month
         }).then(function (res) {
@@ -368,9 +368,9 @@
         legendEl.innerHTML = '';
         items.forEach(function (item) {
             var span = document.createElement('span');
-            span.className = 'mcems-cal-legend-item';
+            span.className = 'mcemexce-cal-legend-item';
             span.innerHTML =
-                '<span class="mcems-cal-legend-dot mcems-cal-' + item.cls + '"></span>' +
+                '<span class="mcemexce-cal-legend-dot mcemexce-cal-' + item.cls + '"></span>' +
                 ' ' + item.label;
             legendEl.appendChild(span);
         });
@@ -380,9 +380,9 @@
        Init
        ---------------------------------------------------------- */
     document.addEventListener('DOMContentLoaded', function () {
-        var wrap      = qs('#mcems-sessioni-calendar-wrap');
-        var container = qs('#mcems-sessioni-calendar');
-        var legendEl  = qs('#mcems-sessioni-legend');
+        var wrap      = qs('#mcemexce-sessioni-calendar-wrap');
+        var container = qs('#mcemexce-sessioni-calendar');
+        var legendEl  = qs('#mcemexce-sessioni-legend');
 
         if (!container) return;
 

@@ -3,39 +3,39 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-if (!defined('MCEMS_SLOT_ESIGENZE_SPECIALI')) {
-    define('MCEMS_SLOT_ESIGENZE_SPECIALI', 'mcems_slot_esigenze_speciali');
+if (!defined('MCEMEXCE_SLOT_ESIGENZE_SPECIALI')) {
+    define('MCEMEXCE_SLOT_ESIGENZE_SPECIALI', 'mcemexce_slot_esigenze_speciali');
 }
 
-class MCEMS_Calendar_Sessioni {
+class MCEMEXCE_Calendar_Sessioni {
 
-    const NONCE_ACTION = 'mcems_cal_slot_nonce';
-    const CRON_HOOK    = 'mcems_cal_slot_midnight_check';
+    const NONCE_ACTION = 'mcemexce_cal_slot_nonce';
+    const CRON_HOOK    = 'mcemexce_cal_slot_midnight_check';
 
     public static function init(): void {
-        add_shortcode('mcems_sessions_calendar', [__CLASS__, 'shortcode']);
-        add_shortcode('mcems_calendario_slot_esame', [__CLASS__, 'shortcode']);
-        add_shortcode('calendario_slot_esame', [__CLASS__, 'shortcode']); // deprecated: use mcems_calendario_slot_esame
+        add_shortcode('mcemexce_sessions_calendar', [__CLASS__, 'shortcode']);
+        add_shortcode('mcemexce_calendario_slot_esame', [__CLASS__, 'shortcode']);
+        add_shortcode('calendario_slot_esame', [__CLASS__, 'shortcode']); // deprecated: use mcemexce_calendario_slot_esame
 
         add_action('wp_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
 
-        add_action('wp_ajax_mcems_get_slot_data', [__CLASS__, 'ajax_get_slot_data']);
-        add_action('wp_ajax_nopriv_mcems_get_slot_data', [__CLASS__, 'ajax_get_slot_data']);
+        add_action('wp_ajax_mcemexce_get_slot_data', [__CLASS__, 'ajax_get_slot_data']);
+        add_action('wp_ajax_nopriv_mcemexce_get_slot_data', [__CLASS__, 'ajax_get_slot_data']);
 
-        add_action('wp_ajax_mcems_get_user_assigned_slots', [__CLASS__, 'ajax_get_user_assigned_slots']);
-        add_action('wp_ajax_mcems_get_all_assigned_slots', [__CLASS__, 'ajax_get_all_assigned_slots']);
+        add_action('wp_ajax_mcemexce_get_user_assigned_slots', [__CLASS__, 'ajax_get_user_assigned_slots']);
+        add_action('wp_ajax_mcemexce_get_all_assigned_slots', [__CLASS__, 'ajax_get_all_assigned_slots']);
 
-        add_action('wp_ajax_mcems_assegna_sessione_slot', [__CLASS__, 'ajax_assegna_sessione_slot']);
-        add_action('wp_ajax_mcems_modifica_assegnazione_sessione_slot', [__CLASS__, 'ajax_modifica_assegnazione_sessione_slot']);
-        add_action('wp_ajax_mcems_elimina_assegnazione_sessione_slot', [__CLASS__, 'ajax_elimina_assegnazione_sessione_slot']);
+        add_action('wp_ajax_mcemexce_assegna_sessione_slot', [__CLASS__, 'ajax_assegna_sessione_slot']);
+        add_action('wp_ajax_mcemexce_modifica_assegnazione_sessione_slot', [__CLASS__, 'ajax_modifica_assegnazione_sessione_slot']);
+        add_action('wp_ajax_mcemexce_elimina_assegnazione_sessione_slot', [__CLASS__, 'ajax_elimina_assegnazione_sessione_slot']);
 
         add_action('init', [__CLASS__, 'schedule_midnight_event']);
         add_action(self::CRON_HOOK, [__CLASS__, 'midnight_check_unassigned_slots']);
     }
 
     public static function enqueue_assets(): void {
-        $ver = defined('MCEMS_VERSION') ? MCEMS_VERSION : '1.0.0';
-        $url = defined('MCEMS_PLUGIN_URL') ? MCEMS_PLUGIN_URL : '';
+        $ver = defined('MCEMEXCE_VERSION') ? MCEMEXCE_VERSION : '1.0.0';
+        $url = defined('MCEMEXCE_PLUGIN_URL') ? MCEMEXCE_PLUGIN_URL : '';
 
         wp_register_style('mcems-style', $url . 'assets/css/style.css', [], $ver);
         wp_enqueue_style('mcems-style');
@@ -94,7 +94,7 @@ class MCEMS_Calendar_Sessioni {
         wp_register_script('mcems-session-calendar', $url . 'assets/js/session-calendar.js', [], $ver, true);
         wp_enqueue_script('mcems-session-calendar');
 
-        wp_localize_script('mcems-session-calendar', 'MCEMS_CAL', [
+        wp_localize_script('mcems-session-calendar', 'MCEMEXCE_CAL', [
             'ajaxUrl'    => admin_url('admin-ajax.php'),
             'nonce'      => wp_create_nonce(self::NONCE_ACTION),
             'isLoggedIn' => is_user_logged_in(),
@@ -168,9 +168,9 @@ class MCEMS_Calendar_Sessioni {
             const allYear  = document.getElementById('allYear');
             const reloadAllBtn = document.getElementById('reloadAllAssignments');
 
-            const AJAX_URL = MCEMS_CAL.ajaxUrl;
-            const AJAX_NONCE = MCEMS_CAL.nonce;
-            const IS_LOGGED_IN = MCEMS_CAL.isLoggedIn;
+            const AJAX_URL = MCEMEXCE_CAL.ajaxUrl;
+            const AJAX_NONCE = MCEMEXCE_CAL.nonce;
+            const IS_LOGGED_IN = MCEMEXCE_CAL.isLoggedIn;
 
             let today = new Date();
             let currentMonth = today.getMonth();
@@ -231,7 +231,7 @@ class MCEMS_Calendar_Sessioni {
             function fetchMonthData(year, month) {
                 const key = `${year}-${month}`;
                 if (cacheSlots[key]) return Promise.resolve(cacheSlots[key]);
-                return fetch(`${AJAX_URL}?action=mcems_get_slot_data&year=${year}&month=${month+1}&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
+                return fetch(`${AJAX_URL}?action=mcemexce_get_slot_data&year=${year}&month=${month+1}&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
                     .then(r => r.json())
                     .then(data => { cacheSlots[key] = data || {}; return cacheSlots[key]; });
             }
@@ -278,18 +278,18 @@ class MCEMS_Calendar_Sessioni {
                                     .sort((a,b) => (a.ora || '').localeCompare(b.ora || ''))
                                     .map(s => {
                                         const assigned = (s.assegnato && s.assegnato_nome)
-                                            ? `${MCEMS_CAL.i18n.assignedTo} ${s.assegnato_nome}`
+                                            ? `${MCEMEXCE_CAL.i18n.assignedTo} ${s.assegnato_nome}`
                                             : null;
 
                                         const btnAssegna = (!assigned && IS_LOGGED_IN)
-                                            ? `<button class="btn-assegna" data-slot="${s.id}" data-data="${d}" data-ora="${s.ora}">${MCEMS_CAL.i18n.assignSession}</button>`
+                                            ? `<button class="btn-assegna" data-slot="${s.id}" data-data="${d}" data-ora="${s.ora}">${MCEMEXCE_CAL.i18n.assignSession}</button>`
                                             : '';
 
                                         const buttonsIfAssigned = (assigned && IS_LOGGED_IN)
                                             ? `<div class="actions">
                                                 <span class="badge-soft">${assigned}</span>
-                                                <button class="btn-modifica" data-slot="${s.id}" data-data="${d}" data-ora="${s.ora}">${MCEMS_CAL.i18n.reassign}</button>
-                                                <button class="btn-elimina" data-slot="${s.id}" data-data="${d}" data-ora="${s.ora}">${MCEMS_CAL.i18n.removeAssignment}</button>
+                                                <button class="btn-modifica" data-slot="${s.id}" data-data="${d}" data-ora="${s.ora}">${MCEMEXCE_CAL.i18n.reassign}</button>
+                                                <button class="btn-elimina" data-slot="${s.id}" data-data="${d}" data-ora="${s.ora}">${MCEMEXCE_CAL.i18n.removeAssignment}</button>
                                                </div>`
                                             : '';
 
@@ -304,14 +304,14 @@ class MCEMS_Calendar_Sessioni {
                                         return `<div class="slot-row" id="slot-row-${s.id}">
                                             <div class="slot-meta">
                                                 <div>${oraHtml}</div>
-                                                ${s.exam_title ? `<div class="muted"><strong>${MCEMS_CAL.i18n.examLabel}</strong> ${s.exam_title}</div>` : ''}
-                                                <div class="muted">${s.prenotati}/${s.totali} ${MCEMS_CAL.i18n.seatsOccupied}</div>
+                                                ${s.exam_title ? `<div class="muted"><strong>${MCEMEXCE_CAL.i18n.examLabel}</strong> ${s.exam_title}</div>` : ''}
+                                                <div class="muted">${s.prenotati}/${s.totali} ${MCEMEXCE_CAL.i18n.seatsOccupied}</div>
                                             </div>
                                             ${right}
                                         </div>`;
                                     }).join('');
 
-                                modalSlotInfo.innerHTML = rows || `<p class="notice">${MCEMS_CAL.i18n.noSessionsOnDate}</p>`;
+                                modalSlotInfo.innerHTML = rows || `<p class="notice">${MCEMEXCE_CAL.i18n.noSessionsOnDate}</p>`;
                                 modal.style.display = 'block';
                                 modal.setAttribute('aria-hidden', 'false');
                             });
@@ -339,23 +339,23 @@ class MCEMS_Calendar_Sessioni {
             window.addEventListener('click', e => { if (e.target == modal) { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); } });
 
             openMy.addEventListener('click', function(){
-                if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInView); return; }
-                myBody.innerHTML = `<p class="notice">${MCEMS_CAL.i18n.loadingDots}</p>`;
-                fetch(`${AJAX_URL}?action=mcems_get_user_assigned_slots&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
+                if (!IS_LOGGED_IN) { alert(MCEMEXCE_CAL.i18n.mustBeLoggedInView); return; }
+                myBody.innerHTML = `<p class="notice">${MCEMEXCE_CAL.i18n.loadingDots}</p>`;
+                fetch(`${AJAX_URL}?action=mcemexce_get_user_assigned_slots&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
                     .then(r => r.json())
                     .then(json => {
-                        if (!json || !json.success) { myBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToLoad}</p>`; return; }
+                        if (!json || !json.success) { myBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToLoad}</p>`; return; }
                         const items = json.data || [];
-                        if (!items.length) { myBody.innerHTML = `<p class="notice">${MCEMS_CAL.i18n.noAssignedSessions}</p>`; return; }
+                        if (!items.length) { myBody.innerHTML = `<p class="notice">${MCEMEXCE_CAL.i18n.noAssignedSessions}</p>`; return; }
                         myBody.innerHTML = items.map(s => `
                             <div class="slot-row" id="myslot-${s.id}" data-date="${s.data}">
                                 <div class="slot-meta">
                                     <div><strong>${s.data_it}</strong></div>
                                     <div><strong>${s.ora}</strong> ${s.speciale ? specialBadgeHTML(true) : ''}</div>
-                                    ${s.exam_title ? `<div class="muted"><strong>${MCEMS_CAL.i18n.examLabel}</strong> ${s.exam_title}</div>` : ''}
+                                    ${s.exam_title ? `<div class="muted"><strong>${MCEMEXCE_CAL.i18n.examLabel}</strong> ${s.exam_title}</div>` : ''}
                                 </div>
                                 <div class="actions">
-                                    <button class="btn-elimina" data-slot="${s.id}" data-data="${s.data}">${MCEMS_CAL.i18n.removeAssignment}</button>
+                                    <button class="btn-elimina" data-slot="${s.id}" data-data="${s.data}">${MCEMEXCE_CAL.i18n.removeAssignment}</button>
                                 </div>
                             </div>
                         `).join('');
@@ -370,31 +370,31 @@ class MCEMS_Calendar_Sessioni {
             window.addEventListener('click', e => { if (e.target == myModal) { myModal.style.display = 'none'; myModal.setAttribute('aria-hidden','true'); } });
 
             function loadAllAssignments(){
-                allBody.innerHTML = `<p class="notice">${MCEMS_CAL.i18n.loadingDots}</p>`;
+                allBody.innerHTML = `<p class="notice">${MCEMEXCE_CAL.i18n.loadingDots}</p>`;
                 const y = allYear.value, m = allMonth.value;
-                fetch(`${AJAX_URL}?action=mcems_get_all_assigned_slots&year=${encodeURIComponent(y)}&month=${encodeURIComponent(m)}&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
+                fetch(`${AJAX_URL}?action=mcemexce_get_all_assigned_slots&year=${encodeURIComponent(y)}&month=${encodeURIComponent(m)}&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
                     .then(r => r.json())
                     .then(json => {
-                        if (!json || !json.success) { allBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToLoad}</p>`; return; }
+                        if (!json || !json.success) { allBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToLoad}</p>`; return; }
                         const items = json.data || [];
                         if (!items.length) { allBody.innerHTML = '<p class="notice">No sessions found for the selected period.</p>'; return; }
 
                         allBody.innerHTML = items.map(s => {
                             const actionHTML = s.assegnato
                                 ? `<div class="actions">
-                                       <span class="badge-soft">${MCEMS_CAL.i18n.assignedTo} ${s.assegnato_nome}</span>
-                                       <button class="btn-modifica" data-slot="${s.id}" data-data="${s.data}" data-ora="${s.ora}">${MCEMS_CAL.i18n.reassign}</button>
-                                       <button class="btn-elimina"  data-slot="${s.id}" data-data="${s.data}" data-ora="${s.ora}">${MCEMS_CAL.i18n.removeAssignment}</button>
+                                       <span class="badge-soft">${MCEMEXCE_CAL.i18n.assignedTo} ${s.assegnato_nome}</span>
+                                       <button class="btn-modifica" data-slot="${s.id}" data-data="${s.data}" data-ora="${s.ora}">${MCEMEXCE_CAL.i18n.reassign}</button>
+                                       <button class="btn-elimina"  data-slot="${s.id}" data-data="${s.data}" data-ora="${s.ora}">${MCEMEXCE_CAL.i18n.removeAssignment}</button>
                                    </div>`
                                 : `<div class="slot-actions">
-                                       <button class="btn-assegna" data-slot="${s.id}" data-data="${s.data}" data-ora="${s.ora}">${MCEMS_CAL.i18n.assignSession}</button>
+                                       <button class="btn-assegna" data-slot="${s.id}" data-data="${s.data}" data-ora="${s.ora}">${MCEMEXCE_CAL.i18n.assignSession}</button>
                                    </div>`;
 
                             return `<div class="slot-row" id="allslot-${s.id}">
                                 <div class="slot-meta">
                                     <div><strong>${s.data_it}</strong></div>
                                     <div><strong>${s.ora}</strong> <span class="slot-id">ID: ${s.id}</span> ${s.speciale ? specialBadgeHTML(true) : ''}</div>
-                                    ${s.exam_title ? `<div class="muted"><strong>${MCEMS_CAL.i18n.examLabel}</strong> ${s.exam_title}</div>` : ''}
+                                    ${s.exam_title ? `<div class="muted"><strong>${MCEMEXCE_CAL.i18n.examLabel}</strong> ${s.exam_title}</div>` : ''}
                                 </div>
                                 ${actionHTML}
                             </div>`;
@@ -417,12 +417,12 @@ class MCEMS_Calendar_Sessioni {
                 if (!btn) return;
                 e.preventDefault();
 
-                if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInAssign); return; }
+                if (!IS_LOGGED_IN) { alert(MCEMEXCE_CAL.i18n.mustBeLoggedInAssign); return; }
                 const slotId = btn.getAttribute('data-slot');
 
-                btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.assigning;
+                btn.disabled = true; btn.textContent = MCEMEXCE_CAL.i18n.assigning;
                 const form = new FormData();
-                form.append('action', 'mcems_assegna_sessione_slot');
+                form.append('action', 'mcemexce_assegna_sessione_slot');
                 form.append('slot_id', slotId);
                 form.append('_ajax_nonce', AJAX_NONCE);
 
@@ -438,9 +438,9 @@ class MCEMS_Calendar_Sessioni {
                                 row.querySelector('.slot-actions')?.remove();
                                 row.insertAdjacentHTML('beforeend',
                                   `<div class="actions">
-                                      <span class="badge-soft">${MCEMS_CAL.i18n.assignedTo} ${nome}</span>
-                                      <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.reassign}</button>
-                                      <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.removeAssignment}</button>
+                                      <span class="badge-soft">${MCEMEXCE_CAL.i18n.assignedTo} ${nome}</span>
+                                      <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">${MCEMEXCE_CAL.i18n.reassign}</button>
+                                      <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">${MCEMEXCE_CAL.i18n.removeAssignment}</button>
                                    </div>`);
                             }
 
@@ -450,19 +450,19 @@ class MCEMS_Calendar_Sessioni {
                                 rowAll.appendChild(meta.cloneNode(true));
                                 rowAll.insertAdjacentHTML('beforeend',
                                   `<div class="actions">
-                                      <span class="badge-soft">${MCEMS_CAL.i18n.assignedTo} ${nome}</span>
-                                      <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.reassign}</button>
-                                      <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.removeAssignment}</button>
+                                      <span class="badge-soft">${MCEMEXCE_CAL.i18n.assignedTo} ${nome}</span>
+                                      <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">${MCEMEXCE_CAL.i18n.reassign}</button>
+                                      <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">${MCEMEXCE_CAL.i18n.removeAssignment}</button>
                                    </div>`);
                             }
 
                             updateCacheAssign(slotId, dateISO, nome);
                         } else {
-                            alert((json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToAssign);
-                            btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.assignSession;
+                            alert((json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToAssign);
+                            btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.assignSession;
                         }
                     })
-                    .catch(() => { alert(MCEMS_CAL.i18n.networkError); btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.assignSession; });
+                    .catch(() => { alert(MCEMEXCE_CAL.i18n.networkError); btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.assignSession; });
             });
 
             document.addEventListener('click', function(e) {
@@ -470,13 +470,13 @@ class MCEMS_Calendar_Sessioni {
                 if (!btn) return;
                 e.preventDefault();
 
-                if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInModify); return; }
+                if (!IS_LOGGED_IN) { alert(MCEMEXCE_CAL.i18n.mustBeLoggedInModify); return; }
                 const slotId = btn.getAttribute('data-slot');
-                if (!confirm(MCEMS_CAL.i18n.confirmReassign)) return;
+                if (!confirm(MCEMEXCE_CAL.i18n.confirmReassign)) return;
 
-                btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.reassigning;
+                btn.disabled = true; btn.textContent = MCEMEXCE_CAL.i18n.reassigning;
                 const form = new FormData();
-                form.append('action', 'mcems_modifica_assegnazione_sessione_slot');
+                form.append('action', 'mcemexce_modifica_assegnazione_sessione_slot');
                 form.append('slot_id', slotId);
                 form.append('_ajax_nonce', AJAX_NONCE);
 
@@ -492,9 +492,9 @@ class MCEMS_Calendar_Sessioni {
                                 const actionsWrap = row.querySelector('.actions');
                                 if (actionsWrap) {
                                     actionsWrap.innerHTML =
-                                      `<span class="badge-soft">${MCEMS_CAL.i18n.assignedTo} ${nome}</span>
-                                       <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.reassign}</button>
-                                       <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.removeAssignment}</button>`;
+                                      `<span class="badge-soft">${MCEMEXCE_CAL.i18n.assignedTo} ${nome}</span>
+                                       <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">${MCEMEXCE_CAL.i18n.reassign}</button>
+                                       <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">${MCEMEXCE_CAL.i18n.removeAssignment}</button>`;
                                 }
                             }
 
@@ -503,19 +503,19 @@ class MCEMS_Calendar_Sessioni {
                                 const actionsWrap = rowAll.querySelector('.actions');
                                 if (actionsWrap) {
                                     actionsWrap.innerHTML =
-                                      `<span class="badge-soft">${MCEMS_CAL.i18n.assignedTo} ${nome}</span>
-                                       <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.reassign}</button>
-                                       <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.removeAssignment}</button>`;
+                                      `<span class="badge-soft">${MCEMEXCE_CAL.i18n.assignedTo} ${nome}</span>
+                                       <button class="btn-modifica" data-slot="${slotId}" data-data="${dateISO}">${MCEMEXCE_CAL.i18n.reassign}</button>
+                                       <button class="btn-elimina"  data-slot="${slotId}" data-data="${dateISO}">${MCEMEXCE_CAL.i18n.removeAssignment}</button>`;
                                 }
                             }
 
                             updateCacheAssign(slotId, dateISO, nome);
                         } else {
-                            alert((json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToReassign);
-                            btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.reassign;
+                            alert((json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToReassign);
+                            btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.reassign;
                         }
                     })
-                    .catch(() => { alert(MCEMS_CAL.i18n.networkError); btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.reassign; });
+                    .catch(() => { alert(MCEMEXCE_CAL.i18n.networkError); btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.reassign; });
             });
 
             document.addEventListener('click', function(e) {
@@ -523,13 +523,13 @@ class MCEMS_Calendar_Sessioni {
                 if (!btn) return;
                 e.preventDefault();
 
-                if (!IS_LOGGED_IN) { alert(MCEMS_CAL.i18n.mustBeLoggedInRemove); return; }
+                if (!IS_LOGGED_IN) { alert(MCEMEXCE_CAL.i18n.mustBeLoggedInRemove); return; }
                 const slotId = btn.getAttribute('data-slot');
-                if (!confirm(MCEMS_CAL.i18n.confirmRemove)) return;
+                if (!confirm(MCEMEXCE_CAL.i18n.confirmRemove)) return;
 
-                btn.disabled = true; btn.textContent = MCEMS_CAL.i18n.removing;
+                btn.disabled = true; btn.textContent = MCEMEXCE_CAL.i18n.removing;
                 const form = new FormData();
-                form.append('action', 'mcems_elimina_assegnazione_sessione_slot');
+                form.append('action', 'mcemexce_elimina_assegnazione_sessione_slot');
                 form.append('slot_id', slotId);
                 form.append('_ajax_nonce', AJAX_NONCE);
 
@@ -544,7 +544,7 @@ class MCEMS_Calendar_Sessioni {
                                 row1.querySelector('.actions')?.remove();
                                 row1.insertAdjacentHTML('beforeend',
                                   `<div class="slot-actions">
-                                     <button class="btn-assegna" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.assignSession}</button>
+                                     <button class="btn-assegna" data-slot="${slotId}" data-data="${dateISO}">${MCEMEXCE_CAL.i18n.assignSession}</button>
                                    </div>`);
                             }
 
@@ -555,17 +555,17 @@ class MCEMS_Calendar_Sessioni {
                             if (row3) {
                                 const actionsWrap = row3.querySelector('.actions');
                                 if (actionsWrap) {
-                                    actionsWrap.outerHTML = `<div class="slot-actions"><button class="btn-assegna" data-slot="${slotId}" data-data="${dateISO}">${MCEMS_CAL.i18n.assignSession}</button></div>`;
+                                    actionsWrap.outerHTML = `<div class="slot-actions"><button class="btn-assegna" data-slot="${slotId}" data-data="${dateISO}">${MCEMEXCE_CAL.i18n.assignSession}</button></div>`;
                                 }
                             }
 
                             updateCacheUnassign(slotId, dateISO);
                         } else {
-                            alert((json && json.data && json.data.message) ? json.data.message : MCEMS_CAL.i18n.unableToRemove);
-                            btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.removeAssignment;
+                            alert((json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToRemove);
+                            btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.removeAssignment;
                         }
                     })
-                    .catch(() => { alert(MCEMS_CAL.i18n.networkError); btn.disabled = false; btn.textContent = MCEMS_CAL.i18n.removeAssignment; });
+                    .catch(() => { alert(MCEMEXCE_CAL.i18n.networkError); btn.disabled = false; btn.textContent = MCEMEXCE_CAL.i18n.removeAssignment; });
             });
         });
         <?php
@@ -574,14 +574,14 @@ class MCEMS_Calendar_Sessioni {
     }
 
     private static function cpt(): string {
-        if (class_exists('MCEMS_CPT_Sessioni_Esame') && defined('MCEMS_CPT_Sessioni_Esame::CPT')) {
-            return MCEMS_CPT_Sessioni_Esame::CPT;
+        if (class_exists('MCEMEXCE_CPT_Sessioni_Esame') && defined('MCEMEXCE_CPT_Sessioni_Esame::CPT')) {
+            return MCEMEXCE_CPT_Sessioni_Esame::CPT;
         }
-        return 'mcems_exam_session';
+        return 'mcemexce_exam_session';
     }
 
     private static function mk(string $const, string $fallback) {
-        $full = 'MCEMS_CPT_Sessioni_Esame::' . $const;
+        $full = 'MCEMEXCE_CPT_Sessioni_Esame::' . $const;
         return defined($full) ? constant($full) : $fallback;
     }
 
@@ -594,45 +594,45 @@ class MCEMS_Calendar_Sessioni {
             'date' => [
                 'slot_data',
                 self::mk('MK_DATE', 'slot_data'),
-                '_mcems_data',
+                '_mcemexce_data',
                 'data',
                 'date',
             ],
             'time' => [
                 'slot_orario',
                 self::mk('MK_TIME', 'slot_orario'),
-                '_mcems_orario',
+                '_mcemexce_orario',
                 'orario',
                 'time',
             ],
             'capacity' => [
                 'slot_posti_max',
                 self::mk('MK_CAPACITY', 'slot_posti_max'),
-                '_mcems_capacity',
+                '_mcemexce_capacity',
                 'capacity',
             ],
             'occupied' => [
                 'slot_posti_occupati',
                 self::mk('MK_OCCUPATI', 'slot_posti_occupati'),
-                '_mcems_occupati',
+                '_mcemexce_occupati',
                 'occupati',
             ],
             'exam_id' => [
                 'slot_corso_id',
                 self::mk('MK_EXAM_ID', 'slot_corso_id'),
-                '_mcems_exam_id',
+                '_mcemexce_exam_id',
                 'exam_id',
             ],
             'is_special' => [
-                MCEMS_SLOT_ESIGENZE_SPECIALI,
-                self::mk('MK_IS_SPECIAL', MCEMS_SLOT_ESIGENZE_SPECIALI),
-                '_mcems_is_special',
+                MCEMEXCE_SLOT_ESIGENZE_SPECIALI,
+                self::mk('MK_IS_SPECIAL', MCEMEXCE_SLOT_ESIGENZE_SPECIALI),
+                '_mcemexce_is_special',
                 'is_special',
             ],
             'special_user_id' => [
                 'slot_special_user_id',
                 self::mk('MK_SPECIAL_USER_ID', 'slot_special_user_id'),
-                '_mcems_special_user_id',
+                '_mcemexce_special_user_id',
                 'special_user_id',
             ],
             'assigned' => [
@@ -649,8 +649,8 @@ class MCEMS_Calendar_Sessioni {
             ],
             'proctor' => [
                 'slot_sorvegliante',
-                '_mcems_proctor_user_id',
-                'mcems_proctor_user_id',
+                '_mcemexce_proctor_user_id',
+                'mcemexce_proctor_user_id',
             ],
             'warn_sent_for' => [
                 'slot_unassigned_warn_sent_for',
@@ -725,14 +725,14 @@ class MCEMS_Calendar_Sessioni {
     }
 
     private static function get_calendar_recipients(): array {
-        if (!class_exists('MCEMS_Settings')) {
+        if (!class_exists('MCEMEXCE_Settings')) {
             $fallback = sanitize_email((string) get_option('admin_email'));
             return $fallback ? [$fallback] : [];
         }
 
-        $raw = trim((string) MCEMS_Settings::get_str('cal_email_notify_to'));
+        $raw = trim((string) MCEMEXCE_Settings::get_str('cal_email_notify_to'));
         if ($raw === '') {
-            $raw = trim((string) MCEMS_Settings::get_str('email_admin_recipients'));
+            $raw = trim((string) MCEMEXCE_Settings::get_str('email_admin_recipients'));
         }
         if ($raw === '') {
             $raw = (string) get_option('admin_email');
@@ -772,7 +772,7 @@ class MCEMS_Calendar_Sessioni {
     }
 
     private static function send_calendar_mail(string $subject_key, string $body_key, array $placeholders = [], ?array $recipients = null): void {
-        if (!class_exists('MCEMS_Settings')) {
+        if (!class_exists('MCEMEXCE_Settings')) {
             return;
         }
 
@@ -793,20 +793,20 @@ class MCEMS_Calendar_Sessioni {
             'cal_email_body_warning' => "The following exam session is scheduled for tomorrow and still has no assigned proctor.\n\nExam: {exam_title}\nDate: {session_date}\nTime: {session_time}\nSession ID: {session_id}",
         ];
 
-        $subject = MCEMS_Settings::get_email_template($subject_key, $default_subjects[$subject_key] ?? '');
-        $body    = MCEMS_Settings::get_email_template($body_key, $default_bodies[$body_key] ?? '');
-        $headers = MCEMS_Settings::get_mail_headers();
+        $subject = MCEMEXCE_Settings::get_email_template($subject_key, $default_subjects[$subject_key] ?? '');
+        $body    = MCEMEXCE_Settings::get_email_template($body_key, $default_bodies[$body_key] ?? '');
+        $headers = MCEMEXCE_Settings::get_mail_headers();
 
         wp_mail(
             $to,
-            MCEMS_Settings::render_email_template($subject, $placeholders),
-            MCEMS_Settings::render_email_template($body, $placeholders),
+            MCEMEXCE_Settings::render_email_template($subject, $placeholders),
+            MCEMEXCE_Settings::render_email_template($body, $placeholders),
             $headers
         );
     }
 
     public static function shortcode(): string {
-        if (!MCEMS_Settings::user_can_view_shortcode('mcems_sessions_calendar')) {
+        if (!MCEMEXCE_Settings::user_can_view_shortcode('mcemexce_sessions_calendar')) {
             return '<p>' . esc_html__('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms') . '</p>';
         }
 
@@ -1119,7 +1119,7 @@ class MCEMS_Calendar_Sessioni {
         self::delete_meta_group($slot_id, 'warn_sent_legacy');
         self::delete_meta_group($slot_id, 'warn_sent_for');
 
-        if (class_exists('MCEMS_Settings') && MCEMS_Settings::email_enabled('cal_email_on_assign', 0)) {
+        if (class_exists('MCEMEXCE_Settings') && MCEMEXCE_Settings::email_enabled('cal_email_on_assign', 0)) {
             self::send_calendar_mail(
                 'cal_email_subject',
                 'cal_email_body',
@@ -1159,7 +1159,7 @@ class MCEMS_Calendar_Sessioni {
         self::delete_meta_group($slot_id, 'warn_sent_legacy');
         self::delete_meta_group($slot_id, 'warn_sent_for');
 
-        if (class_exists('MCEMS_Settings') && MCEMS_Settings::email_enabled('cal_email_on_assign', 0)) {
+        if (class_exists('MCEMEXCE_Settings') && MCEMEXCE_Settings::email_enabled('cal_email_on_assign', 0)) {
             self::send_calendar_mail(
                 'cal_email_subject',
                 'cal_email_body',
@@ -1204,7 +1204,7 @@ class MCEMS_Calendar_Sessioni {
         self::delete_meta_group($slot_id, 'warn_sent_legacy');
         self::delete_meta_group($slot_id, 'warn_sent_for');
 
-        if (class_exists('MCEMS_Settings') && MCEMS_Settings::email_enabled('cal_email_on_unassign', 0)) {
+        if (class_exists('MCEMEXCE_Settings') && MCEMEXCE_Settings::email_enabled('cal_email_on_unassign', 0)) {
             self::send_calendar_mail(
                 'cal_email_subject_unassign',
                 'cal_email_body_unassign',
@@ -1259,7 +1259,7 @@ class MCEMS_Calendar_Sessioni {
             $already_sent_for = self::get_first_meta($slot_id, 'warn_sent_for', true);
             if ($already_sent_for === $target_iso) continue;
 
-            if (class_exists('MCEMS_Settings') && MCEMS_Settings::email_enabled('cal_email_on_unassigned_warning', 1)) {
+            if (class_exists('MCEMEXCE_Settings') && MCEMEXCE_Settings::email_enabled('cal_email_on_unassigned_warning', 1)) {
                 self::send_calendar_mail(
                     'cal_email_subject_warning',
                     'cal_email_body_warning',
@@ -1273,4 +1273,4 @@ class MCEMS_Calendar_Sessioni {
     }
 }
 
-MCEMS_Calendar_Sessioni::init();
+MCEMEXCE_Calendar_Sessioni::init();
