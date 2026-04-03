@@ -19,8 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class MCEMEXCE_Quiz_Stats {
 
     const ITEMS_PER_PAGE   = 25;
-    const PARENT_POST_TYPE = 'mcemexce_exam_session';
-    const PAGE_SLUG        = 'mcems-quiz-stats';
+    const PARENT_POST_TYPE = 'mcemexce_session';
+    const PAGE_SLUG        = 'mcemexce-quiz-stats';
 
     /** In-request cache for question answer options. */
     protected static $question_options_cache = [];

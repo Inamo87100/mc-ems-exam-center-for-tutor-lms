@@ -218,7 +218,7 @@ class MCEMEXCE_Settings {
             __('Settings', 'mc-ems-exam-center-for-tutor-lms'),
             __('Settings', 'mc-ems-exam-center-for-tutor-lms'),
             'manage_options',
-            'mcems-settings-cpt',
+            'mcemexce-settings-cpt',
             [__CLASS__, 'render']
         );
     }
@@ -783,7 +783,7 @@ class MCEMEXCE_Settings {
         echo '<h2 class="nav-tab-wrapper" style="margin-top:12px;">';
         foreach ($tabs as $key => $label) {
             $cls = ($tab === $key) ? 'nav-tab nav-tab-active' : 'nav-tab';
-            echo '<a class="' . esc_attr($cls) . '" href="' . esc_url(add_query_arg(['page' => 'mcems-settings-cpt', 'tab' => $key], admin_url('edit.php?post_type=' . MCEMEXCE_CPT_Sessioni_Esame::CPT))) . '">' . esc_html($label) . '</a>';
+            echo '<a class="' . esc_attr($cls) . '" href="' . esc_url(add_query_arg(['page' => 'mcemexce-settings-cpt', 'tab' => $key], admin_url('edit.php?post_type=' . MCEMEXCE_CPT_Sessioni_Esame::CPT))) . '">' . esc_html($label) . '</a>';
         }
         echo '</h2>';
 

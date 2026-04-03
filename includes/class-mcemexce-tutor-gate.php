@@ -135,7 +135,7 @@ class MCEMEXCE_Tutor_Gate {
 
         $cpt = class_exists('MCEMEXCE_CPT_Sessioni_Esame')
             ? MCEMEXCE_CPT_Sessioni_Esame::CPT
-            : 'mcemexce_exam_session';
+            : 'mcemexce_session';
 
         if ($slot_id > 0 && get_post_type($slot_id) !== $cpt) {
             unset($map[$exam_id]);

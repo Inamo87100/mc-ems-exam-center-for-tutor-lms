@@ -577,7 +577,7 @@ class MCEMEXCE_Calendar_Sessioni {
         if (class_exists('MCEMEXCE_CPT_Sessioni_Esame') && defined('MCEMEXCE_CPT_Sessioni_Esame::CPT')) {
             return MCEMEXCE_CPT_Sessioni_Esame::CPT;
         }
-        return 'mcemexce_exam_session';
+        return 'mcemexce_session';
     }
 
     private static function mk(string $const, string $fallback) {
