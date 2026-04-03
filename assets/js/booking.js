@@ -53,7 +53,7 @@
       dateInput.addEventListener("change", function () {
         setMsg("");
         renderSessions([]);
-        post("mcemexce_get_sessions_by_date", {
+        post("mcemexce_get_slot_per_data", {
           nonce: MCEMEXCE_BOOKING.nonce,
           date: dateInput.value
         }).then(function (res) {
@@ -79,9 +79,9 @@
         }
 
         bookBtn.disabled = true;
-        post("mcemexce_confirm_booking", {
+        post("mcemexce_booking", {
           nonce: MCEMEXCE_BOOKING.nonce,
-          session_id: checked.value
+          slot_id: checked.value
         }).then(function (res) {
           bookBtn.disabled = false;
           if (!res || !res.success) {

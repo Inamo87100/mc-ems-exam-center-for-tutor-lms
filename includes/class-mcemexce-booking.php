@@ -22,8 +22,8 @@ class MCEMEXCE_Booking {
 
         add_action('wp_ajax_mcemexce_check_active_booking', [__CLASS__, 'ajax_check_active_booking']);
 
-        add_action('wp_ajax_mcemexce_conferma_prenotazione_slot', [__CLASS__, 'ajax_confirm_booking']);
-        add_action('wp_ajax_nopriv_mcemexce_conferma_prenotazione_slot', [__CLASS__, 'ajax_confirm_booking']);
+        add_action('wp_ajax_mcemexce_booking', [__CLASS__, 'ajax_confirm_booking']);
+        add_action('wp_ajax_nopriv_mcemexce_booking', [__CLASS__, 'ajax_confirm_booking']);
 
         add_action('wp_ajax_mcemexce_cancel_booking', [__CLASS__, 'ajax_cancel_booking']);
 
@@ -76,7 +76,7 @@ class MCEMEXCE_Booking {
 
         wp_localize_script('mcems-booking', 'MCEMEXCE_BOOKING', [
             'ajaxUrl'          => admin_url('admin-ajax.php'),
-            'nonce'            => wp_create_nonce('mcemexce_booking'),
+            'nonce'            => wp_create_nonce('mcemexce_booking_action'),
             'cancelNonce'      => wp_create_nonce('mcemexce_cancel'),
             'manageBookingUrl' => MCEMEXCE_Settings::get_manage_booking_page_url() ?: '',
             'i18n'             => [
@@ -463,7 +463,8 @@ class MCEMEXCE_Booking {
                     }
 
                     const formData = new FormData();
-                    formData.append('action', 'mcemexce_conferma_prenotazione_slot');
+                    formData.append('action', 'mcemexce_booking');
+                    formData.append('nonce', mcemsNonce);
                     formData.append('slot_id', selectedSlot);
 
                     fetch(MCEMEXCE_BOOKING.ajaxUrl, {
@@ -906,7 +907,7 @@ class MCEMEXCE_Booking {
 
     public static function ajax_check_active_booking(): void {
         $nonce = isset($_GET['nonce']) ? sanitize_text_field(wp_unslash($_GET['nonce'])) : '';
-        if (!wp_verify_nonce($nonce, 'mcemexce_booking')) {
+        if (!wp_verify_nonce($nonce, 'mcemexce_booking_action')) {
             wp_send_json(['has_booking' => false]);
             return;
         }
@@ -924,7 +925,7 @@ class MCEMEXCE_Booking {
 
     public static function ajax_get_booking_calendar(): void {
         $nonce = isset($_GET['nonce']) ? sanitize_text_field(wp_unslash($_GET['nonce'])) : '';
-        if (!wp_verify_nonce($nonce, 'mcemexce_booking')) {
+        if (!wp_verify_nonce($nonce, 'mcemexce_booking_action')) {
             wp_send_json([]);
             return;
         }
@@ -999,7 +1000,7 @@ class MCEMEXCE_Booking {
 
     public static function ajax_get_slots_by_date(): void {
         $nonce = isset($_GET['nonce']) ? sanitize_text_field(wp_unslash($_GET['nonce'])) : '';
-        if (!wp_verify_nonce($nonce, 'mcemexce_booking')) {
+        if (!wp_verify_nonce($nonce, 'mcemexce_booking_action')) {
             wp_send_json([]);
             return;
         }
@@ -1072,8 +1073,7 @@ class MCEMEXCE_Booking {
             wp_send_json_error(['message' => esc_html__('You must be logged in to book.', 'mc-ems-exam-center-for-tutor-lms')], 403);
         }
 
-        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-        if (!wp_verify_nonce($nonce, 'mcemexce_booking')) {
+        if (!check_ajax_referer('mcemexce_booking_action', 'nonce', false)) {
             wp_send_json_error(['message' => esc_html__('Invalid nonce.', 'mc-ems-exam-center-for-tutor-lms')], 400);
         }
 
