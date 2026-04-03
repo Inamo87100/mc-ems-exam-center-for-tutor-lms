@@ -60,18 +60,18 @@ class MCEMEXCE_Upsell {
 				<strong><?php esc_html_e( 'MC-EMS Free plan limits:', 'mc-ems-exam-center-for-tutor-lms' ); ?></strong>
 				<?php esc_html_e( '1 session per day', 'mc-ems-exam-center-for-tutor-lms' ); ?> &bull;
 				<?php
-				printf(
+				echo esc_html( sprintf(
 					/* translators: %d: maximum number of active sessions allowed on the free plan */
-					esc_html__( 'max %d active sessions', 'mc-ems-exam-center-for-tutor-lms' ),
+					__( 'max %d active sessions', 'mc-ems-exam-center-for-tutor-lms' ),
 					self::FREE_MAX_ACTIVE_SESSIONS
-				);
+				) );
 				?> &bull;
 				<?php
-				printf(
+				echo esc_html( sprintf(
 					/* translators: %d: maximum number of seats per session allowed on the free plan */
-					esc_html__( 'max %d seats per session', 'mc-ems-exam-center-for-tutor-lms' ),
+					__( 'max %d seats per session', 'mc-ems-exam-center-for-tutor-lms' ),
 					self::FREE_MAX_SEATS_PER_SESSION
-				);
+				) );
 				?>
 				&mdash;
 				<a href="<?php echo esc_url( self::UPGRADE_URL ); ?>" target="_blank" rel="noopener noreferrer">

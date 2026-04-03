@@ -90,10 +90,16 @@ class MCEMEXCE_Upgrader {
         ] as $old_suffix => $new_suffix) {
             $old_table = $wpdb->prefix . $old_suffix;
             $new_table = $wpdb->prefix . $new_suffix;
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            if ($wpdb->get_var("SHOW TABLES LIKE '{$old_table}'")) {
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                $wpdb->query("RENAME TABLE {$old_table} TO {$new_table}");
+            // Table names are derived from $wpdb->prefix + hardcoded suffixes (no user input).
+            // Guard defensively: skip if the name contains any non-identifier character.
+            if ( ! preg_match( '/^[a-zA-Z0-9_]+$/', $old_table ) || ! preg_match( '/^[a-zA-Z0-9_]+$/', $new_table ) ) {
+                continue;
+            }
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $old_table ) ) ) {
+                // MySQL does not support parameterised identifiers; table names are validated above.
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+                $wpdb->query( 'RENAME TABLE `' . $old_table . '` TO `' . $new_table . '`' );
             }
         }
 
