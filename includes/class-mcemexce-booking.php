@@ -915,6 +915,8 @@ class MCEMEXCE_Booking {
             'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
             'posts_per_page' => -1,
             'post_status'    => 'publish',
+            // TODO: Plugin Check slow-query warning – meta_query on postmeta is necessary here;
+            // consider a custom table for large-scale deployments.
             'meta_query'     => [
                 [
                     'key'     => MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID,
@@ -929,6 +931,7 @@ class MCEMEXCE_Booking {
                 ],
             ],
             'orderby'        => 'meta_value',
+            // TODO: Plugin Check – meta_key used for ordering; acceptable with proper index.
             'meta_key'       => MCEMEXCE_CPT_Sessioni_Esame::MK_DATE,
             'order'          => 'ASC',
         ]);
@@ -999,8 +1002,11 @@ class MCEMEXCE_Booking {
             'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
             'posts_per_page' => -1,
             'post_status'    => 'publish',
+            // TODO: Plugin Check slow-query warning – meta_query on postmeta is necessary here;
+            // consider a custom table for large-scale deployments.
             'meta_query'     => $meta_query,
             'orderby'        => 'meta_value',
+            // TODO: Plugin Check – meta_key used for ordering; acceptable with proper index.
             'meta_key'       => MCEMEXCE_CPT_Sessioni_Esame::MK_TIME,
             'order'          => 'ASC',
         ]);
@@ -1149,14 +1155,18 @@ class MCEMEXCE_Booking {
         $slot_id  = absint($_POST['slot_id'] ?? 0);
         $exam_id  = absint($_POST['exam_id'] ?? 0);
 
-        error_log(sprintf(
-            '[MC-EMS] ajax_cancel_booking START — user_id=%d slot_id=%d exam_id=%d nonce_received=%s',
-            $user_id, $slot_id, $exam_id, $nonce_in ? 'yes' : 'no'
-        ));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                '[MC-EMS] ajax_cancel_booking START — user_id=%d slot_id=%d exam_id=%d nonce_received=%s',
+                $user_id, $slot_id, $exam_id, $nonce_in ? 'yes' : 'no'
+            ));
+        }
 
         // Step 1: user must be logged in
         if (!$user_id) {
-            error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: not_logged_in');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: not_logged_in'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+            }
             wp_send_json_error([
                 'reason'  => 'not_logged_in',
                 'message' => __('You must be logged in.', 'mc-ems-exam-center-for-tutor-lms'),
@@ -1165,12 +1175,16 @@ class MCEMEXCE_Booking {
 
         // Step 2: nonce validation (action: mcemexce_cancel)
         $nonce_ok = check_ajax_referer('mcemexce_cancel', 'nonce', false);
-        error_log(sprintf(
-            '[MC-EMS] ajax_cancel_booking nonce check — user_id=%d nonce_valid=%s',
-            $user_id, $nonce_ok ? 'yes' : 'no'
-        ));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                '[MC-EMS] ajax_cancel_booking nonce check — user_id=%d nonce_valid=%s',
+                $user_id, $nonce_ok ? 'yes' : 'no'
+            ));
+        }
         if (!$nonce_ok) {
-            error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: invalid_nonce');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: invalid_nonce'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+            }
             wp_send_json_error([
                 'reason'  => 'invalid_nonce',
                 'message' => __('Invalid nonce.', 'mc-ems-exam-center-for-tutor-lms'),
@@ -1193,15 +1207,19 @@ class MCEMEXCE_Booking {
 
         // Step 3: capability check
         $has_cap = current_user_can($capability);
-        error_log(sprintf(
-            '[MC-EMS] ajax_cancel_booking capability check — user_id=%d capability=%s has_cap=%s',
-            $user_id, $capability, $has_cap ? 'yes' : 'no'
-        ));
-        if (!$has_cap) {
-            error_log(sprintf(
-                '[MC-EMS] ajax_cancel_booking BLOCKED — reason: insufficient_permissions capability=%s',
-                $capability
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                '[MC-EMS] ajax_cancel_booking capability check — user_id=%d capability=%s has_cap=%s',
+                $user_id, $capability, $has_cap ? 'yes' : 'no'
             ));
+        }
+        if (!$has_cap) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log(sprintf( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                    '[MC-EMS] ajax_cancel_booking BLOCKED — reason: insufficient_permissions capability=%s',
+                    $capability
+                ));
+            }
             wp_send_json_error([
                 'reason'     => 'insufficient_permissions',
                 'capability' => $capability,
@@ -1211,7 +1229,9 @@ class MCEMEXCE_Booking {
 
         // Step 4: cancellation globally enabled?
         if (!self::is_annullamento_consentito()) {
-            error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: cancellation_disabled');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: cancellation_disabled'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+            }
             wp_send_json_error([
                 'reason'  => 'cancellation_disabled',
                 'message' => __('Cancellation is disabled.', 'mc-ems-exam-center-for-tutor-lms'),
@@ -1220,7 +1240,9 @@ class MCEMEXCE_Booking {
 
         // Step 5: slot_id must be valid
         if ($slot_id <= 0) {
-            error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: invalid_slot slot_id=0');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: invalid_slot slot_id=0'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+            }
             wp_send_json_error([
                 'reason'  => 'invalid_slot',
                 'message' => __('Invalid exam session.', 'mc-ems-exam-center-for-tutor-lms'),
@@ -1229,15 +1251,19 @@ class MCEMEXCE_Booking {
 
         // Step 6: validate CPT type
         $post_type = get_post_type($slot_id);
-        error_log(sprintf(
-            '[MC-EMS] ajax_cancel_booking slot post_type check — slot_id=%d post_type=%s expected=%s',
-            $slot_id, (string) $post_type, MCEMEXCE_CPT_Sessioni_Esame::CPT
-        ));
-        if ($post_type !== MCEMEXCE_CPT_Sessioni_Esame::CPT) {
-            error_log(sprintf(
-                '[MC-EMS] ajax_cancel_booking slot not found or wrong type — slot_id=%d post_type=%s — realigning meta and succeeding',
-                $slot_id, (string) $post_type
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                '[MC-EMS] ajax_cancel_booking slot post_type check — slot_id=%d post_type=%s expected=%s',
+                $slot_id, (string) $post_type, MCEMEXCE_CPT_Sessioni_Esame::CPT
             ));
+        }
+        if ($post_type !== MCEMEXCE_CPT_Sessioni_Esame::CPT) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log(sprintf( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                    '[MC-EMS] ajax_cancel_booking slot not found or wrong type — slot_id=%d post_type=%s — realigning meta and succeeding',
+                    $slot_id, (string) $post_type
+                ));
+            }
             if ($exam_id > 0) self::remove_active_booking_for_exam($user_id, $exam_id);
             wp_send_json_success(true);
         }
@@ -1254,12 +1280,16 @@ class MCEMEXCE_Booking {
         if ($slot_ts > $now_ts) {
             $diff_secs = $slot_ts - $now_ts;
             $limit_secs = self::get_annullamento_ore() * HOUR_IN_SECONDS;
-            error_log(sprintf(
-                '[MC-EMS] ajax_cancel_booking deadline check — slot_ts=%d now_ts=%d diff_secs=%d limit_secs=%d',
-                $slot_ts, $now_ts, $diff_secs, $limit_secs
-            ));
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log(sprintf( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                    '[MC-EMS] ajax_cancel_booking deadline check — slot_ts=%d now_ts=%d diff_secs=%d limit_secs=%d',
+                    $slot_ts, $now_ts, $diff_secs, $limit_secs
+                ));
+            }
             if ($diff_secs <= $limit_secs) {
-                error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: too_late_to_cancel');
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('[MC-EMS] ajax_cancel_booking BLOCKED — reason: too_late_to_cancel'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                }
                 wp_send_json_error([
                     'reason'  => 'too_late_to_cancel',
                     'message' => __('Too late to cancel.', 'mc-ems-exam-center-for-tutor-lms'),
@@ -1272,15 +1302,19 @@ class MCEMEXCE_Booking {
 
         // Step 8: verify the user is actually booked on this slot
         $is_booked = in_array($user_id, $occupati, true);
-        error_log(sprintf(
-            '[MC-EMS] ajax_cancel_booking ownership check — user_id=%d slot_id=%d is_booked=%s occupati=%s',
-            $user_id, $slot_id, $is_booked ? 'yes' : 'no', implode(',', $occupati)
-        ));
-        if (!$is_booked) {
-            error_log(sprintf(
-                '[MC-EMS] ajax_cancel_booking BLOCKED — reason: not_your_booking user_id=%d slot_id=%d',
-                $user_id, $slot_id
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                '[MC-EMS] ajax_cancel_booking ownership check — user_id=%d slot_id=%d is_booked=%s occupati=%s',
+                $user_id, $slot_id, $is_booked ? 'yes' : 'no', implode(',', $occupati)
             ));
+        }
+        if (!$is_booked) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log(sprintf( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                    '[MC-EMS] ajax_cancel_booking BLOCKED — reason: not_your_booking user_id=%d slot_id=%d',
+                    $user_id, $slot_id
+                ));
+            }
             if ($exam_id > 0) self::remove_active_booking_for_exam($user_id, $exam_id);
             wp_send_json_error([
                 'reason'  => 'not_your_booking',
@@ -1292,10 +1326,12 @@ class MCEMEXCE_Booking {
         $is_special = ((int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
         $spec_uid   = (int) get_post_meta($slot_id, MCEMEXCE_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, true);
         if ($is_special && $spec_uid > 0) {
-            error_log(sprintf(
-                '[MC-EMS] ajax_cancel_booking BLOCKED — reason: reserved_session slot_id=%d spec_uid=%d',
-                $slot_id, $spec_uid
-            ));
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log(sprintf( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                    '[MC-EMS] ajax_cancel_booking BLOCKED — reason: reserved_session slot_id=%d spec_uid=%d',
+                    $slot_id, $spec_uid
+                ));
+            }
             wp_send_json_error([
                 'reason'  => 'reserved_session',
                 'message' => __('This session is reserved and cannot be cancelled from the front-end.', 'mc-ems-exam-center-for-tutor-lms'),
@@ -1311,10 +1347,12 @@ class MCEMEXCE_Booking {
         self::add_history($user_id, $slot_id, 'cancelled');
         if ($exam_id > 0) self::maybe_send_booking_notifications($user_id, $slot_id, $exam_id, 'cancelled');
 
-        error_log(sprintf(
-            '[MC-EMS] ajax_cancel_booking SUCCESS — user_id=%d slot_id=%d exam_id=%d',
-            $user_id, $slot_id, $exam_id
-        ));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                '[MC-EMS] ajax_cancel_booking SUCCESS — user_id=%d slot_id=%d exam_id=%d',
+                $user_id, $slot_id, $exam_id
+            ));
+        }
 
         wp_send_json_success(true);
     }

@@ -116,11 +116,15 @@ class MCEMEXCE_Quiz_Stats {
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
         $results = (array) $wpdb->get_results(
-            "SELECT ID, post_title
-               FROM {$wpdb->posts}
-              WHERE post_type = 'courses'
-                AND post_status = 'publish'
-              ORDER BY post_title"
+            $wpdb->prepare(
+                "SELECT ID, post_title
+                   FROM {$wpdb->posts}
+                  WHERE post_type = %s
+                    AND post_status = %s
+                  ORDER BY post_title",
+                'courses',
+                'publish'
+            )
         );
 
         wp_cache_set( $cache_key, $results, 'mcems', 300 );
@@ -334,10 +338,14 @@ class MCEMEXCE_Quiz_Stats {
         } else {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $courses = $wpdb->get_results(
-                "SELECT ID, post_title
-                   FROM {$wpdb->posts}
-                  WHERE post_type = 'courses'
-                    AND post_status = 'publish'"
+                $wpdb->prepare(
+                    "SELECT ID, post_title
+                       FROM {$wpdb->posts}
+                      WHERE post_type = %s
+                        AND post_status = %s",
+                    'courses',
+                    'publish'
+                )
             );
         }
 
