@@ -100,7 +100,10 @@
     var btn = e.target.closest(".mcemexce-cancel-booking, .mcems-cancel");
     if (!btn) return;
 
-    console.log("[MC-EMS] Cancel booking click", { slot: btn.dataset.slot, exam: btn.dataset.exam });
+    var slotId  = btn.dataset.slot  || "";
+    var examId  = btn.dataset.exam  || "";
+    var nonce   = (typeof MCEMEXCE_BOOKING !== 'undefined') ? MCEMEXCE_BOOKING.cancelNonce : '';
+    console.log("[MC-EMS] Cancel booking click", { slot: slotId, exam: examId, noncePresent: !!nonce });
 
     e.preventDefault();
 
@@ -118,19 +121,27 @@
 
     btn.disabled = true;
     post("mcemexce_cancel_booking", {
-      nonce: MCEMEXCE_BOOKING.cancelNonce,
-      slot_id: btn.dataset.slot || "",
-      exam_id: btn.dataset.exam || ""
+      nonce:   nonce,
+      slot_id: slotId,
+      exam_id: examId
     }).then(function (res) {
       btn.disabled = false;
+      console.log("[MC-EMS] Cancel booking response", res);
       if (!res || !res.success) {
-        setMsg((res && res.data) ? res.data : i18n('cancellationFailed', 'Cancellation failed.'), true);
+        var reason  = (res && res.data && res.data.reason)  ? res.data.reason  : '';
+        var message = (res && res.data && res.data.message) ? res.data.message
+                    : (res && res.data)                     ? res.data
+                    : i18n('cancellationFailed', 'Cancellation failed.');
+        console.warn("[MC-EMS] Cancel booking FAILED", { reason: reason, message: message, raw: res });
+        setMsg(message, true);
         return;
       }
+      console.log("[MC-EMS] Cancel booking SUCCESS");
       setMsg(i18n('bookingCancelled', 'Exam booking cancelled.'));
       window.location.reload();
-    }).catch(function () {
+    }).catch(function (err) {
       btn.disabled = false;
+      console.error("[MC-EMS] Cancel booking network error", err);
       setMsg(i18n('networkError', 'Network error'), true);
     });
   });
