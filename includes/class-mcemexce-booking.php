@@ -1145,10 +1145,29 @@ class MCEMEXCE_Booking {
 
     public static function ajax_cancel_booking(): void {
         $user_id = (int) get_current_user_id();
-        if (!$user_id) wp_send_json_error(__('You must be logged in.', 'mc-ems-exam-center-for-tutor-lms'));
+        if (!$user_id) {
+            wp_send_json_error(__('You must be logged in.', 'mc-ems-exam-center-for-tutor-lms'), 401);
+        }
 
-        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'mcemexce_cancel')) {
-            wp_send_json_error(__('Invalid nonce.', 'mc-ems-exam-center-for-tutor-lms'));
+        if (!check_ajax_referer('mcemexce_cancel', 'nonce', false)) {
+            wp_send_json_error(__('Invalid nonce.', 'mc-ems-exam-center-for-tutor-lms'), 403);
+        }
+
+        /**
+         * Filters the capability required to cancel an exam booking from the front-end.
+         *
+         * Default is 'read', which allows any logged-in user (subscriber, student, customer, etc.)
+         * to cancel their own booking. Change via this filter to restrict access to a custom role
+         * or capability.
+         *
+         * @param string $capability WordPress capability slug. Default 'read'.
+         */
+        $capability = (string) apply_filters('mcemexce_cancel_booking_capability', 'read');
+        if (empty($capability)) {
+            $capability = 'read';
+        }
+        if (!current_user_can($capability)) {
+            wp_send_json_error(__('Insufficient permissions.', 'mc-ems-exam-center-for-tutor-lms'), 403);
         }
 
         if (!self::is_annullamento_consentito()) {
