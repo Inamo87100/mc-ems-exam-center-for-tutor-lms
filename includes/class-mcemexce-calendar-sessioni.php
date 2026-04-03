@@ -168,6 +168,8 @@ class MCEMEXCE_Calendar_Sessioni {
             const allYear  = document.getElementById('allYear');
             const reloadAllBtn = document.getElementById('reloadAllAssignments');
 
+            if (!calendar) return;
+
             const AJAX_URL = MCEMEXCE_CAL.ajaxUrl;
             const AJAX_NONCE = MCEMEXCE_CAL.nonce;
             const IS_LOGGED_IN = MCEMEXCE_CAL.isLoggedIn;
@@ -237,8 +239,11 @@ class MCEMEXCE_Calendar_Sessioni {
             }
 
             function renderCalendar(year, month) {
-                document.getElementById('monthYear').textContent = new Date(year, month)
-                    .toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                const monthYearEl = document.getElementById('monthYear');
+                if (monthYearEl) {
+                    monthYearEl.textContent = new Date(year, month)
+                        .toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                }
 
                 calendar.innerHTML = '';
 
@@ -272,7 +277,7 @@ class MCEMEXCE_Calendar_Sessioni {
                             else dayEl.classList.add('slot-rosso');
 
                             dayEl.addEventListener('click', () => {
-                                modalData.textContent = formatDateIT(d);
+                                if (modalData) modalData.textContent = formatDateIT(d);
 
                                 const rows = (dayObj.slots || [])
                                     .sort((a,b) => (a.ora || '').localeCompare(b.ora || ''))
@@ -311,9 +316,8 @@ class MCEMEXCE_Calendar_Sessioni {
                                         </div>`;
                                     }).join('');
 
-                                modalSlotInfo.innerHTML = rows || `<p class="notice">${MCEMEXCE_CAL.i18n.noSessionsOnDate}</p>`;
-                                modal.style.display = 'block';
-                                modal.setAttribute('aria-hidden', 'false');
+                                if (modalSlotInfo) modalSlotInfo.innerHTML = rows || `<p class="notice">${MCEMEXCE_CAL.i18n.noSessionsOnDate}</p>`;
+                                if (modal) { modal.style.display = 'block'; modal.setAttribute('aria-hidden', 'false'); }
                             });
                         } else {
                             dayEl.classList.add('no-slot');
@@ -324,57 +328,72 @@ class MCEMEXCE_Calendar_Sessioni {
 
             renderCalendar(currentYear, currentMonth);
 
-            document.getElementById('prevMonth').addEventListener('click', () => {
-                currentMonth--;
-                if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-                renderCalendar(currentYear, currentMonth);
-            });
-            document.getElementById('nextMonth').addEventListener('click', () => {
-                currentMonth++;
-                if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-                renderCalendar(currentYear, currentMonth);
-            });
+            const prevMonthBtn = document.getElementById('prevMonth');
+            const nextMonthBtn = document.getElementById('nextMonth');
 
-            closeModal.addEventListener('click', () => { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); });
-            window.addEventListener('click', e => { if (e.target == modal) { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); } });
+            if (prevMonthBtn) {
+                prevMonthBtn.addEventListener('click', () => {
+                    currentMonth--;
+                    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+                    renderCalendar(currentYear, currentMonth);
+                });
+            }
+            if (nextMonthBtn) {
+                nextMonthBtn.addEventListener('click', () => {
+                    currentMonth++;
+                    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+                    renderCalendar(currentYear, currentMonth);
+                });
+            }
 
-            openMy.addEventListener('click', function(){
-                if (!IS_LOGGED_IN) { alert(MCEMEXCE_CAL.i18n.mustBeLoggedInView); return; }
-                myBody.innerHTML = `<p class="notice">${MCEMEXCE_CAL.i18n.loadingDots}</p>`;
-                fetch(`${AJAX_URL}?action=mcemexce_get_user_assigned_slots&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
-                    .then(r => r.json())
-                    .then(json => {
-                        if (!json || !json.success) { myBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToLoad}</p>`; return; }
-                        const items = json.data || [];
-                        if (!items.length) { myBody.innerHTML = `<p class="notice">${MCEMEXCE_CAL.i18n.noAssignedSessions}</p>`; return; }
-                        myBody.innerHTML = items.map(s => `
-                            <div class="slot-row" id="myslot-${s.id}" data-date="${s.data}">
-                                <div class="slot-meta">
-                                    <div><strong>${s.data_it}</strong></div>
-                                    <div><strong>${s.ora}</strong> ${s.speciale ? specialBadgeHTML(true) : ''}</div>
-                                    ${s.exam_title ? `<div class="muted"><strong>${MCEMEXCE_CAL.i18n.examLabel}</strong> ${s.exam_title}</div>` : ''}
+            if (closeModal) {
+                closeModal.addEventListener('click', () => { if (modal) { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); } });
+            }
+            window.addEventListener('click', e => { if (modal && e.target == modal) { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); } });
+
+            if (openMy) {
+                openMy.addEventListener('click', function(){
+                    if (!IS_LOGGED_IN) { alert(MCEMEXCE_CAL.i18n.mustBeLoggedInView); return; }
+                    if (myBody) myBody.innerHTML = `<p class="notice">${MCEMEXCE_CAL.i18n.loadingDots}</p>`;
+                    fetch(`${AJAX_URL}?action=mcemexce_get_user_assigned_slots&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
+                        .then(r => r.json())
+                        .then(json => {
+                            if (!myBody) return;
+                            if (!json || !json.success) { myBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToLoad}</p>`; return; }
+                            const items = json.data || [];
+                            if (!items.length) { myBody.innerHTML = `<p class="notice">${MCEMEXCE_CAL.i18n.noAssignedSessions}</p>`; return; }
+                            myBody.innerHTML = items.map(s => `
+                                <div class="slot-row" id="myslot-${s.id}" data-date="${s.data}">
+                                    <div class="slot-meta">
+                                        <div><strong>${s.data_it}</strong></div>
+                                        <div><strong>${s.ora}</strong> ${s.speciale ? specialBadgeHTML(true) : ''}</div>
+                                        ${s.exam_title ? `<div class="muted"><strong>${MCEMEXCE_CAL.i18n.examLabel}</strong> ${s.exam_title}</div>` : ''}
+                                    </div>
+                                    <div class="actions">
+                                        <button class="btn-elimina" data-slot="${s.id}" data-data="${s.data}">${MCEMEXCE_CAL.i18n.removeAssignment}</button>
+                                    </div>
                                 </div>
-                                <div class="actions">
-                                    <button class="btn-elimina" data-slot="${s.id}" data-data="${s.data}">${MCEMEXCE_CAL.i18n.removeAssignment}</button>
-                                </div>
-                            </div>
-                        `).join('');
-                    })
-                    .catch(() => { myBody.innerHTML = '<p class="notice">Network error. Please try again.</p>'; });
+                            `).join('');
+                        })
+                        .catch(() => { if (myBody) myBody.innerHTML = '<p class="notice">Network error. Please try again.</p>'; });
 
-                myModal.style.display = 'block';
-                myModal.setAttribute('aria-hidden','false');
-            });
+                    if (myModal) { myModal.style.display = 'block'; myModal.setAttribute('aria-hidden','false'); }
+                });
+            }
 
-            closeMy.addEventListener('click', () => { myModal.style.display = 'none'; myModal.setAttribute('aria-hidden','true'); });
-            window.addEventListener('click', e => { if (e.target == myModal) { myModal.style.display = 'none'; myModal.setAttribute('aria-hidden','true'); } });
+            if (closeMy) {
+                closeMy.addEventListener('click', () => { if (myModal) { myModal.style.display = 'none'; myModal.setAttribute('aria-hidden','true'); } });
+            }
+            window.addEventListener('click', e => { if (myModal && e.target == myModal) { myModal.style.display = 'none'; myModal.setAttribute('aria-hidden','true'); } });
 
             function loadAllAssignments(){
+                if (!allBody || !allYear || !allMonth) return;
                 allBody.innerHTML = `<p class="notice">${MCEMEXCE_CAL.i18n.loadingDots}</p>`;
                 const y = allYear.value, m = allMonth.value;
                 fetch(`${AJAX_URL}?action=mcemexce_get_all_assigned_slots&year=${encodeURIComponent(y)}&month=${encodeURIComponent(m)}&_ajax_nonce=${encodeURIComponent(AJAX_NONCE)}`)
                     .then(r => r.json())
                     .then(json => {
+                        if (!allBody) return;
                         if (!json || !json.success) { allBody.innerHTML = `<p class="notice">${(json && json.data && json.data.message) ? json.data.message : MCEMEXCE_CAL.i18n.unableToLoad}</p>`; return; }
                         const items = json.data || [];
                         if (!items.length) { allBody.innerHTML = '<p class="notice">No sessions found for the selected period.</p>'; return; }
@@ -400,17 +419,20 @@ class MCEMEXCE_Calendar_Sessioni {
                             </div>`;
                         }).join('');
                     })
-                    .catch(() => { allBody.innerHTML = '<p class="notice">Network error. Please try again.</p>'; });
+                    .catch(() => { if (allBody) allBody.innerHTML = '<p class="notice">Network error. Please try again.</p>'; });
             }
 
-            openAll.addEventListener('click', function(){
-                loadAllAssignments();
-                allModal.style.display = 'block';
-                allModal.setAttribute('aria-hidden','false');
-            });
-            reloadAllBtn.addEventListener('click', loadAllAssignments);
-            closeAll.addEventListener('click', () => { allModal.style.display = 'none'; allModal.setAttribute('aria-hidden','true'); });
-            window.addEventListener('click', e => { if (e.target == allModal) { allModal.style.display = 'none'; allModal.setAttribute('aria-hidden','true'); } });
+            if (openAll) {
+                openAll.addEventListener('click', function(){
+                    loadAllAssignments();
+                    if (allModal) { allModal.style.display = 'block'; allModal.setAttribute('aria-hidden','false'); }
+                });
+            }
+            if (reloadAllBtn) { reloadAllBtn.addEventListener('click', loadAllAssignments); }
+            if (closeAll) {
+                closeAll.addEventListener('click', () => { if (allModal) { allModal.style.display = 'none'; allModal.setAttribute('aria-hidden','true'); } });
+            }
+            window.addEventListener('click', e => { if (allModal && e.target == allModal) { allModal.style.display = 'none'; allModal.setAttribute('aria-hidden','true'); } });
 
             document.addEventListener('click', function(e) {
                 const btn = e.target.closest('.btn-assegna');
