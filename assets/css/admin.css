@@ -15,19 +15,19 @@
 /* =============================================================
    1. Admin Calendar (date picker used in session generation form)
    ============================================================= */
-#mcems-calendar {
+#mcemexce-calendar {
     max-width: 308px;
     font-family: inherit;
 }
 
-.mcems-cal-header {
+.mcemexce-cal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 6px;
 }
 
-.mcems-cal-header button {
+.mcemexce-cal-header button {
     background: none;
     border: 1px solid #c3c4c7;
     border-radius: 4px;
@@ -38,21 +38,21 @@
     transition: background 0.15s;
 }
 
-.mcems-cal-header button:hover {
+.mcemexce-cal-header button:hover {
     background: #f0f0f1;
 }
 
-.mcems-cal-header span {
+.mcemexce-cal-header span {
     font-weight: 600;
     font-size: 14px;
 }
 
-.mcems-cal-table {
+.mcemexce-cal-table {
     border-collapse: collapse;
     width: 100%;
 }
 
-.mcems-cal-table th {
+.mcemexce-cal-table th {
     text-align: center;
     font-size: 11px;
     padding: 4px 2px;
@@ -60,12 +60,12 @@
     font-weight: 600;
 }
 
-.mcems-cal-table td {
+.mcemexce-cal-table td {
     padding: 2px;
     text-align: center;
 }
 
-.mcems-cal-day {
+.mcemexce-cal-day {
     display: inline-block;
     width: 34px;
     height: 34px;
@@ -76,42 +76,42 @@
     transition: background 0.1s;
 }
 
-.mcems-cal-day[data-date] {
+.mcemexce-cal-day[data-date] {
     cursor: pointer;
 }
 
-.mcems-cal-day[data-date]:hover {
+.mcemexce-cal-day[data-date]:hover {
     background: #e8f0fe;
 }
 
-.mcems-cal-day.mcems-cal-selected {
+.mcemexce-cal-day.mcemexce-cal-selected {
     background: #2271b1;
     color: #fff;
 }
 
-.mcems-cal-day.mcems-cal-today {
+.mcemexce-cal-day.mcemexce-cal-today {
     font-weight: 700;
     border: 2px solid #2271b1;
 }
 
-.mcems-cal-day.mcems-cal-past {
+.mcemexce-cal-day.mcemexce-cal-past {
     color: #c3c4c7;
     cursor: default;
 }
 
-.mcems-cal-day.mcems-cal-past:hover {
+.mcemexce-cal-day.mcemexce-cal-past:hover {
     background: none;
 }
 
 /* Selected dates chip list */
-#mcems-selected-dates {
+#mcemexce-selected-dates {
     margin-top: 8px;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
 }
 
-.mcems-date-chip {
+.mcemexce-date-chip {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -123,7 +123,7 @@
     font-weight: 700;
 }
 
-.mcems-date-chip .remove-date {
+.mcemexce-date-chip .remove-date {
     cursor: pointer;
     font-weight: 900;
     color: #2271b1;
@@ -134,21 +134,21 @@
     font-size: 14px;
 }
 
-.mcems-date-chip .remove-date:hover {
+.mcemexce-date-chip .remove-date:hover {
     color: #c62d2d;
 }
 
 /* =============================================================
    2. Admin Table (sessions list)
    ============================================================= */
-.mcems-admin-table {
+.mcemexce-admin-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
     margin-top: 10px;
 }
 
-.mcems-admin-table th {
+.mcemexce-admin-table th {
     text-align: left;
     padding: 8px 12px;
     background: #f0f0f1;
@@ -157,44 +157,44 @@
     white-space: nowrap;
 }
 
-.mcems-admin-table td {
+.mcemexce-admin-table td {
     padding: 8px 12px;
     border-bottom: 1px solid #e0e0e0;
     vertical-align: middle;
 }
 
-.mcems-admin-table tr:nth-child(even) td {
+.mcemexce-admin-table tr:nth-child(even) td {
     background: #f9f9f9;
 }
 
-.mcems-admin-table tr:hover td {
+.mcemexce-admin-table tr:hover td {
     background: #eef5fb;
 }
 
 /* Sortable column headers */
-.mcems-admin-table th.sortable {
+.mcemexce-admin-table th.sortable {
     cursor: pointer;
     user-select: none;
 }
 
-.mcems-admin-table th.sortable::after {
+.mcemexce-admin-table th.sortable::after {
     content: ' ↕';
     font-size: 10px;
     opacity: 0.5;
 }
 
-.mcems-admin-table th.sort-asc::after {
+.mcemexce-admin-table th.sort-asc::after {
     content: ' ↑';
     opacity: 1;
 }
 
-.mcems-admin-table th.sort-desc::after {
+.mcemexce-admin-table th.sort-desc::after {
     content: ' ↓';
     opacity: 1;
 }
 
 /* Capacity badge */
-.mcems-capacity-badge {
+.mcemexce-capacity-badge {
     display: inline-block;
     padding: 2px 8px;
     border-radius: 999px;
@@ -202,17 +202,17 @@
     font-weight: 700;
 }
 
-.mcems-capacity-badge.available {
+.mcemexce-capacity-badge.available {
     background: #d1fae5;
     color: #065f46;
 }
 
-.mcems-capacity-badge.limited {
+.mcemexce-capacity-badge.limited {
     background: #fef9c3;
     color: #713f12;
 }
 
-.mcems-capacity-badge.full {
+.mcemexce-capacity-badge.full {
     background: #fee2e2;
     color: #991b1b;
 }
@@ -220,7 +220,7 @@
 /* =============================================================
    3. Bulk Actions
    ============================================================= */
-.mcems-bulk-actions-bar {
+.mcemexce-bulk-actions-bar {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -228,20 +228,20 @@
     flex-wrap: wrap;
 }
 
-.mcems-bulk-actions-bar select {
+.mcemexce-bulk-actions-bar select {
     padding: 5px 10px;
     border: 1px solid #c3c4c7;
     border-radius: 4px;
     font-size: 13px;
 }
 
-.mcems-bulk-actions-bar button {
+.mcemexce-bulk-actions-bar button {
     padding: 5px 12px;
     font-size: 13px;
 }
 
 /* Select-all checkbox cell */
-.mcems-cb {
+.mcemexce-cb {
     width: 30px;
     text-align: center;
 }
@@ -249,7 +249,7 @@
 /* =============================================================
    4. Inline Editing
    ============================================================= */
-.mcems-inline-edit-wrap {
+.mcemexce-inline-edit-wrap {
     display: none;
     background: #fff;
     border: 1px solid #2271b1;
@@ -259,11 +259,11 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-.mcems-inline-edit-wrap.visible {
+.mcemexce-inline-edit-wrap.visible {
     display: block;
 }
 
-.mcems-inline-edit-wrap label {
+.mcemexce-inline-edit-wrap label {
     font-size: 12px;
     font-weight: 600;
     display: block;
@@ -271,10 +271,10 @@
     color: #3c434a;
 }
 
-.mcems-inline-edit-wrap input[type="text"],
-.mcems-inline-edit-wrap input[type="date"],
-.mcems-inline-edit-wrap input[type="time"],
-.mcems-inline-edit-wrap input[type="number"] {
+.mcemexce-inline-edit-wrap input[type="text"],
+.mcemexce-inline-edit-wrap input[type="date"],
+.mcemexce-inline-edit-wrap input[type="time"],
+.mcemexce-inline-edit-wrap input[type="number"] {
     width: 100%;
     padding: 6px 8px;
     border: 1px solid #c3c4c7;
@@ -284,33 +284,33 @@
     margin-bottom: 8px;
 }
 
-.mcems-inline-edit-wrap input:focus {
+.mcemexce-inline-edit-wrap input:focus {
     outline: 2px solid #2271b1;
     outline-offset: 1px;
     border-color: #2271b1;
 }
 
-.mcems-inline-edit-actions {
+.mcemexce-inline-edit-actions {
     display: flex;
     gap: 8px;
     margin-top: 4px;
 }
 
-.mcems-inline-edit-error {
+.mcemexce-inline-edit-error {
     color: #c62d2d;
     font-size: 12px;
     margin-top: 4px;
     display: none;
 }
 
-.mcems-inline-edit-error.visible {
+.mcemexce-inline-edit-error.visible {
     display: block;
 }
 
 /* =============================================================
    5. Admin Banner / Notice
    ============================================================= */
-.mcems-admin-banner {
+.mcemexce-admin-banner {
     position: relative;
     border-left-width: 4px;
     border-left-style: solid;
@@ -321,19 +321,19 @@
     border-radius: 0 4px 4px 0;
 }
 
-.mcems-admin-banner.notice-info {
+.mcemexce-admin-banner.notice-info {
     border-left-color: #2271b1;
 }
 
-.mcems-admin-banner.notice-warning {
+.mcemexce-admin-banner.notice-warning {
     border-left-color: #dba617;
 }
 
-.mcems-admin-banner.notice-success {
+.mcemexce-admin-banner.notice-success {
     border-left-color: #00a32a;
 }
 
-.mcems-admin-banner .mcems-banner-dismiss {
+.mcemexce-admin-banner .mcemexce-banner-dismiss {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -348,34 +348,34 @@
     transition: color 0.15s, background 0.15s;
 }
 
-.mcems-admin-banner .mcems-banner-dismiss:hover {
+.mcemexce-admin-banner .mcemexce-banner-dismiss:hover {
     color: #c62d2d;
     background: #fee2e2;
 }
 
-.mcems-admin-banner p {
+.mcemexce-admin-banner p {
     margin: 0 0 4px;
     font-size: 13px;
 }
 
-.mcems-admin-banner p:last-child {
+.mcemexce-admin-banner p:last-child {
     margin-bottom: 0;
 }
 
 /* =============================================================
    6. Metabox styling
    ============================================================= */
-.mcems-metabox-grid {
+.mcemexce-metabox-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
 }
 
-.mcems-metabox-grid .full-width {
+.mcemexce-metabox-grid .full-width {
     grid-column: 1 / -1;
 }
 
-.mcems-metabox-field label {
+.mcemexce-metabox-field label {
     font-size: 12px;
     font-weight: 600;
     color: #3c434a;
@@ -383,11 +383,11 @@
     margin-bottom: 4px;
 }
 
-.mcems-metabox-field input[type="text"],
-.mcems-metabox-field input[type="date"],
-.mcems-metabox-field input[type="time"],
-.mcems-metabox-field input[type="number"],
-.mcems-metabox-field select {
+.mcemexce-metabox-field input[type="text"],
+.mcemexce-metabox-field input[type="date"],
+.mcemexce-metabox-field input[type="time"],
+.mcemexce-metabox-field input[type="number"],
+.mcemexce-metabox-field select {
     width: 100%;
     box-sizing: border-box;
     padding: 6px 8px;
@@ -396,8 +396,8 @@
     font-size: 13px;
 }
 
-.mcems-metabox-field input:focus,
-.mcems-metabox-field select:focus {
+.mcemexce-metabox-field input:focus,
+.mcemexce-metabox-field select:focus {
     outline: 2px solid #2271b1;
     outline-offset: 1px;
     border-color: #2271b1;
@@ -406,7 +406,7 @@
 /* =============================================================
    7. Admin Filters
    ============================================================= */
-.mcems-admin-filters {
+.mcemexce-admin-filters {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -418,7 +418,7 @@
     border-radius: 6px;
 }
 
-.mcems-admin-filters label {
+.mcemexce-admin-filters label {
     font-size: 12px;
     font-weight: 600;
     color: #3c434a;
@@ -426,16 +426,16 @@
     margin-bottom: 3px;
 }
 
-.mcems-admin-filters input[type="date"],
-.mcems-admin-filters input[type="text"],
-.mcems-admin-filters select {
+.mcemexce-admin-filters input[type="date"],
+.mcemexce-admin-filters input[type="text"],
+.mcemexce-admin-filters select {
     padding: 5px 8px;
     border: 1px solid #c3c4c7;
     border-radius: 4px;
     font-size: 13px;
 }
 
-.mcems-admin-filters .mcems-filter-clear {
+.mcemexce-admin-filters .mcemexce-filter-clear {
     font-size: 12px;
     color: #787c82;
     text-decoration: underline;
@@ -445,14 +445,14 @@
     padding: 4px;
 }
 
-.mcems-admin-filters .mcems-filter-clear:hover {
+.mcemexce-admin-filters .mcemexce-filter-clear:hover {
     color: #c62d2d;
 }
 
 /* =============================================================
    8. Admin Modals
    ============================================================= */
-.mcems-modal-overlay {
+.mcemexce-modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
@@ -462,11 +462,11 @@
     justify-content: center;
 }
 
-.mcems-modal-overlay.open {
+.mcemexce-modal-overlay.open {
     display: flex;
 }
 
-.mcems-modal {
+.mcemexce-modal {
     background: #fff;
     border-radius: 8px;
     padding: 24px;
@@ -478,7 +478,7 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
 }
 
-.mcems-modal-close {
+.mcemexce-modal-close {
     position: absolute;
     top: 12px;
     right: 12px;
@@ -492,18 +492,18 @@
     border-radius: 4px;
 }
 
-.mcems-modal-close:hover {
+.mcemexce-modal-close:hover {
     color: #c62d2d;
     background: #fee2e2;
 }
 
-.mcems-modal h2 {
+.mcemexce-modal h2 {
     margin: 0 0 16px;
     font-size: 16px;
     padding-right: 24px;
 }
 
-.mcems-modal label {
+.mcemexce-modal label {
     font-size: 13px;
     font-weight: 600;
     display: block;
@@ -511,13 +511,13 @@
     color: #3c434a;
 }
 
-.mcems-modal input[type="text"],
-.mcems-modal input[type="email"],
-.mcems-modal input[type="date"],
-.mcems-modal input[type="time"],
-.mcems-modal input[type="number"],
-.mcems-modal select,
-.mcems-modal textarea {
+.mcemexce-modal input[type="text"],
+.mcemexce-modal input[type="email"],
+.mcemexce-modal input[type="date"],
+.mcemexce-modal input[type="time"],
+.mcemexce-modal input[type="number"],
+.mcemexce-modal select,
+.mcemexce-modal textarea {
     width: 100%;
     box-sizing: border-box;
     padding: 7px 10px;
@@ -527,15 +527,15 @@
     margin-bottom: 12px;
 }
 
-.mcems-modal input:focus,
-.mcems-modal select:focus,
-.mcems-modal textarea:focus {
+.mcemexce-modal input:focus,
+.mcemexce-modal select:focus,
+.mcemexce-modal textarea:focus {
     outline: 2px solid #2271b1;
     outline-offset: 1px;
     border-color: #2271b1;
 }
 
-.mcems-modal-footer {
+.mcemexce-modal-footer {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
@@ -547,14 +547,14 @@
 /* =============================================================
    9. User Search Widget (metabox proctor & candidate search)
    ============================================================= */
-.mcems-user-search-wrap {
+.mcemexce-user-search-wrap {
     position: relative;
     display: inline-block;
     max-width: 360px;
     width: 100%;
 }
 
-.mcems-user-search-wrap input[type="text"] {
+.mcemexce-user-search-wrap input[type="text"] {
     width: 100%;
     box-sizing: border-box;
     padding: 6px 8px;
@@ -563,13 +563,13 @@
     font-size: 13px;
 }
 
-.mcems-user-search-wrap input[type="text"]:focus {
+.mcemexce-user-search-wrap input[type="text"]:focus {
     outline: 2px solid #2271b1;
     outline-offset: 1px;
     border-color: #2271b1;
 }
 
-.mcems-user-search-results {
+.mcemexce-user-search-results {
     display: none;
     position: absolute;
     z-index: 9999;
@@ -584,7 +584,7 @@
     top: calc(100% + 2px);
 }
 
-.mcems-user-item {
+.mcemexce-user-item {
     padding: 8px 12px;
     cursor: pointer;
     font-size: 13px;
@@ -592,32 +592,32 @@
     line-height: 1.4;
 }
 
-.mcems-user-item:last-child {
+.mcemexce-user-item:last-child {
     border-bottom: none;
 }
 
-.mcems-user-item:hover,
-.mcems-user-item.focused {
+.mcemexce-user-item:hover,
+.mcemexce-user-item.focused {
     background: #e8f0fe;
 }
 
-.mcems-user-item-empty {
+.mcemexce-user-item-empty {
     cursor: default;
     color: #787c82;
     font-style: italic;
 }
 
-.mcems-user-item-empty:hover {
+.mcemexce-user-item-empty:hover {
     background: none;
 }
 
-.mcems-user-item-email {
+.mcemexce-user-item-email {
     font-size: 11px;
     color: #787c82;
     display: block;
 }
 
-.mcems-user-selected {
+.mcemexce-user-selected {
     margin-top: 6px;
     font-size: 12px;
     color: #3c434a;
@@ -627,15 +627,15 @@
     flex-wrap: wrap;
 }
 
-.mcems-user-selected-name {
+.mcemexce-user-selected-name {
     font-weight: 600;
 }
 
-.mcems-user-selected-email {
+.mcemexce-user-selected-email {
     color: #787c82;
 }
 
-.mcems-user-search-clear {
+.mcemexce-user-search-clear {
     background: none;
     border: 1px solid #c62d2d;
     border-radius: 3px;
@@ -647,19 +647,19 @@
     display: none;
 }
 
-.mcems-user-search-clear:hover {
+.mcemexce-user-search-clear:hover {
     background: #fee2e2;
 }
 
 /* =============================================================
    10. Bookings List (admin shortcode/page)
    ============================================================= */
-.mcems-adminwrap {
+.mcemexce-adminwrap {
     max-width: 1200px;
     margin: 0 auto;
 }
 
-.mcems-panel {
+.mcemexce-panel {
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
@@ -667,38 +667,38 @@
     box-shadow: 0 1px 2px rgba(16, 24, 40, .06);
 }
 
-.mcems-title {
+.mcemexce-title {
     margin: 0 0 6px;
     font-size: 1.2rem;
     font-weight: 900;
 }
 
-.mcems-desc {
+.mcemexce-desc {
     margin: 0 0 14px;
     color: #667085;
 }
 
-.mcems-filters {
+.mcemexce-filters {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     align-items: flex-end;
 }
 
-.mcems-field {
+.mcemexce-field {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.mcems-field label {
+.mcemexce-field label {
     font-size: 12px;
     font-weight: 800;
     color: #344054;
 }
 
-.mcems-field input,
-.mcems-field select {
+.mcemexce-field input,
+.mcemexce-field select {
     min-width: 240px;
     padding: 9px 10px;
     border-radius: 12px;
@@ -706,13 +706,13 @@
     background: #fff;
 }
 
-.mcems-actions {
+.mcemexce-actions {
     display: flex;
     gap: 10px;
     align-items: center;
 }
 
-.mcems-btn {
+.mcemexce-btn {
     appearance: none;
     border: 1px solid #d0d5dd;
     background: #101828;
@@ -723,11 +723,11 @@
     cursor: pointer;
 }
 
-.mcems-btn:hover {
+.mcemexce-btn:hover {
     filter: brightness(1.05);
 }
 
-.mcems-link {
+.mcemexce-link {
     font-weight: 800;
     color: #344054;
     text-decoration: none;
@@ -737,22 +737,22 @@
     background: #fff;
 }
 
-.mcems-link:hover {
+.mcemexce-link:hover {
     background: #f9fafb;
 }
 
-.mcems-hint {
+.mcemexce-hint {
     margin-top: 10px;
     color: #667085;
     font-size: 12px;
 }
 
-.mcems-tablewrap {
+.mcemexce-tablewrap {
     margin-top: 14px;
     overflow: auto;
 }
 
-table.mcems-table {
+table.mcemexce-table {
     min-width: 1100px;
     border-collapse: separate;
     border-spacing: 0;
@@ -761,7 +761,7 @@ table.mcems-table {
     border-radius: 14px;
 }
 
-table.mcems-table thead th {
+table.mcemexce-table thead th {
     background: #f9fafb;
     color: #344054;
     font-weight: 900;
@@ -772,17 +772,17 @@ table.mcems-table thead th {
     border-bottom: 1px solid #e5e7eb;
 }
 
-table.mcems-table tbody td {
+table.mcemexce-table tbody td {
     padding: 10px;
     border-bottom: 1px solid #f2f4f7;
     vertical-align: top;
 }
 
-table.mcems-table tbody tr:hover td {
+table.mcemexce-table tbody tr:hover td {
     background: #fcfcfd;
 }
 
-.mcems-empty {
+.mcemexce-empty {
     margin-top: 12px;
     padding: 12px;
     border: 1px dashed #d0d5dd;
@@ -791,7 +791,7 @@ table.mcems-table tbody tr:hover td {
     background: #fcfcfd;
 }
 
-.mcems-pill {
+.mcemexce-pill {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -806,7 +806,7 @@ table.mcems-table tbody tr:hover td {
 /* =============================================================
    11. Admin Promotional Banner (Mamba Coding)
    ============================================================= */
-.mcems-banner-wrap {
+.mcemexce-banner-wrap {
     padding: 0;
     border: none;
     background: transparent;
@@ -814,7 +814,7 @@ table.mcems-table tbody tr:hover td {
     margin: 16px 0 18px 0;
 }
 
-.mcems-banner-inner {
+.mcemexce-banner-inner {
     background: linear-gradient(135deg, #31006F 0%, #4a1590 45%, #FDB927 100%);
     border-radius: 18px;
     padding: 18px 22px;
@@ -826,14 +826,14 @@ table.mcems-table tbody tr:hover td {
     position: relative;
 }
 
-.mcems-banner-logo-wrap {
+.mcemexce-banner-logo-wrap {
     display: flex;
     align-items: center;
     gap: 20px;
     min-width: 0;
 }
 
-.mcems-banner-logo-link {
+.mcemexce-banner-logo-link {
     display: block;
     flex: 0 0 auto;
     background: #fff;
@@ -842,18 +842,18 @@ table.mcems-table tbody tr:hover td {
     line-height: 0;
 }
 
-.mcems-banner-logo-link img {
+.mcemexce-banner-logo-link img {
     display: block;
     height: 64px;
     max-width: 100%;
     width: auto;
 }
 
-.mcems-banner-text-wrap {
+.mcemexce-banner-text-wrap {
     min-width: 0;
 }
 
-.mcems-banner-headline {
+.mcemexce-banner-headline {
     font-size: 24px;
     font-weight: 700;
     line-height: 1.2;
@@ -861,14 +861,14 @@ table.mcems-table tbody tr:hover td {
     margin: 0 0 6px 0;
 }
 
-.mcems-banner-desc {
+.mcemexce-banner-desc {
     font-size: 14px;
     line-height: 1.5;
     color: rgba(255, 255, 255, .92);
     max-width: 760px;
 }
 
-.mcems-banner-btn {
+.mcemexce-banner-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -883,7 +883,7 @@ table.mcems-table tbody tr:hover td {
     box-shadow: 0 4px 12px rgba(0, 0, 0, .18);
 }
 
-.mcems-banner-dismiss {
+.mcemexce-banner-dismiss {
     position: absolute;
     top: 10px;
     right: 14px;
@@ -896,6 +896,6 @@ table.mcems-table tbody tr:hover td {
     padding: 0;
 }
 
-.mcems-banner-dismiss:hover {
+.mcemexce-banner-dismiss:hover {
     color: #fff;
 }

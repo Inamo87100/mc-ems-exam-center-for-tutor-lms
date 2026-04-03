@@ -1,12 +1,12 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-class MCEMS_Admin_Sessioni {
+class MCEMEXCE_Admin_Sessioni {
 
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'menu']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
-        add_action('wp_ajax_mcems_user_search', [__CLASS__, 'ajax_user_search']);
+        add_action('wp_ajax_mcemexce_user_search', [__CLASS__, 'ajax_user_search']);
     }
 
     /**
@@ -16,7 +16,7 @@ class MCEMS_Admin_Sessioni {
      * Returns JSON: [{id, name, email}, ...] (max 20 results, deduplicated).
      */
     public static function ajax_user_search(): void {
-        check_ajax_referer('mcems_user_search', 'nonce');
+        check_ajax_referer('mcemexce_user_search', 'nonce');
 
         if (!current_user_can('manage_options')) {
             wp_send_json_error('Unauthorized');
@@ -64,12 +64,12 @@ class MCEMS_Admin_Sessioni {
 
     public static function enqueue_assets(string $hook): void {
         // Only load on the plugin's admin pages
-        if (strpos($hook, 'mcems') === false && strpos($hook, MCEMS_CPT_Sessioni_Esame::CPT) === false) {
+        if (strpos($hook, 'mcems') === false && strpos($hook, MCEMEXCE_CPT_Sessioni_Esame::CPT) === false) {
             return;
         }
 
-        $ver = defined('MCEMS_VERSION') ? MCEMS_VERSION : '1.0.0';
-        $url = defined('MCEMS_PLUGIN_URL') ? MCEMS_PLUGIN_URL : '';
+        $ver = defined('MCEMEXCE_VERSION') ? MCEMEXCE_VERSION : '1.0.0';
+        $url = defined('MCEMEXCE_PLUGIN_URL') ? MCEMEXCE_PLUGIN_URL : '';
 
         wp_register_style('mcems-admin-style', $url . 'assets/css/admin.css', [], $ver);
         wp_enqueue_style('mcems-admin-style');
@@ -96,11 +96,11 @@ class MCEMS_Admin_Sessioni {
         wp_register_script('mcems-admin', $url . 'assets/js/admin.js', [], $ver, true);
         wp_enqueue_script('mcems-admin');
 
-        wp_localize_script('mcems-admin', 'MCEMS_ADMIN', [
+        wp_localize_script('mcems-admin', 'MCEMEXCE_ADMIN', [
             'ajaxUrl'          => admin_url('admin-ajax.php'),
-            'nonce'            => wp_create_nonce('mcems_admin'),
-            'exportNonce'      => wp_create_nonce('mcems_export_csv'),
-            'userSearchNonce'  => wp_create_nonce('mcems_user_search'),
+            'nonce'            => wp_create_nonce('mcemexce_admin'),
+            'exportNonce'      => wp_create_nonce('mcemexce_export_csv'),
+            'userSearchNonce'  => wp_create_nonce('mcemexce_user_search'),
             'freePlan'         => self::is_free_plan(),
             'monthNames'       => [
                 __('January','mc-ems-exam-center-for-tutor-lms'),
@@ -146,20 +146,20 @@ class MCEMS_Admin_Sessioni {
         ob_start();
         ?>
         (function(){
-            const cb = document.getElementById('mcems_generate_special');
-            const std = document.getElementById('mcems_gen_standard');
-            const sp  = document.getElementById('mcems_gen_special');
+            const cb = document.getElementById('mcemexce_generate_special');
+            const std = document.getElementById('mcemexce_gen_standard');
+            const sp  = document.getElementById('mcemexce_gen_special');
 
-            const specialExam = document.getElementById('mcems_special_exam_id');
-            const specialDate   = document.getElementById('mcems_special_date');
-            const specialTime   = document.getElementById('mcems_special_time');
-            const specialEmail  = document.getElementById('mcems_special_user_email');
+            const specialExam = document.getElementById('mcemexce_special_exam_id');
+            const specialDate   = document.getElementById('mcemexce_special_date');
+            const specialTime   = document.getElementById('mcemexce_special_time');
+            const specialEmail  = document.getElementById('mcemexce_special_user_email');
 
-            const standardExam = document.getElementById('mcems_exam_id');
-            const standardStart  = document.getElementById('mcems_date_start');
-            const standardEnd    = document.getElementById('mcems_date_end');
-            const standardTimes  = document.getElementById(MCEMS_ADMIN.freePlan ? 'mcems_time_single' : 'mcems_times');
-            const standardCap    = document.getElementById('mcems_capacity');
+            const standardExam = document.getElementById('mcemexce_exam_id');
+            const standardStart  = document.getElementById('mcemexce_date_start');
+            const standardEnd    = document.getElementById('mcemexce_date_end');
+            const standardTimes  = document.getElementById(MCEMEXCE_ADMIN.freePlan ? 'mcemexce_time_single' : 'mcemexce_times');
+            const standardCap    = document.getElementById('mcemexce_capacity');
 
             if (!cb) return;
 
@@ -215,13 +215,13 @@ class MCEMS_Admin_Sessioni {
             if (!genForm) return;
 
             genForm.addEventListener('submit', function(e){
-                const special = document.getElementById('mcems_generate_special');
+                const special = document.getElementById('mcemexce_generate_special');
                 const isSpecial = special && special.checked;
 
-                const sel = document.getElementById(isSpecial ? 'mcems_special_exam_id' : 'mcems_exam_id');
+                const sel = document.getElementById(isSpecial ? 'mcemexce_special_exam_id' : 'mcemexce_exam_id');
                 if (sel && !sel.value) {
                     e.preventDefault();
-                    alert(MCEMS_ADMIN.i18n.selectExamBeforeGenerating);
+                    alert(MCEMEXCE_ADMIN.i18n.selectExamBeforeGenerating);
                     sel.focus();
                     return;
                 }
@@ -230,20 +230,20 @@ class MCEMS_Admin_Sessioni {
                     const calContainer = document.getElementById('mcems-selected-dates');
                     if (calContainer && calContainer.querySelectorAll('input[name="selected_dates[]"]').length === 0) {
                         e.preventDefault();
-                        alert(MCEMS_ADMIN.i18n.selectAtLeastOneDate);
+                        alert(MCEMEXCE_ADMIN.i18n.selectAtLeastOneDate);
                         return;
                     }
 
-                    if (MCEMS_ADMIN.freePlan) {
-                        const ti = document.getElementById('mcems_time_single');
+                    if (MCEMEXCE_ADMIN.freePlan) {
+                        const ti = document.getElementById('mcemexce_time_single');
                         if (ti && !ti.value) {
                             e.preventDefault();
-                            alert(MCEMS_ADMIN.i18n.selectValidTime);
+                            alert(MCEMEXCE_ADMIN.i18n.selectValidTime);
                             ti.focus();
                             return;
                         }
                     } else {
-                        const ta = document.getElementById('mcems_times');
+                        const ta = document.getElementById('mcemexce_times');
                         if (ta) {
                             const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(function(l){
                                 return /^\s*\d{2}:\d{2}\s*$/.test(l);
@@ -251,35 +251,35 @@ class MCEMS_Admin_Sessioni {
 
                             if (!hasTime) {
                                 e.preventDefault();
-                                alert(MCEMS_ADMIN.i18n.enterAtLeastOneTime);
+                                alert(MCEMEXCE_ADMIN.i18n.enterAtLeastOneTime);
                                 ta.focus();
                                 return;
                             }
                         }
                     }
                 } else {
-                    const sDate = document.getElementById('mcems_special_date');
-                    const sTime = document.getElementById('mcems_special_time');
-                    const sUser = document.getElementById('mcems_special_user_email');
-                    const sUserId = document.getElementById('mcems_special_user_id');
+                    const sDate = document.getElementById('mcemexce_special_date');
+                    const sTime = document.getElementById('mcemexce_special_time');
+                    const sUser = document.getElementById('mcemexce_special_user_email');
+                    const sUserId = document.getElementById('mcemexce_special_user_id');
 
                     if (sDate && !sDate.value) {
                         e.preventDefault();
-                        alert(MCEMS_ADMIN.i18n.selectSpecialDate);
+                        alert(MCEMEXCE_ADMIN.i18n.selectSpecialDate);
                         sDate.focus();
                         return;
                     }
 
                     if (sTime && !sTime.value) {
                         e.preventDefault();
-                        alert(MCEMS_ADMIN.i18n.selectSpecialTime);
+                        alert(MCEMEXCE_ADMIN.i18n.selectSpecialTime);
                         sTime.focus();
                         return;
                     }
 
                     if (!sUserId || !sUserId.value) {
                         e.preventDefault();
-                        alert(MCEMS_ADMIN.i18n.selectSpecialCandidate);
+                        alert(MCEMEXCE_ADMIN.i18n.selectSpecialCandidate);
                         if (sUser) sUser.focus();
                         return;
                     }
@@ -288,13 +288,13 @@ class MCEMS_Admin_Sessioni {
         })();
 
         (function(){
-            const input = document.getElementById('mcems_special_user_email');
-            const hidden = document.getElementById('mcems_special_user_id');
-            const box = document.getElementById('mcems_user_suggest');
+            const input = document.getElementById('mcemexce_special_user_email');
+            const hidden = document.getElementById('mcemexce_special_user_id');
+            const box = document.getElementById('mcemexce_user_suggest');
 
             if (!input || !hidden || !box || typeof ajaxurl === 'undefined') return;
 
-            const nonce = (typeof MCEMS_ADMIN !== 'undefined' && MCEMS_ADMIN.userSearchNonce) ? MCEMS_ADMIN.userSearchNonce : '';
+            const nonce = (typeof MCEMEXCE_ADMIN !== 'undefined' && MCEMEXCE_ADMIN.userSearchNonce) ? MCEMEXCE_ADMIN.userSearchNonce : '';
             let timer = null;
             let last = '';
 
@@ -343,7 +343,7 @@ class MCEMS_Admin_Sessioni {
 
             async function doSearch(q){
                 const fd = new FormData();
-                fd.append('action', 'mcems_user_search');
+                fd.append('action', 'mcemexce_user_search');
                 fd.append('nonce', nonce);
                 fd.append('q', q);
 
@@ -437,9 +437,9 @@ class MCEMS_Admin_Sessioni {
                 update();
             }
 
-            setMinDate('mcems_special_date');
+            setMinDate('mcemexce_special_date');
 
-            bindDateTime('mcems_special_date', 'mcems_special_time');
+            bindDateTime('mcemexce_special_date', 'mcemexce_special_time');
         })();
 
         (function(){
@@ -458,8 +458,8 @@ class MCEMS_Admin_Sessioni {
             currentYear  = td.getFullYear();
             currentMonth = td.getMonth(); // 0-indexed
 
-            var monthNames = MCEMS_ADMIN.monthNames;
-            var dayNames = MCEMS_ADMIN.dayNames;
+            var monthNames = MCEMEXCE_ADMIN.monthNames;
+            var dayNames = MCEMEXCE_ADMIN.dayNames;
 
             function updateHidden(){
                 var container = document.getElementById('mcems-selected-dates');
@@ -551,7 +551,7 @@ class MCEMS_Admin_Sessioni {
 
     public static function menu(): void {
         add_submenu_page(
-            'edit.php?post_type=' . MCEMS_CPT_Sessioni_Esame::CPT,
+            'edit.php?post_type=' . MCEMEXCE_CPT_Sessioni_Esame::CPT,
             __('Create sessions', 'mc-ems-exam-center-for-tutor-lms'),
             __('Create sessions', 'mc-ems-exam-center-for-tutor-lms'),
             'manage_options',
@@ -568,11 +568,11 @@ class MCEMS_Admin_Sessioni {
         $today = gmdate('Y-m-d');
         $week  = gmdate('Y-m-d', strtotime('+7 days'));
 
-        $exams   = MCEMS_Tutor::get_exams();
-        $exam_pt = MCEMS_Tutor::exam_post_type();
+        $exams   = MCEMEXCE_Tutor::get_exams();
+        $exam_pt = MCEMEXCE_Tutor::exam_post_type();
 
         $free_plan    = self::is_free_plan();
-        $max_capacity = $free_plan ? (int) MCEMS_Upsell::FREE_MAX_SEATS_PER_SESSION : 500;
+        $max_capacity = $free_plan ? (int) MCEMEXCE_Upsell::FREE_MAX_SEATS_PER_SESSION : 500;
 
         $notice = '';
         $error  = '';
@@ -580,15 +580,15 @@ class MCEMS_Admin_Sessioni {
 
         $request_method = isset($_SERVER['REQUEST_METHOD']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'])) : '';
         $posted = ($request_method === 'POST');
-        if ($posted && empty($_POST['mcems_action'])) {
-            $error = 'Form submission detected but missing action (mcems_action). Check whether security/cache plugins are altering POST requests.';
+        if ($posted && empty($_POST['mcemexce_action'])) {
+            $error = 'Form submission detected but missing action (mcemexce_action). Check whether security/cache plugins are altering POST requests.';
         }
 
-        if ($request_method === 'POST' && isset($_POST['mcems_action'])) {
-            $action = sanitize_text_field(wp_unslash($_POST['mcems_action']));
+        if ($request_method === 'POST' && isset($_POST['mcemexce_action'])) {
+            $action = sanitize_text_field(wp_unslash($_POST['mcemexce_action']));
 
-            if ($action === 'generate' && check_admin_referer('mcems_generate', 'mcems_generate_nonce')) {
-                $is_special = !empty($_POST['mcems_generate_special']);
+            if ($action === 'generate' && check_admin_referer('mcemexce_generate', 'mcemexce_generate_nonce')) {
+                $is_special = !empty($_POST['mcemexce_generate_special']);
 
                 if ($is_special) {
                     $result = self::handle_generate_special();
@@ -600,7 +600,7 @@ class MCEMS_Admin_Sessioni {
                 $upgrade_notice = $result[2] ?? '';
             }
 
-            if ($action === 'update_capacity' && !$free_plan && check_admin_referer('mcems_update_capacity', 'mcems_update_capacity_nonce')) {
+            if ($action === 'update_capacity' && !$free_plan && check_admin_referer('mcemexce_update_capacity', 'mcemexce_update_capacity_nonce')) {
                 $result = self::handle_update_capacity();
                 $notice         = $result[0] ?? '';
                 $error          = $result[1] ?? '';
@@ -621,18 +621,18 @@ class MCEMS_Admin_Sessioni {
                     printf(
                         /* translators: %d: maximum number of active sessions allowed on the free plan */
                         esc_html__('max %d active sessions', 'mc-ems-exam-center-for-tutor-lms'),
-                        (int) MCEMS_Upsell::FREE_MAX_ACTIVE_SESSIONS
+                        (int) MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS
                     );
                     ?> &bull;
                     <?php
                     printf(
                         /* translators: %d: maximum number of seats per session allowed on the free plan */
                         esc_html__('max %d seats per session', 'mc-ems-exam-center-for-tutor-lms'),
-                        (int) MCEMS_Upsell::FREE_MAX_SEATS_PER_SESSION
+                        (int) MCEMEXCE_Upsell::FREE_MAX_SEATS_PER_SESSION
                     );
                     ?>
                     &mdash;
-                    <a href="<?php echo esc_url(MCEMS_Upsell::UPGRADE_URL); ?>" target="_blank" rel="noopener noreferrer">
+                    <a href="<?php echo esc_url(MCEMEXCE_Upsell::UPGRADE_URL); ?>" target="_blank" rel="noopener noreferrer">
                         <?php esc_html_e('Upgrade to MC-EMS Premium', 'mc-ems-exam-center-for-tutor-lms'); ?> &rarr;
                     </a>
                 </p>
@@ -655,32 +655,32 @@ class MCEMS_Admin_Sessioni {
                 <h2><?php echo esc_html__('Generate new sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
 
                 <form method="post" id="mcems-generate-form">
-                    <?php wp_nonce_field('mcems_generate', 'mcems_generate_nonce'); ?>
-                    <input type="hidden" name="mcems_action" value="generate">
+                    <?php wp_nonce_field('mcemexce_generate', 'mcemexce_generate_nonce'); ?>
+                    <input type="hidden" name="mcemexce_action" value="generate">
 
                     <table class="form-table">
                         <tr>
                             <th><?php echo esc_html__('Generation type', 'mc-ems-exam-center-for-tutor-lms'); ?></th>
                             <td>
                                 <label style="display:flex;align-items:center;gap:10px;font-weight:700;">
-                                    <input type="checkbox" name="mcems_generate_special" id="mcems_generate_special" value="1">
+                                    <input type="checkbox" name="mcemexce_generate_special" id="mcemexce_generate_special" value="1">
                                     ♿ <?php echo esc_html__('Create an exam session for a candidate with special requirements', 'mc-ems-exam-center-for-tutor-lms'); ?>
                                 </label>
                             </td>
                         </tr>
                     </table>
 
-                    <div id="mcems_gen_standard">
+                    <div id="mcemexce_gen_standard">
                         <table class="form-table">
                             <tr>
-                                <th><label for="mcems_exam_id"><?php echo esc_html__('Tutor LMS exam', 'mc-ems-exam-center-for-tutor-lms'); ?></label></th>
+                                <th><label for="mcemexce_exam_id"><?php echo esc_html__('Tutor LMS exam', 'mc-ems-exam-center-for-tutor-lms'); ?></label></th>
                                 <td>
                                     <?php if (!$exam_pt): ?>
                                         <em><?php echo esc_html__('Tutor LMS not detected (exam post type not found).', 'mc-ems-exam-center-for-tutor-lms'); ?></em>
                                     <?php elseif (!$exams): ?>
                                         <em><?php echo esc_html__('No published Tutor LMS exam found.', 'mc-ems-exam-center-for-tutor-lms'); ?></em>
                                     <?php else: ?>
-                                        <select id="mcems_exam_id" name="exam_id">
+                                        <select id="mcemexce_exam_id" name="exam_id">
                                             <option value=""><?php echo esc_html__('— Select exam —', 'mc-ems-exam-center-for-tutor-lms'); ?></option>
                                             <?php foreach ($exams as $cid => $title): ?>
                                                 <option value="<?php echo (int) $cid; ?>"><?php echo esc_html($title); ?></option>
@@ -703,21 +703,21 @@ class MCEMS_Admin_Sessioni {
                             <tr>
                                 <th>
                                     <?php if ($free_plan): ?>
-                                    <label for="mcems_time_single"><?php echo esc_html__('Exam session time', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                                    <label for="mcemexce_time_single"><?php echo esc_html__('Exam session time', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                                     <?php else: ?>
-                                    <label for="mcems_times"><?php echo esc_html__('Exam session times (one per line)', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                                    <label for="mcemexce_times"><?php echo esc_html__('Exam session times (one per line)', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                                     <?php endif; ?>
                                 </th>
                                 <td>
                                     <?php if ($free_plan): ?>
                                     <input
                                         type="time"
-                                        id="mcems_time_single"
+                                        id="mcemexce_time_single"
                                         name="time_single"
                                     >
                                     <?php else: ?>
                                     <textarea
-                                        id="mcems_times"
+                                        id="mcemexce_times"
                                         name="times"
                                         rows="5"
                                         cols="40"
@@ -729,26 +729,26 @@ class MCEMS_Admin_Sessioni {
 
                             <tr>
                                 <th>
-                                    <label for="mcems_capacity"><?php echo esc_html__('Seats per exam session', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                                    <label for="mcemexce_capacity"><?php echo esc_html__('Seats per exam session', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                                 </th>
                                 <td>
-                                    <input type="number" id="mcems_capacity" name="capacity" min="1" max="<?php echo (int) $max_capacity; ?>">
+                                    <input type="number" id="mcemexce_capacity" name="capacity" min="1" max="<?php echo (int) $max_capacity; ?>">
                                 </td>
                             </tr>
                         </table>
                     </div>
 
-                    <div id="mcems_gen_special" style="display:none;">
+                    <div id="mcemexce_gen_special" style="display:none;">
                         <table class="form-table">
                             <tr>
-                                <th><label for="mcems_special_exam_id"><?php echo esc_html__('Tutor LMS exam', 'mc-ems-exam-center-for-tutor-lms'); ?></label></th>
+                                <th><label for="mcemexce_special_exam_id"><?php echo esc_html__('Tutor LMS exam', 'mc-ems-exam-center-for-tutor-lms'); ?></label></th>
                                 <td>
                                     <?php if (!$exam_pt): ?>
                                         <em><?php echo esc_html__('Tutor LMS not detected.', 'mc-ems-exam-center-for-tutor-lms'); ?></em>
                                     <?php elseif (!$exams): ?>
                                         <em><?php echo esc_html__('No published Tutor LMS exam found.', 'mc-ems-exam-center-for-tutor-lms'); ?></em>
                                     <?php else: ?>
-                                        <select id="mcems_special_exam_id" name="special_exam_id" disabled>
+                                        <select id="mcemexce_special_exam_id" name="special_exam_id" disabled>
                                             <option value=""><?php echo esc_html__('— Select exam —', 'mc-ems-exam-center-for-tutor-lms'); ?></option>
                                             <?php foreach ($exams as $cid => $title): ?>
                                                 <option value="<?php echo (int) $cid; ?>"><?php echo esc_html($title); ?></option>
@@ -759,11 +759,11 @@ class MCEMS_Admin_Sessioni {
                             </tr>
 
                             <tr>
-                                <th><label for="mcems_special_date"><?php echo esc_html__('Date', 'mc-ems-exam-center-for-tutor-lms'); ?></label></th>
+                                <th><label for="mcemexce_special_date"><?php echo esc_html__('Date', 'mc-ems-exam-center-for-tutor-lms'); ?></label></th>
                                 <td>
                                     <input
                                         type="date"
-                                        id="mcems_special_date"
+                                        id="mcemexce_special_date"
                                         name="special_date"
                                         value="<?php echo esc_attr($today); ?>"
                                         min="<?php echo esc_attr($today); ?>"
@@ -773,11 +773,11 @@ class MCEMS_Admin_Sessioni {
                             </tr>
 
                             <tr>
-                                <th><label for="mcems_special_time"><?php echo esc_html__('Time (single)', 'mc-ems-exam-center-for-tutor-lms'); ?></label></th>
+                                <th><label for="mcemexce_special_time"><?php echo esc_html__('Time (single)', 'mc-ems-exam-center-for-tutor-lms'); ?></label></th>
                                 <td>
                                     <input
                                         type="time"
-                                        id="mcems_special_time"
+                                        id="mcemexce_special_time"
                                         name="special_time"
                                         value=""
                                         disabled
@@ -796,15 +796,15 @@ class MCEMS_Admin_Sessioni {
                                     <div class="mcems-user-search-wrap">
                                         <input
                                             type="text"
-                                            id="mcems_special_user_email"
+                                            id="mcemexce_special_user_email"
                                             name="special_user_email"
                                             value=""
                                             placeholder="<?php echo esc_attr__('Search by name or email…', 'mc-ems-exam-center-for-tutor-lms'); ?>"
                                             autocomplete="off"
                                             disabled
                                         >
-                                        <input type="hidden" id="mcems_special_user_id" name="special_user_id" value="">
-                                        <div id="mcems_user_suggest" class="mcems-user-search-results"></div>
+                                        <input type="hidden" id="mcemexce_special_user_id" name="special_user_id" value="">
+                                        <div id="mcemexce_user_suggest" class="mcems-user-search-results"></div>
                                     </div>
                                     <p class="description" style="margin-top:8px;"><?php echo esc_html__('Start typing a name or email address, then click the user to select.', 'mc-ems-exam-center-for-tutor-lms'); ?></p>
                                 </td>
@@ -813,7 +813,7 @@ class MCEMS_Admin_Sessioni {
                     </div>
 
                     <p class="submit">
-                        <button type="submit" class="button button-primary" name="mcems_submit_generate" value="1">
+                        <button type="submit" class="button button-primary" name="mcemexce_submit_generate" value="1">
                             <?php echo esc_html__('Generate Sessions', 'mc-ems-exam-center-for-tutor-lms'); ?>
                         </button>
                     </p>
@@ -827,15 +827,15 @@ class MCEMS_Admin_Sessioni {
                 <h2><?php echo esc_html__('Bulk update session capacity', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
                 <p class="description"><?php echo esc_html__('Override the capacity of all standard (non-special) sessions in bulk.', 'mc-ems-exam-center-for-tutor-lms'); ?></p>
                 <form method="post">
-                    <?php wp_nonce_field('mcems_update_capacity', 'mcems_update_capacity_nonce'); ?>
-                    <input type="hidden" name="mcems_action" value="update_capacity">
+                    <?php wp_nonce_field('mcemexce_update_capacity', 'mcemexce_update_capacity_nonce'); ?>
+                    <input type="hidden" name="mcemexce_action" value="update_capacity">
                     <table class="form-table">
                         <tr>
                             <th>
-                                <label for="mcems_new_capacity"><?php echo esc_html__('New capacity', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                                <label for="mcemexce_new_capacity"><?php echo esc_html__('New capacity', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                             </th>
                             <td>
-                                <input type="number" id="mcems_new_capacity" name="new_capacity" min="1" max="<?php echo (int) $max_capacity; ?>" value="1">
+                                <input type="number" id="mcemexce_new_capacity" name="new_capacity" min="1" max="<?php echo (int) $max_capacity; ?>" value="1">
                             </td>
                         </tr>
                         <tr>
@@ -862,7 +862,7 @@ class MCEMS_Admin_Sessioni {
     }
 
     private static function handle_generate_standard(): array {
-        check_admin_referer('mcems_generate', 'mcems_generate_nonce');
+        check_admin_referer('mcemexce_generate', 'mcemexce_generate_nonce');
         $selected_dates_raw = isset($_POST['selected_dates']) && is_array($_POST['selected_dates'])
             ? array_map('sanitize_text_field', wp_unslash($_POST['selected_dates']))
             : [];
@@ -874,12 +874,12 @@ class MCEMS_Admin_Sessioni {
         }
 
         // Free plan: enforce max seats per session.
-        if (self::is_free_plan() && $capacity > MCEMS_Upsell::FREE_MAX_SEATS_PER_SESSION) {
-            return ['', MCEMS_Upsell::limit_error(
+        if (self::is_free_plan() && $capacity > MCEMEXCE_Upsell::FREE_MAX_SEATS_PER_SESSION) {
+            return ['', MCEMEXCE_Upsell::limit_error(
                 sprintf(
                     /* translators: %d: maximum seats allowed on free plan */
                     __('The free plan allows a maximum of %d seats per session.', 'mc-ems-exam-center-for-tutor-lms'),
-                    MCEMS_Upsell::FREE_MAX_SEATS_PER_SESSION
+                    MCEMEXCE_Upsell::FREE_MAX_SEATS_PER_SESSION
                 )
             ), ''];
         }
@@ -925,12 +925,12 @@ class MCEMS_Admin_Sessioni {
         $is_free_plan   = self::is_free_plan();
         $current_count  = $is_free_plan ? self::count_future_sessions() : 0;
 
-        if ($is_free_plan && $current_count >= MCEMS_Upsell::FREE_MAX_ACTIVE_SESSIONS) {
-            return ['', MCEMS_Upsell::limit_error(
+        if ($is_free_plan && $current_count >= MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS) {
+            return ['', MCEMEXCE_Upsell::limit_error(
                 sprintf(
                     /* translators: %d: maximum active sessions allowed on free plan */
                     __('The free plan allows a maximum of %d active sessions. You have reached this limit.', 'mc-ems-exam-center-for-tutor-lms'),
-                    MCEMS_Upsell::FREE_MAX_ACTIVE_SESSIONS
+                    MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS
                 )
             ), ''];
         }
@@ -954,7 +954,7 @@ class MCEMS_Admin_Sessioni {
 
             foreach ($times as $time) {
                 // Free plan: stop once the active-sessions cap is reached.
-                if ($is_free_plan && ($current_count + $created) >= MCEMS_Upsell::FREE_MAX_ACTIVE_SESSIONS) {
+                if ($is_free_plan && ($current_count + $created) >= MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS) {
                     $skipped++;
                     $limit_cap_reached = true;
                     continue;
@@ -1011,17 +1011,17 @@ class MCEMS_Admin_Sessioni {
                     /* translators: 1: list of blocked dates, 2: max sessions per day */
                     __('The free plan allows only %2$d session per day — the following dates were skipped because a session already exists: %1$s.', 'mc-ems-exam-center-for-tutor-lms'),
                     implode(', ', $limit_dates_blocked),
-                    MCEMS_Upsell::FREE_MAX_SESSIONS_PER_DAY
+                    MCEMEXCE_Upsell::FREE_MAX_SESSIONS_PER_DAY
                 );
             }
             if ($limit_cap_reached) {
                 $limit_parts[] = sprintf(
                     /* translators: %d: maximum active sessions allowed on free plan */
                     __('The free plan allows a maximum of %d active sessions — additional sessions were not created.', 'mc-ems-exam-center-for-tutor-lms'),
-                    MCEMS_Upsell::FREE_MAX_ACTIVE_SESSIONS
+                    MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS
                 );
             }
-            $upgrade_notice = MCEMS_Upsell::limit_error(implode(' ', $limit_parts));
+            $upgrade_notice = MCEMEXCE_Upsell::limit_error(implode(' ', $limit_parts));
         }
 
         if (!$created && !$upgrade_notice) {
@@ -1037,7 +1037,7 @@ class MCEMS_Admin_Sessioni {
     }
 
     private static function handle_generate_special(): array {
-        check_admin_referer('mcems_generate', 'mcems_generate_nonce');
+        check_admin_referer('mcemexce_generate', 'mcemexce_generate_nonce');
         $date      = sanitize_text_field(wp_unslash($_POST['special_date'] ?? ''));
         $time      = sanitize_text_field(wp_unslash($_POST['special_time'] ?? ''));
         $uid     = absint($_POST['special_user_id'] ?? 0);
@@ -1055,12 +1055,12 @@ class MCEMS_Admin_Sessioni {
         // Free plan: enforce max active sessions.
         if (self::is_free_plan()) {
             $current_count = self::count_future_sessions();
-            if ($current_count >= MCEMS_Upsell::FREE_MAX_ACTIVE_SESSIONS) {
-                return ['', MCEMS_Upsell::limit_error(
+            if ($current_count >= MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS) {
+                return ['', MCEMEXCE_Upsell::limit_error(
                     sprintf(
                         /* translators: %d: maximum active sessions allowed on free plan */
                         __('The free plan allows a maximum of %d active sessions. You have reached this limit.', 'mc-ems-exam-center-for-tutor-lms'),
-                        MCEMS_Upsell::FREE_MAX_ACTIVE_SESSIONS
+                        MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS
                     )
                 ), ''];
             }
@@ -1099,16 +1099,16 @@ class MCEMS_Admin_Sessioni {
             return ['', __('Unable to create exam session.', 'mc-ems-exam-center-for-tutor-lms'), ''];
         }
 
-        update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, [$uid]);
+        update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, [$uid]);
 
-        update_user_meta($uid, MCEMS_Booking::UM_ACTIVE_BOOKING, [
+        update_user_meta($uid, MCEMEXCE_Booking::UM_ACTIVE_BOOKING, [
             'slot_id'    => $sid,
             'data'       => $date,
             'orario'     => $time,
             'created_at' => current_time('mysql'),
         ]);
 
-        $storico = get_user_meta($uid, MCEMS_Booking::UM_HISTORY, true);
+        $storico = get_user_meta($uid, MCEMEXCE_Booking::UM_HISTORY, true);
         if (!is_array($storico)) {
             $storico = [];
         }
@@ -1121,7 +1121,7 @@ class MCEMS_Admin_Sessioni {
             'timestamp' => (int) current_time('timestamp'),
         ];
 
-        update_user_meta($uid, MCEMS_Booking::UM_HISTORY, $storico);
+        update_user_meta($uid, MCEMEXCE_Booking::UM_HISTORY, $storico);
 
         return [sprintf(
             /* translators: %d: ID of the newly created special exam session */
@@ -1131,23 +1131,23 @@ class MCEMS_Admin_Sessioni {
     }
 
     private static function handle_update_capacity(): array {
-        check_admin_referer('mcems_update_capacity', 'mcems_update_capacity_nonce');
+        check_admin_referer('mcemexce_update_capacity', 'mcemexce_update_capacity_nonce');
         $new_cap     = max(1, absint($_POST['new_capacity'] ?? 0));
         $only_future = !empty($_POST['only_future']);
 
         // Free plan: enforce max seats per session.
-        if (self::is_free_plan() && $new_cap > MCEMS_Upsell::FREE_MAX_SEATS_PER_SESSION) {
-            return ['', MCEMS_Upsell::limit_error(
+        if (self::is_free_plan() && $new_cap > MCEMEXCE_Upsell::FREE_MAX_SEATS_PER_SESSION) {
+            return ['', MCEMEXCE_Upsell::limit_error(
                 sprintf(
                     /* translators: %d: maximum seats allowed on free plan */
                     __('The free plan allows a maximum of %d seats per session.', 'mc-ems-exam-center-for-tutor-lms'),
-                    MCEMS_Upsell::FREE_MAX_SEATS_PER_SESSION
+                    MCEMEXCE_Upsell::FREE_MAX_SEATS_PER_SESSION
                 )
             ), ''];
         }
 
         $ids = get_posts([
-            'post_type'      => MCEMS_CPT_Sessioni_Esame::CPT,
+            'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
             'post_status'    => 'publish',
             'posts_per_page' => -1,
             'fields'         => 'ids',
@@ -1158,19 +1158,19 @@ class MCEMS_Admin_Sessioni {
 
         foreach ($ids as $sid) {
             $sid = (int) $sid;
-            $is_special = (int) get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_IS_SPECIAL, true);
-            $date = (string) get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_DATE, true);
+            $is_special = (int) get_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_IS_SPECIAL, true);
+            $date = (string) get_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
 
             if ($only_future && $date && $date < $today) {
                 continue;
             }
 
             if ($is_special === 1) {
-                update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_CAPACITY, 1);
+                update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_CAPACITY, 1);
                 continue;
             }
 
-            update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_CAPACITY, $new_cap);
+            update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_CAPACITY, $new_cap);
             $updated++;
         }
 
@@ -1185,7 +1185,7 @@ class MCEMS_Admin_Sessioni {
      * Returns true when MC-EMS Premium is NOT active (i.e. free-plan limits apply).
      */
     private static function is_free_plan(): bool {
-        return class_exists('MCEMS_Upsell') && !MCEMS_Upsell::is_premium();
+        return class_exists('MCEMEXCE_Upsell') && !MCEMEXCE_Upsell::is_premium();
     }
 
     /**
@@ -1194,13 +1194,13 @@ class MCEMS_Admin_Sessioni {
     private static function count_future_sessions(): int {
         $today = current_time('Y-m-d');
         $q = new WP_Query([
-            'post_type'      => MCEMS_CPT_Sessioni_Esame::CPT,
+            'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
             'post_status'    => 'publish',
             'posts_per_page' => -1,
             'fields'         => 'ids',
             'meta_query'     => [
                 [
-                    'key'     => MCEMS_CPT_Sessioni_Esame::MK_DATE,
+                    'key'     => MCEMEXCE_CPT_Sessioni_Esame::MK_DATE,
                     'value'   => $today,
                     'compare' => '>=',
                     'type'    => 'DATE',
@@ -1215,13 +1215,13 @@ class MCEMS_Admin_Sessioni {
      */
     private static function has_session_on_date(string $date): bool {
         $q = new WP_Query([
-            'post_type'      => MCEMS_CPT_Sessioni_Esame::CPT,
+            'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
             'post_status'    => 'publish',
             'posts_per_page' => 1,
             'fields'         => 'ids',
             'meta_query'     => [
                 [
-                    'key'   => MCEMS_CPT_Sessioni_Esame::MK_DATE,
+                    'key'   => MCEMEXCE_CPT_Sessioni_Esame::MK_DATE,
                     'value' => $date,
                 ],
             ],
@@ -1236,13 +1236,13 @@ class MCEMS_Admin_Sessioni {
      */
     private static function get_session_dates_in_range(string $start, string $end): array {
         $ids = get_posts([
-            'post_type'      => MCEMS_CPT_Sessioni_Esame::CPT,
+            'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
             'post_status'    => 'publish',
             'posts_per_page' => -1,
             'fields'         => 'ids',
             'meta_query'     => [
                 [
-                    'key'     => MCEMS_CPT_Sessioni_Esame::MK_DATE,
+                    'key'     => MCEMEXCE_CPT_Sessioni_Esame::MK_DATE,
                     'value'   => [$start, $end],
                     'compare' => 'BETWEEN',
                     'type'    => 'DATE',
@@ -1252,7 +1252,7 @@ class MCEMS_Admin_Sessioni {
 
         $dates = [];
         foreach ($ids as $sid) {
-            $d = (string) get_post_meta((int) $sid, MCEMS_CPT_Sessioni_Esame::MK_DATE, true);
+            $d = (string) get_post_meta((int) $sid, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
             if ($d) {
                 $dates[] = $d;
             }
@@ -1262,17 +1262,17 @@ class MCEMS_Admin_Sessioni {
 
     private static function session_exists(string $date, string $time, int $exam_id, bool $special_only = false): bool {
         $meta = [
-            ['key' => MCEMS_CPT_Sessioni_Esame::MK_DATE, 'value' => $date],
-            ['key' => MCEMS_CPT_Sessioni_Esame::MK_TIME, 'value' => $time],
-            ['key' => MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, 'value' => $exam_id],
+            ['key' => MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, 'value' => $date],
+            ['key' => MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, 'value' => $time],
+            ['key' => MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID, 'value' => $exam_id],
         ];
 
         if ($special_only) {
-            $meta[] = ['key' => MCEMS_CPT_Sessioni_Esame::MK_IS_SPECIAL, 'value' => 1];
+            $meta[] = ['key' => MCEMEXCE_CPT_Sessioni_Esame::MK_IS_SPECIAL, 'value' => 1];
         }
 
         $q = new WP_Query([
-            'post_type'      => MCEMS_CPT_Sessioni_Esame::CPT,
+            'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
             'post_status'    => 'publish',
             'posts_per_page' => 1,
             'fields'         => 'ids',
@@ -1284,7 +1284,7 @@ class MCEMS_Admin_Sessioni {
 
     private static function create_session(string $date, string $time, int $capacity, int $is_special, int $special_user_id, int $exam_id): int {
         $sid = wp_insert_post([
-            'post_type'   => MCEMS_CPT_Sessioni_Esame::CPT,
+            'post_type'   => MCEMEXCE_CPT_Sessioni_Esame::CPT,
             'post_status' => 'publish',
             'post_title'  => "Session {$date} {$time}",
         ], true);
@@ -1293,13 +1293,13 @@ class MCEMS_Admin_Sessioni {
             return 0;
         }
 
-        update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_DATE, $date);
-        update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_TIME, $time);
-        update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, $exam_id > 0 ? (int) $exam_id : 0);
-        update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_CAPACITY, max(1, $capacity));
-        update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, []);
-        update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_IS_SPECIAL, $is_special ? 1 : 0);
-        update_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, $special_user_id > 0 ? (int) $special_user_id : 0);
+        update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, $date);
+        update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, $time);
+        update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID, $exam_id > 0 ? (int) $exam_id : 0);
+        update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_CAPACITY, max(1, $capacity));
+        update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, []);
+        update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_IS_SPECIAL, $is_special ? 1 : 0);
+        update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_SPECIAL_USER_ID, $special_user_id > 0 ? (int) $special_user_id : 0);
 
         return (int) $sid;
     }

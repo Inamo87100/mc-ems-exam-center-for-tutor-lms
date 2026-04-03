@@ -2,17 +2,17 @@
 if (!defined('ABSPATH')) exit;
 
 /**
- * EMS_Session_ID_Column
+ * MCEMEXCE_Session_ID_Column
  *
  * Adds a "Session ID" column to the admin list for exam sessions.
  * The column is sortable and a backend search/filter is supported.
  */
-class EMS_Session_ID_Column {
+class MCEMEXCE_Session_ID_Column {
 
     public static function init(): void {
-        add_filter('manage_edit-' . MCEMS_CPT_Sessioni_Esame::CPT . '_columns', [__CLASS__, 'add_col'], 20);
-        add_action('manage_' . MCEMS_CPT_Sessioni_Esame::CPT . '_posts_custom_column', [__CLASS__, 'render'], 10, 2);
-        add_filter('manage_edit-' . MCEMS_CPT_Sessioni_Esame::CPT . '_sortable_columns', [__CLASS__, 'sortable_cols']);
+        add_filter('manage_edit-' . MCEMEXCE_CPT_Sessioni_Esame::CPT . '_columns', [__CLASS__, 'add_col'], 20);
+        add_action('manage_' . MCEMEXCE_CPT_Sessioni_Esame::CPT . '_posts_custom_column', [__CLASS__, 'render'], 10, 2);
+        add_filter('manage_edit-' . MCEMEXCE_CPT_Sessioni_Esame::CPT . '_sortable_columns', [__CLASS__, 'sortable_cols']);
         add_action('pre_get_posts', [__CLASS__, 'filter_by_session_id']);
         add_action('restrict_manage_posts', [__CLASS__, 'render_filter_input']);
     }
@@ -28,11 +28,11 @@ class EMS_Session_ID_Column {
         foreach ($columns as $key => $label) {
             $new[$key] = $label;
             if ($key === 'title') {
-                $new['ems_session_id'] = __('Session ID', 'mc-ems-exam-center-for-tutor-lms');
+                $new['mcemexce_session_id'] = __('Session ID', 'mc-ems-exam-center-for-tutor-lms');
             }
         }
-        if (!isset($new['ems_session_id'])) {
-            $new['ems_session_id'] = __('Session ID', 'mc-ems-exam-center-for-tutor-lms');
+        if (!isset($new['mcemexce_session_id'])) {
+            $new['mcemexce_session_id'] = __('Session ID', 'mc-ems-exam-center-for-tutor-lms');
         }
         return $new;
     }
@@ -44,7 +44,7 @@ class EMS_Session_ID_Column {
      * @return array
      */
     public static function sortable_cols($sortable) {
-        $sortable['ems_session_id'] = 'ID';
+        $sortable['mcemexce_session_id'] = 'ID';
         return $sortable;
     }
 
@@ -55,7 +55,7 @@ class EMS_Session_ID_Column {
      * @param int    $post_id
      */
     public static function render($column, $post_id): void {
-        if ($column === 'ems_session_id') {
+        if ($column === 'mcemexce_session_id') {
             echo absint($post_id);
         }
     }
@@ -67,19 +67,19 @@ class EMS_Session_ID_Column {
      * @param string $post_type
      */
     public static function render_filter_input($post_type): void {
-        if ($post_type !== MCEMS_CPT_Sessioni_Esame::CPT) {
+        if ($post_type !== MCEMEXCE_CPT_Sessioni_Esame::CPT) {
             return;
         }
 
-        $nonce_raw   = isset($_GET['ems_session_id_nonce']) ? sanitize_text_field(wp_unslash($_GET['ems_session_id_nonce'])) : '';
-        $nonce_valid = $nonce_raw && wp_verify_nonce($nonce_raw, 'ems_session_id_filter');
+        $nonce_raw   = isset($_GET['mcemexce_session_id_nonce']) ? sanitize_text_field(wp_unslash($_GET['mcemexce_session_id_nonce'])) : '';
+        $nonce_valid = $nonce_raw && wp_verify_nonce($nonce_raw, 'mcemexce_session_id_filter');
 
-        $value = ($nonce_valid && isset($_GET['ems_session_id_filter']))
-            ? absint(wp_unslash($_GET['ems_session_id_filter']))
+        $value = ($nonce_valid && isset($_GET['mcemexce_session_id_filter']))
+            ? absint(wp_unslash($_GET['mcemexce_session_id_filter']))
             : 0;
 
-        echo '<input type="hidden" name="ems_session_id_nonce" value="' . esc_attr(wp_create_nonce('ems_session_id_filter')) . '">';
-        echo '<input type="number" name="ems_session_id_filter" id="ems_session_id_filter"'
+        echo '<input type="hidden" name="mcemexce_session_id_nonce" value="' . esc_attr(wp_create_nonce('mcemexce_session_id_filter')) . '">';
+        echo '<input type="number" name="mcemexce_session_id_filter" id="mcemexce_session_id_filter"'
             . ' value="' . ($value > 0 ? (int) $value : '') . '"'
             . ' placeholder="' . esc_attr__('Session ID…', 'mc-ems-exam-center-for-tutor-lms') . '"'
             . ' style="width:110px;" min="1">';
@@ -95,16 +95,16 @@ class EMS_Session_ID_Column {
             return;
         }
 
-        if ($query->get('post_type') !== MCEMS_CPT_Sessioni_Esame::CPT) {
+        if ($query->get('post_type') !== MCEMEXCE_CPT_Sessioni_Esame::CPT) {
             return;
         }
 
-        $nonce_raw = isset($_GET['ems_session_id_nonce']) ? sanitize_text_field(wp_unslash($_GET['ems_session_id_nonce'])) : '';
-        if (!$nonce_raw || !wp_verify_nonce($nonce_raw, 'ems_session_id_filter')) {
+        $nonce_raw = isset($_GET['mcemexce_session_id_nonce']) ? sanitize_text_field(wp_unslash($_GET['mcemexce_session_id_nonce'])) : '';
+        if (!$nonce_raw || !wp_verify_nonce($nonce_raw, 'mcemexce_session_id_filter')) {
             return;
         }
 
-        $raw = isset($_GET['ems_session_id_filter']) ? absint(wp_unslash($_GET['ems_session_id_filter'])) : 0;
+        $raw = isset($_GET['mcemexce_session_id_filter']) ? absint(wp_unslash($_GET['mcemexce_session_id_filter'])) : 0;
         if ($raw <= 0) {
             return;
         }

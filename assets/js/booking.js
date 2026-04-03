@@ -3,8 +3,8 @@
   function $all(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
 
   function i18n(key, fallback) {
-    if (typeof MCEMS_BOOKING !== 'undefined' && MCEMS_BOOKING.i18n && MCEMS_BOOKING.i18n[key]) {
-      return MCEMS_BOOKING.i18n[key];
+    if (typeof MCEMEXCE_BOOKING !== 'undefined' && MCEMEXCE_BOOKING.i18n && MCEMEXCE_BOOKING.i18n[key]) {
+      return MCEMEXCE_BOOKING.i18n[key];
     }
     return fallback || key;
   }
@@ -13,15 +13,15 @@
     const fd = new FormData();
     fd.append("action", action);
     Object.keys(data || {}).forEach(k => fd.append(k, data[k]));
-    return fetch(MCEMS_BOOKING.ajaxUrl, { method: "POST", credentials: "same-origin", body: fd })
+    return fetch(MCEMEXCE_BOOKING.ajaxUrl, { method: "POST", credentials: "same-origin", body: fd })
       .then(r => r.json());
   }
 
   // Prenota: carica sessioni per data
-  $all("[data-mcems-booking]").forEach(function (wrap) {
-    const dateInput = $(".mcems-date", wrap);
-    const sessBox   = $(".mcems-sessions", wrap);
-    const msgBox    = $(".mcems-msg", wrap);
+  $all("[data-mcemexce-booking]").forEach(function (wrap) {
+    const dateInput = $(".mcemexce-date", wrap);
+    const sessBox   = $(".mcemexce-sessions", wrap);
+    const msgBox    = $(".mcemexce-msg", wrap);
 
     function setMsg(t, isErr) {
       msgBox.textContent = t || "";
@@ -36,12 +36,12 @@
       }
 
       const ul = document.createElement("ul");
-      ul.className = "mcems-session-list";
+      ul.className = "mcemexce-session-list";
       items.forEach(function (s) {
         const li = document.createElement("li");
         li.innerHTML =
           `<label>
-            <input type="radio" name="mcems_session_id" value="${s.id}">
+            <input type="radio" name="mcemexce_session_id" value="${s.id}">
             <strong>${s.time}</strong> ${s.label}
           </label>`;
         ul.appendChild(li);
@@ -53,8 +53,8 @@
       dateInput.addEventListener("change", function () {
         setMsg("");
         renderSessions([]);
-        post("mcems_get_sessions_by_date", {
-          nonce: MCEMS_BOOKING.nonce,
+        post("mcemexce_get_sessions_by_date", {
+          nonce: MCEMEXCE_BOOKING.nonce,
           date: dateInput.value
         }).then(function (res) {
           if (!res || !res.success) {
@@ -66,21 +66,21 @@
       });
     }
 
-    const bookBtn = $(".mcems-book-btn", wrap);
+    const bookBtn = $(".mcemexce-book-btn", wrap);
     if (bookBtn) {
       bookBtn.addEventListener("click", function (e) {
         e.preventDefault();
         setMsg("");
 
-        const checked = $("input[name='mcems_session_id']:checked", wrap);
+        const checked = $("input[name='mcemexce_session_id']:checked", wrap);
         if (!checked) {
           setMsg("Select an exam session before booking.", true);
           return;
         }
 
         bookBtn.disabled = true;
-        post("mcems_confirm_booking", {
-          nonce: MCEMS_BOOKING.nonce,
+        post("mcemexce_confirm_booking", {
+          nonce: MCEMEXCE_BOOKING.nonce,
           session_id: checked.value
         }).then(function (res) {
           bookBtn.disabled = false;
@@ -96,9 +96,9 @@
   });
 
   // Gestisci: cancella
-  $all("[data-mcems-manage]").forEach(function (wrap) {
-    const cancelBtn = $(".mcems-cancel-btn", wrap);
-    const msgBox = $(".mcems-msg", wrap);
+  $all("[data-mcemexce-manage]").forEach(function (wrap) {
+    const cancelBtn = $(".mcemexce-cancel-btn", wrap);
+    const msgBox = $(".mcemexce-msg", wrap);
 
     function setMsg(t, isErr) {
       msgBox.textContent = t || "";
@@ -113,7 +113,7 @@
         if (!confirm("Do you want to cancel the booking?")) return;
 
         cancelBtn.disabled = true;
-        post("mcems_cancel_booking", { nonce: MCEMS_BOOKING.cancelNonce || MCEMS_BOOKING.nonce })
+        post("mcemexce_cancel_booking", { nonce: MCEMEXCE_BOOKING.cancelNonce || MCEMEXCE_BOOKING.nonce })
           .then(function (res) {
             cancelBtn.disabled = false;
             if (!res || !res.success) {

@@ -10,12 +10,12 @@
  *  6. Export CSV
  *  7. Admin banner dismiss
  *
- * Depends on: MCEMS_ADMIN (localised via wp_localize_script)
- *   - MCEMS_ADMIN.ajaxUrl
- *   - MCEMS_ADMIN.nonce
- *   - MCEMS_ADMIN.i18n.*
+ * Depends on: MCEMEXCE_ADMIN (localised via wp_localize_script)
+ *   - MCEMEXCE_ADMIN.ajaxUrl
+ *   - MCEMEXCE_ADMIN.nonce
+ *   - MCEMEXCE_ADMIN.i18n.*
  */
-/* global MCEMS_ADMIN */
+/* global MCEMEXCE_ADMIN */
 (function () {
     'use strict';
 
@@ -37,16 +37,16 @@
      * @returns {Promise<Object>} Parsed JSON response
      */
     function ajaxPost(action, data) {
-        if (typeof MCEMS_ADMIN === 'undefined') {
-            return Promise.reject(new Error('MCEMS_ADMIN not defined'));
+        if (typeof MCEMEXCE_ADMIN === 'undefined') {
+            return Promise.reject(new Error('MCEMEXCE_ADMIN not defined'));
         }
         var fd = new FormData();
         fd.append('action', action);
-        fd.append('nonce', MCEMS_ADMIN.nonce);
+        fd.append('nonce', MCEMEXCE_ADMIN.nonce);
         Object.keys(data || {}).forEach(function (k) {
             fd.append(k, data[k]);
         });
-        return fetch(MCEMS_ADMIN.ajaxUrl, {
+        return fetch(MCEMEXCE_ADMIN.ajaxUrl, {
             method: 'POST',
             credentials: 'same-origin',
             body: fd
@@ -54,8 +54,8 @@
     }
 
     function i18n(key, fallback) {
-        if (typeof MCEMS_ADMIN !== 'undefined' && MCEMS_ADMIN.i18n && MCEMS_ADMIN.i18n[key]) {
-            return MCEMS_ADMIN.i18n[key];
+        if (typeof MCEMEXCE_ADMIN !== 'undefined' && MCEMEXCE_ADMIN.i18n && MCEMEXCE_ADMIN.i18n[key]) {
+            return MCEMEXCE_ADMIN.i18n[key];
         }
         return fallback || key;
     }
@@ -64,13 +64,13 @@
        1. Bulk Actions
        ---------------------------------------------------------- */
     function initBulkActions() {
-        var bar = qs('.mcems-bulk-actions-bar');
+        var bar = qs('.mcemexce-bulk-actions-bar');
         if (!bar) return;
 
-        var selectAll = qs('#mcems-select-all');
-        var checkboxes = qsa('input.mcems-row-cb');
-        var actionSelect = qs('#mcems-bulk-action-select', bar);
-        var applyBtn = qs('#mcems-bulk-action-apply', bar);
+        var selectAll = qs('#mcemexce-select-all');
+        var checkboxes = qsa('input.mcemexce-row-cb');
+        var actionSelect = qs('#mcemexce-bulk-action-select', bar);
+        var applyBtn = qs('#mcemexce-bulk-action-apply', bar);
 
         if (selectAll) {
             selectAll.addEventListener('change', function () {
@@ -109,7 +109,7 @@
 
                 applyBtn.disabled = true;
 
-                ajaxPost('mcems_bulk_action', {
+                ajaxPost('mcemexce_bulk_action', {
                     bulk_action: action,
                     ids: JSON.stringify(selected)
                 }).then(function (res) {
@@ -131,7 +131,7 @@
        2. Admin Table Sorting (client-side for small tables)
        ---------------------------------------------------------- */
     function initTableSort() {
-        qsa('.mcems-admin-table th.sortable').forEach(function (th) {
+        qsa('.mcemexce-admin-table th.sortable').forEach(function (th) {
             th.addEventListener('click', function () {
                 var table = th.closest('table');
                 if (!table) return;
@@ -165,10 +165,10 @@
        3. Admin Filters
        ---------------------------------------------------------- */
     function initAdminFilters() {
-        var filterBar = qs('.mcems-admin-filters');
+        var filterBar = qs('.mcemexce-admin-filters');
         if (!filterBar) return;
 
-        var clearBtn = qs('.mcems-filter-clear', filterBar);
+        var clearBtn = qs('.mcemexce-filter-clear', filterBar);
         if (clearBtn) {
             clearBtn.addEventListener('click', function () {
                 qsa('input, select', filterBar).forEach(function (el) {
@@ -190,9 +190,9 @@
        ---------------------------------------------------------- */
     function initModals() {
         // Open modal
-        qsa('[data-mcems-modal-open]').forEach(function (btn) {
+        qsa('[data-mcemexce-modal-open]').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                var targetId = btn.getAttribute('data-mcems-modal-open');
+                var targetId = btn.getAttribute('data-mcemexce-modal-open');
                 var overlay = qs('#' + targetId);
                 if (overlay) {
                     overlay.classList.add('open');
@@ -202,15 +202,15 @@
             });
         });
 
-        // Close modal via .mcems-modal-close or clicking the overlay background
-        qsa('.mcems-modal-overlay').forEach(function (overlay) {
+        // Close modal via .mcemexce-modal-close or clicking the overlay background
+        qsa('.mcemexce-modal-overlay').forEach(function (overlay) {
             overlay.addEventListener('click', function (e) {
                 if (e.target === overlay) {
                     overlay.classList.remove('open');
                 }
             });
 
-            qsa('.mcems-modal-close', overlay).forEach(function (btn) {
+            qsa('.mcemexce-modal-close', overlay).forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     overlay.classList.remove('open');
                 });
@@ -220,7 +220,7 @@
         // Close on Escape key
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
-                qsa('.mcems-modal-overlay.open').forEach(function (overlay) {
+                qsa('.mcemexce-modal-overlay.open').forEach(function (overlay) {
                     overlay.classList.remove('open');
                 });
             }
@@ -231,15 +231,15 @@
        5. Inline Editing
        ---------------------------------------------------------- */
     function initInlineEditing() {
-        qsa('[data-mcems-inline-edit]').forEach(function (btn) {
+        qsa('[data-mcemexce-inline-edit]').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                var rowId = btn.getAttribute('data-mcems-inline-edit');
-                var wrap = qs('#mcems-inline-' + rowId);
+                var rowId = btn.getAttribute('data-mcemexce-inline-edit');
+                var wrap = qs('#mcemexce-inline-' + rowId);
                 if (!wrap) return;
 
                 var isVisible = wrap.classList.contains('visible');
                 // Close all open inline forms first
-                qsa('.mcems-inline-edit-wrap.visible').forEach(function (el) {
+                qsa('.mcemexce-inline-edit-wrap.visible').forEach(function (el) {
                     el.classList.remove('visible');
                 });
 
@@ -252,21 +252,21 @@
         });
 
         // Cancel inline editing
-        qsa('.mcems-inline-edit-cancel').forEach(function (btn) {
+        qsa('.mcemexce-inline-edit-cancel').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                var wrap = btn.closest('.mcems-inline-edit-wrap');
+                var wrap = btn.closest('.mcemexce-inline-edit-wrap');
                 if (wrap) wrap.classList.remove('visible');
             });
         });
 
         // Save inline editing via AJAX
-        qsa('.mcems-inline-edit-save').forEach(function (btn) {
+        qsa('.mcemexce-inline-edit-save').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                var wrap = btn.closest('.mcems-inline-edit-wrap');
+                var wrap = btn.closest('.mcemexce-inline-edit-wrap');
                 if (!wrap) return;
 
-                var itemId = wrap.getAttribute('data-mcems-item-id');
-                var errEl = qs('.mcems-inline-edit-error', wrap);
+                var itemId = wrap.getAttribute('data-mcemexce-item-id');
+                var errEl = qs('.mcemexce-inline-edit-error', wrap);
                 var fields = {};
 
                 qsa('input, select', wrap).forEach(function (input) {
@@ -275,7 +275,7 @@
 
                 btn.disabled = true;
 
-                ajaxPost('mcems_inline_edit_save', Object.assign({ item_id: itemId }, fields))
+                ajaxPost('mcemexce_inline_edit_save', Object.assign({ item_id: itemId }, fields))
                     .then(function (res) {
                         btn.disabled = false;
                         if (res && res.success) {
@@ -309,7 +309,7 @@
        6. Export CSV
        ---------------------------------------------------------- */
     function initExportCsv() {
-        var exportBtn = qs('#mcems-export-csv');
+        var exportBtn = qs('#mcemexce-export-csv');
         if (!exportBtn) return;
 
         exportBtn.addEventListener('click', function () {
@@ -318,8 +318,8 @@
 
             // Collect current filter params if any
             var params = new URLSearchParams(window.location.search);
-            params.set('mcems_export', 'csv');
-            params.set('mcems_export_nonce', typeof MCEMS_ADMIN !== 'undefined' ? MCEMS_ADMIN.exportNonce || '' : '');
+            params.set('mcemexce_export', 'csv');
+            params.set('mcemexce_export_nonce', typeof MCEMEXCE_ADMIN !== 'undefined' ? MCEMEXCE_ADMIN.exportNonce || '' : '');
 
             window.location.href = window.location.pathname + '?' + params.toString();
 
@@ -335,9 +335,9 @@
        7. Admin Banner Dismiss
        ---------------------------------------------------------- */
     function initBannerDismiss() {
-        qsa('.mcems-banner-dismiss').forEach(function (btn) {
+        qsa('.mcemexce-banner-dismiss').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                var banner = btn.closest('.mcems-admin-banner, .notice');
+                var banner = btn.closest('.mcemexce-admin-banner, .notice');
                 if (!banner) return;
 
                 // Fade out
@@ -349,15 +349,15 @@
 
                 // Persist dismiss via AJAX
                 var bannerKey = btn.getAttribute('data-banner-key') || '';
-                var nonce = btn.getAttribute('data-nonce') || (typeof MCEMS_ADMIN !== 'undefined' ? MCEMS_ADMIN.nonce : '');
+                var nonce = btn.getAttribute('data-nonce') || (typeof MCEMEXCE_ADMIN !== 'undefined' ? MCEMEXCE_ADMIN.nonce : '');
 
                 if (bannerKey) {
-                    if (typeof MCEMS_ADMIN === 'undefined') return;
+                    if (typeof MCEMEXCE_ADMIN === 'undefined') return;
                     var fd = new FormData();
-                    fd.append('action', 'mcems_dismiss_banner');
+                    fd.append('action', 'mcemexce_dismiss_banner');
                     fd.append('banner_key', bannerKey);
                     fd.append('nonce', nonce);
-                    fetch(MCEMS_ADMIN.ajaxUrl, {
+                    fetch(MCEMEXCE_ADMIN.ajaxUrl, {
                         method: 'POST',
                         credentials: 'same-origin',
                         body: fd

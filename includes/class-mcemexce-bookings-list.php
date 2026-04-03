@@ -1,16 +1,16 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-class MCEMS_Bookings_List_Base {
+class MCEMEXCE_Bookings_List_Base {
 
     public static function init(): void {
-        add_shortcode('mcems_bookings_list', [__CLASS__, 'shortcode']);
-        add_shortcode('mcems_exam_bookings_list', [__CLASS__, 'shortcode']);
+        add_shortcode('mcemexce_bookings_list', [__CLASS__, 'shortcode']);
+        add_shortcode('mcemexce_exam_bookings_list', [__CLASS__, 'shortcode']);
         add_action('template_redirect', [__CLASS__, 'maybe_export_csv'], 1);
     }
 
     private static function can_view(): bool {
-        $cap = MCEMS_Settings::get_str('cap_view_bookings');
+        $cap = MCEMEXCE_Settings::get_str('cap_view_bookings');
         if (!$cap) $cap = 'manage_options';
         return current_user_can($cap) || current_user_can('manage_options');
     }
@@ -58,13 +58,13 @@ class MCEMS_Bookings_List_Base {
         $meta = [];
         if (($filter['type'] ?? '') === 'single' && !empty($filter['date'])) {
             $meta[] = [
-                'key'     => MCEMS_CPT_Sessioni_Esame::MK_DATE,
+                'key'     => MCEMEXCE_CPT_Sessioni_Esame::MK_DATE,
                 'value'   => (string) $filter['date'],
                 'compare' => '=',
             ];
         } elseif (($filter['type'] ?? '') === 'range' && !empty($filter['from']) && !empty($filter['to'])) {
             $meta[] = [
-                'key'     => MCEMS_CPT_Sessioni_Esame::MK_DATE,
+                'key'     => MCEMEXCE_CPT_Sessioni_Esame::MK_DATE,
                 'value'   => [(string) $filter['from'], (string) $filter['to']],
                 'compare' => 'BETWEEN',
                 'type'    => 'DATE',
@@ -72,36 +72,36 @@ class MCEMS_Bookings_List_Base {
         }
         if ($selected_exam > 0) {
             $meta[] = [
-                'key'     => MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID,
+                'key'     => MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID,
                 'value'   => $selected_exam,
                 'compare' => '=',
             ];
         }
 
         $session_ids = get_posts([
-            'post_type'      => MCEMS_CPT_Sessioni_Esame::CPT,
+            'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
             'post_status'    => 'publish',
             'posts_per_page' => -1,
             'fields'         => 'ids',
             'meta_query'     => $meta,
             'orderby'        => 'meta_value',
-            'meta_key'       => MCEMS_CPT_Sessioni_Esame::MK_TIME,
+            'meta_key'       => MCEMEXCE_CPT_Sessioni_Esame::MK_TIME,
             'order'          => 'ASC',
         ]);
 
         $rows = [];
         foreach ($session_ids as $sid) {
             $sid = (int) $sid;
-            $date      = (string) get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_DATE, true);
-            $time      = (string) get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_TIME, true);
-            $exam_id = (int) get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_EXAM_ID, true);
+            $date      = (string) get_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
+            $time      = (string) get_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_TIME, true);
+            $exam_id = (int) get_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_EXAM_ID, true);
 
-            $occ = get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_OCCUPATI, true);
+            $occ = get_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, true);
             if (!is_array($occ) || empty($occ)) continue;
 
-            $is_special = ((int) get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
+            $is_special = ((int) get_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_IS_SPECIAL, true) === 1);
 
-            $proctor_id    = (int) get_post_meta($sid, MCEMS_CPT_Sessioni_Esame::MK_PROCTOR_USER_ID, true);
+            $proctor_id    = (int) get_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_PROCTOR_USER_ID, true);
             $proctor       = $proctor_id ? get_user_by('id', $proctor_id) : null;
             $proctor_label = $proctor ? $proctor->display_name : '—';
 
@@ -139,7 +139,7 @@ class MCEMS_Bookings_List_Base {
     }
 
     public static function maybe_export_csv(): void {
-        if (!isset($_GET['mcems_export']) || sanitize_text_field(wp_unslash($_GET['mcems_export'])) !== 'csv') {
+        if (!isset($_GET['mcemexce_export']) || sanitize_text_field(wp_unslash($_GET['mcemexce_export'])) !== 'csv') {
             return;
         }
 
@@ -148,16 +148,16 @@ class MCEMS_Bookings_List_Base {
             exit;
         }
 
-        if (!isset($_GET['mcems_export_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['mcems_export_nonce'])), 'mcems_export_csv')) {
+        if (!isset($_GET['mcemexce_export_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['mcemexce_export_nonce'])), 'mcemexce_export_csv')) {
             status_header(403);
             exit;
         }
 
-        $selected_date  = isset($_GET['mcems_date']) ? sanitize_text_field(wp_unslash($_GET['mcems_date'])) : '';
-        $date_from      = isset($_GET['mcems_from']) ? sanitize_text_field(wp_unslash($_GET['mcems_from'])) : '';
-        $date_to        = isset($_GET['mcems_to']) ? sanitize_text_field(wp_unslash($_GET['mcems_to'])) : '';
-        $selected_exam  = isset($_GET['mcems_exam']) ? absint(wp_unslash($_GET['mcems_exam'])) : 0;
-        $advanced       = isset($_GET['mcems_adv']) && sanitize_text_field(wp_unslash($_GET['mcems_adv'])) === '1';
+        $selected_date  = isset($_GET['mcemexce_date']) ? sanitize_text_field(wp_unslash($_GET['mcemexce_date'])) : '';
+        $date_from      = isset($_GET['mcemexce_from']) ? sanitize_text_field(wp_unslash($_GET['mcemexce_from'])) : '';
+        $date_to        = isset($_GET['mcemexce_to']) ? sanitize_text_field(wp_unslash($_GET['mcemexce_to'])) : '';
+        $selected_exam  = isset($_GET['mcemexce_exam']) ? absint(wp_unslash($_GET['mcemexce_exam'])) : 0;
+        $advanced       = isset($_GET['mcemexce_adv']) && sanitize_text_field(wp_unslash($_GET['mcemexce_adv'])) === '1';
 
         $filter = self::normalize_date_filter($selected_date, $date_from, $date_to, $advanced);
         if ($filter === null) {
@@ -175,8 +175,8 @@ class MCEMS_Bookings_List_Base {
 
         if ($selected_exam > 0) {
             $exam_title = '';
-            if (class_exists('MCEMS_Tutor')) {
-                $exam_title = (string) MCEMS_Tutor::exam_title($selected_exam);
+            if (class_exists('MCEMEXCE_Tutor')) {
+                $exam_title = (string) MCEMEXCE_Tutor::exam_title($selected_exam);
             }
             if (!$exam_title) {
                 $exam_title = (string) get_the_title($selected_exam);
@@ -203,8 +203,8 @@ class MCEMS_Bookings_List_Base {
         foreach ($rows as $r) {
             $data_h = !empty($r['data']) ? date_i18n('d/m/Y', strtotime($r['data'])) : '';
             $corso_t = '';
-            if (!empty($r['corso']) && class_exists('MCEMS_Tutor')) {
-                $corso_t = MCEMS_Tutor::exam_title((int) $r['corso']);
+            if (!empty($r['corso']) && class_exists('MCEMEXCE_Tutor')) {
+                $corso_t = MCEMEXCE_Tutor::exam_title((int) $r['corso']);
             }
             $spec = !empty($r['special']) ? 'Yes' : 'No';
 
@@ -239,17 +239,17 @@ class MCEMS_Bookings_List_Base {
         if (!is_user_logged_in()) return '<p>You must be logged in.</p>';
         if (!self::can_view()) return '<p>Insufficient permissions.</p>';
 
-        $exams = MCEMS_Tutor::get_exams();
-        $exam_pt = MCEMS_Tutor::exam_post_type();
+        $exams = MCEMEXCE_Tutor::get_exams();
+        $exam_pt = MCEMEXCE_Tutor::exam_post_type();
 
-        $filter_nonce  = isset($_GET['mcems_filter_nonce']) ? sanitize_text_field(wp_unslash($_GET['mcems_filter_nonce'])) : '';
-        $nonce_valid   = wp_verify_nonce($filter_nonce, 'mcems_filter');
+        $filter_nonce  = isset($_GET['mcemexce_filter_nonce']) ? sanitize_text_field(wp_unslash($_GET['mcemexce_filter_nonce'])) : '';
+        $nonce_valid   = wp_verify_nonce($filter_nonce, 'mcemexce_filter');
 
-        $selected_date  = ($nonce_valid && isset($_GET['mcems_date'])) ? sanitize_text_field(wp_unslash($_GET['mcems_date'])) : '';
-        $date_from      = ($nonce_valid && isset($_GET['mcems_from'])) ? sanitize_text_field(wp_unslash($_GET['mcems_from'])) : '';
-        $date_to        = ($nonce_valid && isset($_GET['mcems_to'])) ? sanitize_text_field(wp_unslash($_GET['mcems_to'])) : '';
-        $selected_exam  = ($nonce_valid && isset($_GET['mcems_exam'])) ? absint(wp_unslash($_GET['mcems_exam'])) : 0;
-        $advanced       = $nonce_valid && isset($_GET['mcems_adv']) && sanitize_text_field(wp_unslash($_GET['mcems_adv'])) === '1';
+        $selected_date  = ($nonce_valid && isset($_GET['mcemexce_date'])) ? sanitize_text_field(wp_unslash($_GET['mcemexce_date'])) : '';
+        $date_from      = ($nonce_valid && isset($_GET['mcemexce_from'])) ? sanitize_text_field(wp_unslash($_GET['mcemexce_from'])) : '';
+        $date_to        = ($nonce_valid && isset($_GET['mcemexce_to'])) ? sanitize_text_field(wp_unslash($_GET['mcemexce_to'])) : '';
+        $selected_exam  = ($nonce_valid && isset($_GET['mcemexce_exam'])) ? absint(wp_unslash($_GET['mcemexce_exam'])) : 0;
+        $advanced       = $nonce_valid && isset($_GET['mcemexce_adv']) && sanitize_text_field(wp_unslash($_GET['mcemexce_adv'])) === '1';
 
         $filter     = self::normalize_date_filter($selected_date, $date_from, $date_to, $advanced);
         $has_filter = (bool) $filter;
@@ -288,31 +288,31 @@ class MCEMS_Bookings_List_Base {
                 echo sprintf(esc_html__('Filter by %1$sdate%2$s (single day or date range). You can also filter by exam.', 'mc-ems-exam-center-for-tutor-lms'), '<strong>', '</strong>'); ?></p>
 
                 <div class="mcems-search-toggle" style="margin:8px 0 14px 0;">
-                    <button type="button" id="mcems_adv_btn" class="mcems-btn" aria-pressed="false">
+                    <button type="button" id="mcemexce_adv_btn" class="mcems-btn" aria-pressed="false">
                         <?php echo esc_html__('Advanced search', 'mc-ems-exam-center-for-tutor-lms'); ?>
                     </button>
                 </div>
 
                 <form method="get" class="mcems-filters">
-                    <input type="hidden" name="post_type" value="<?php echo esc_attr(MCEMS_CPT_Sessioni_Esame::CPT); ?>">
+                    <input type="hidden" name="post_type" value="<?php echo esc_attr(MCEMEXCE_CPT_Sessioni_Esame::CPT); ?>">
                     <?php
                     if (isset($_GET['page'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- WordPress admin page slug, read-only navigation
                         echo '<input type="hidden" name="page" value="' . esc_attr(sanitize_text_field(wp_unslash($_GET['page']))) . '">'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                     }
                     ?>
-                    <input type="hidden" name="mcems_filter_nonce" value="<?php echo esc_attr(wp_create_nonce('mcems_filter')); ?>">
-                    <input type="hidden" name="mcems_export_nonce" value="<?php echo esc_attr(wp_create_nonce('mcems_export_csv')); ?>">
+                    <input type="hidden" name="mcemexce_filter_nonce" value="<?php echo esc_attr(wp_create_nonce('mcemexce_filter')); ?>">
+                    <input type="hidden" name="mcemexce_export_nonce" value="<?php echo esc_attr(wp_create_nonce('mcemexce_export_csv')); ?>">
 
-                    <input type="hidden" id="mcems_adv" name="mcems_adv" value="<?php echo esc_attr($advanced ? '1' : '0'); ?>">
+                    <input type="hidden" id="mcemexce_adv" name="mcemexce_adv" value="<?php echo esc_attr($advanced ? '1' : '0'); ?>">
 
                     <div class="mcems-basic-filters" style="display:flex; gap:12px; flex-wrap:wrap;">
                         <div class="mcems-field">
-                            <label for="mcems_date"><?php echo esc_html__('Date', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
-                            <input type="date" id="mcems_date" name="mcems_date" value="<?php echo esc_attr($selected_date); ?>">
+                            <label for="mcemexce_date"><?php echo esc_html__('Date', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                            <input type="date" id="mcemexce_date" name="mcemexce_date" value="<?php echo esc_attr($selected_date); ?>">
                         </div>
                         <div class="mcems-field">
-                            <label for="mcems_exam"><?php echo esc_html__('Exam', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
-                            <select id="mcems_exam" name="mcems_exam">
+                            <label for="mcemexce_exam"><?php echo esc_html__('Exam', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                            <select id="mcemexce_exam" name="mcemexce_exam">
                                 <option value="0"><?php echo esc_html__('All exams', 'mc-ems-exam-center-for-tutor-lms'); ?></option>
                                 <?php if ($exam_pt && $exams): foreach ($exams as $cid => $title): ?>
                                     <option value="<?php echo (int) $cid; ?>" <?php selected($selected_exam, (int) $cid); ?>>
@@ -325,16 +325,16 @@ class MCEMS_Bookings_List_Base {
 
                     <div class="mcems-advanced-filters" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:10px;">
                         <div class="mcems-field">
-                            <label for="mcems_from"><?php echo esc_html__('From', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
-                            <input type="date" id="mcems_from" name="mcems_from" value="<?php echo esc_attr($date_from); ?>">
+                            <label for="mcemexce_from"><?php echo esc_html__('From', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                            <input type="date" id="mcemexce_from" name="mcemexce_from" value="<?php echo esc_attr($date_from); ?>">
                         </div>
                         <div class="mcems-field">
-                            <label for="mcems_to"><?php echo esc_html__('To', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
-                            <input type="date" id="mcems_to" name="mcems_to" value="<?php echo esc_attr($date_to); ?>">
+                            <label for="mcemexce_to"><?php echo esc_html__('To', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                            <input type="date" id="mcemexce_to" name="mcemexce_to" value="<?php echo esc_attr($date_to); ?>">
                         </div>
                         <div class="mcems-field">
-                            <label for="mcems_exam_adv"><?php echo esc_html__('Exam', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
-                            <select id="mcems_exam_adv" name="mcems_exam">
+                            <label for="mcemexce_exam_adv"><?php echo esc_html__('Exam', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                            <select id="mcemexce_exam_adv" name="mcemexce_exam">
                                 <option value="0"><?php echo esc_html__('All exams', 'mc-ems-exam-center-for-tutor-lms'); ?></option>
                                 <?php if ($exam_pt && $exams): foreach ($exams as $cid => $title): ?>
                                     <option value="<?php echo (int) $cid; ?>" <?php selected($selected_exam, (int) $cid); ?>>
@@ -347,16 +347,16 @@ class MCEMS_Bookings_List_Base {
 
                     <div class="mcems-actions">
                         <button class="mcems-btn" type="submit"><?php echo esc_html__('Filter', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
-                        <a class="mcems-link" href="<?php echo esc_url(remove_query_arg(['mcems_date', 'mcems_from', 'mcems_to', 'mcems_exam', 'mcems_adv'])); ?>"><?php echo esc_html__('Reset', 'mc-ems-exam-center-for-tutor-lms'); ?></a>
+                        <a class="mcems-link" href="<?php echo esc_url(remove_query_arg(['mcemexce_date', 'mcemexce_from', 'mcemexce_to', 'mcemexce_exam', 'mcemexce_adv'])); ?>"><?php echo esc_html__('Reset', 'mc-ems-exam-center-for-tutor-lms'); ?></a>
                         <?php if ($has_filter): ?>
-                            <button class="mcems-btn" type="submit" name="mcems_export" value="csv"><?php echo esc_html__('Export CSV', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
+                            <button class="mcems-btn" type="submit" name="mcemexce_export" value="csv"><?php echo esc_html__('Export CSV', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
                         <?php endif; ?>
                     </div>
 
                     <script>
 (function(){
-    var btn = document.getElementById('mcems_adv_btn');
-    var adv = document.getElementById('mcems_adv');
+    var btn = document.getElementById('mcemexce_adv_btn');
+    var adv = document.getElementById('mcemexce_adv');
     var basicWrap = document.querySelector('.mcems-basic-filters');
     var advWrap   = document.querySelector('.mcems-advanced-filters');
 
@@ -369,9 +369,9 @@ class MCEMS_Bookings_List_Base {
             btn.textContent = isAdv ? '<?php echo esc_js(__('Basic search', 'mc-ems-exam-center-for-tutor-lms')); ?>' : '<?php echo esc_js(__('Advanced search', 'mc-ems-exam-center-for-tutor-lms')); ?>';
         }
         if(isAdv){
-            var d = document.getElementById('mcems_date'); if(d) d.value='';
+            var d = document.getElementById('mcemexce_date'); if(d) d.value='';
         } else {
-            ['mcems_from','mcems_to'].forEach(function(id){
+            ['mcemexce_from','mcemexce_to'].forEach(function(id){
                 var el=document.getElementById(id); if(el) el.value='';
             });
         }
@@ -408,7 +408,7 @@ class MCEMS_Bookings_List_Base {
                     <div class="mcems-hint">
                         <span class="mcems-pill">📅 <?php echo esc_html__('Date:', 'mc-ems-exam-center-for-tutor-lms'); ?> <strong><?php echo esc_html($label); ?></strong></span>
                         <?php if ($selected_exam > 0): ?>
-                            <span class="mcems-pill">📘 <?php echo esc_html__('Exam:', 'mc-ems-exam-center-for-tutor-lms'); ?> <strong><?php echo esc_html(MCEMS_Tutor::exam_title($selected_exam)); ?></strong></span>
+                            <span class="mcems-pill">📘 <?php echo esc_html__('Exam:', 'mc-ems-exam-center-for-tutor-lms'); ?> <strong><?php echo esc_html(MCEMEXCE_Tutor::exam_title($selected_exam)); ?></strong></span>
                         <?php else: ?>
                             <span class="mcems-pill">📘 <?php echo esc_html__('Exam:', 'mc-ems-exam-center-for-tutor-lms'); ?> <strong><?php echo esc_html__('All', 'mc-ems-exam-center-for-tutor-lms'); ?></strong></span>
                         <?php endif; ?>
@@ -441,7 +441,7 @@ class MCEMS_Bookings_List_Base {
                                     <td><?php echo esc_html($r['session_id']); ?></td>
                                     <td><?php echo esc_html(date_i18n('d/m/Y', strtotime($r['data']))); ?></td>
                                     <td><?php echo esc_html($r['ora']); ?></td>
-                                    <td><?php echo esc_html(MCEMS_Tutor::exam_title((int) $r['corso'])); ?></td>
+                                    <td><?php echo esc_html(MCEMEXCE_Tutor::exam_title((int) $r['corso'])); ?></td>
                                     <td><?php echo wp_kses_post(self::badge_special(!empty($r['special']))); ?></td>
                                     <td><?php echo esc_html($r['proctor']); ?></td>
                                 </tr>
