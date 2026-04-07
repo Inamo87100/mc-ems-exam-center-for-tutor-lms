@@ -33,6 +33,7 @@ class MCEMEXCE_Quiz_Stats {
     public static function init(): void {
         add_action( 'admin_menu', [ __CLASS__, 'menu' ] );
         add_action( 'init',       [ __CLASS__, 'ensure_stats_table' ] );
+        add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_assets' ] );
         add_action( 'admin_post_mcemexce_recalc_quiz_stats',       [ __CLASS__, 'handle_recalc' ] );
         add_action( 'admin_post_mcemexce_download_quiz_stats_csv', [ __CLASS__, 'handle_csv_download' ] );
     }
@@ -904,12 +905,24 @@ class MCEMEXCE_Quiz_Stats {
     }
 
     // -------------------------------------------------------------------------
-    // Inline styles
+    // Inline styles (enqueued via admin_enqueue_scripts)
     // -------------------------------------------------------------------------
 
-    protected static function render_styles(): void {
-        ?>
-        <style>
+    public static function enqueue_admin_assets( string $hook ): void {
+        if ( strpos( $hook, self::PAGE_SLUG ) === false ) {
+            return;
+        }
+
+        $ver = defined( 'MCEMEXCE_VERSION' ) ? MCEMEXCE_VERSION : '1.0.0';
+        $url = defined( 'MCEMEXCE_PLUGIN_URL' ) ? MCEMEXCE_PLUGIN_URL : '';
+
+        wp_register_style( 'mcems-admin-style', $url . 'assets/css/admin.css', [], $ver );
+        wp_enqueue_style( 'mcems-admin-style' );
+        wp_add_inline_style( 'mcems-admin-style', self::get_inline_styles() );
+    }
+
+    private static function get_inline_styles(): string {
+        return '
             .mcems-stats-shell { max-width: 1600px; }
 
             .mcems-stats-toolbar {
@@ -1054,8 +1067,7 @@ class MCEMEXCE_Quiz_Stats {
                 color: #fff;
                 font-weight: 600;
             }
-        </style>
-        <?php
+        ';
     }
 
     // -------------------------------------------------------------------------
@@ -1111,7 +1123,6 @@ class MCEMEXCE_Quiz_Stats {
             $last_updated = self::get_last_updated( $course_id );
         }
 
-        self::render_styles();
         ?>
         <div class="wrap mcems-stats-shell">
             <h1><?php esc_html_e( 'Quiz Statistics', 'mc-ems-exam-center-for-tutor-lms' ); ?></h1>

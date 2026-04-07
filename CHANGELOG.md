@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.6] - 2026-04-07
+
+### Fixed
+- fix: eliminate tutte le stampe dirette di `<script>` e `<style>` (WordPress Plugin Check compliance)
+  - `class-mcemexce-settings.php`: sostituzione dei multipli `echo '<script>...'` con `wp_print_inline_script_tag()` (disponibile da WP 5.7, richiesto ≥ 6.0) nel metodo `field_multi_course_checkbox()`.
+  - `class-mcemexce-bookings-list.php`: spostamento del blocco `<style>` (CSS statico) e del blocco `<script>` (toggle filtro avanzato/base) nel hook `wp_enqueue_scripts` tramite `wp_add_inline_style()` e `wp_add_inline_script()` su handle virtuali (`false` source). Le stringhe tradotte sono incorporate nel JS tramite `esc_js()`.
+  - `class-mcemexce-quiz-stats.php`: spostamento del blocco `<style>` (CSS della pagina statistiche quiz) nel hook `admin_enqueue_scripts` tramite `wp_add_inline_style('mcems-admin-style', ...)`. Aggiunto metodo pubblico `enqueue_admin_assets()` e helper privato `get_inline_styles()`. Rimosso metodo `render_styles()` e relativa chiamata da `render()`.
+
 ## [1.2.5] - 2026-04-03
 
 ### Fixed

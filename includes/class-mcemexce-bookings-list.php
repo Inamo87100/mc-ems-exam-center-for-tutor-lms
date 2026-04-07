@@ -7,6 +7,65 @@ class MCEMEXCE_Bookings_List_Base {
         add_shortcode('mcemexce_bookings_list', [__CLASS__, 'shortcode']);
         add_shortcode('mcemexce_exam_bookings_list', [__CLASS__, 'shortcode']);
         add_action('template_redirect', [__CLASS__, 'maybe_export_csv'], 1);
+        add_action('wp_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
+    }
+
+    public static function enqueue_assets(): void {
+        $ver = defined('MCEMEXCE_VERSION') ? MCEMEXCE_VERSION : '1.0.0';
+
+        wp_register_style('mcems-bookings-list', false, [], $ver); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+        wp_enqueue_style('mcems-bookings-list');
+        wp_add_inline_style('mcems-bookings-list', '
+            .mcems-adminwrap{max-width:1200px;margin:0 auto;}
+            .mcems-panel{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(16,24,40,.06);}
+            .mcems-title{margin:0 0 6px;font-size:1.2rem;font-weight:900;}
+            .mcems-desc{margin:0 0 14px;color:#667085;}
+            .mcems-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;}
+            .mcems-field{display:flex;flex-direction:column;gap:6px;}
+            .mcems-field label{font-size:12px;font-weight:800;color:#344054;}
+            .mcems-field input,.mcems-field select{min-width:240px;padding:9px 10px;border-radius:12px;border:1px solid #d0d5dd;background:#fff;}
+            .mcems-actions{display:flex;gap:10px;align-items:center;}
+            .mcems-btn{appearance:none;border:1px solid #d0d5dd;background:#101828;color:#fff;border-radius:12px;padding:10px 14px;font-weight:900;cursor:pointer;}
+            .mcems-btn:hover{filter:brightness(1.05);}
+            .mcems-link{font-weight:800;color:#344054;text-decoration:none;border:1px solid #d0d5dd;border-radius:12px;padding:10px 14px;background:#fff;}
+            .mcems-link:hover{background:#f9fafb;}
+            .mcems-hint{margin-top:10px;color:#667085;font-size:12px;}
+            .mcems-tablewrap{margin-top:14px;overflow:auto;}
+            table.mcems-table{min-width:1100px;border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid #e5e7eb;border-radius:14px;}
+            table.mcems-table thead th{background:#f9fafb;color:#344054;font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:.02em;padding:10px;border-bottom:1px solid #e5e7eb;}
+            table.mcems-table tbody td{padding:10px;border-bottom:1px solid #f2f4f7;vertical-align:top;}
+            table.mcems-table tbody tr:hover td{background:#fcfcfd;}
+            .mcems-empty{margin-top:12px;padding:12px;border:1px dashed #d0d5dd;border-radius:14px;color:#667085;background:#fcfcfd;}
+            .mcems-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f2f4f7;color:#344054;font-size:12px;font-weight:800;}
+        ');
+
+        wp_register_script('mcems-bookings-list', false, [], $ver, true); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+        wp_enqueue_script('mcems-bookings-list');
+
+        $basic_search    = esc_js(__('Basic search', 'mc-ems-exam-center-for-tutor-lms'));
+        $advanced_search = esc_js(__('Advanced search', 'mc-ems-exam-center-for-tutor-lms'));
+
+        wp_add_inline_script('mcems-bookings-list',
+            '(function(){' .
+            'var btn=document.getElementById("mcemexce_adv_btn");' .
+            'var adv=document.getElementById("mcemexce_adv");' .
+            'var basicWrap=document.querySelector(".mcems-basic-filters");' .
+            'var advWrap=document.querySelector(".mcems-advanced-filters");' .
+            'function setMode(isAdv){' .
+            'if(adv)adv.value=isAdv?"1":"0";' .
+            'if(basicWrap)basicWrap.style.display=isAdv?"none":"flex";' .
+            'if(advWrap)advWrap.style.display=isAdv?"flex":"none";' .
+            'if(btn){' .
+            'btn.setAttribute("aria-pressed",isAdv?"true":"false");' .
+            'btn.textContent=isAdv?"' . $basic_search . '":"' . $advanced_search . '";' .
+            '}' .
+            'if(isAdv){var d=document.getElementById("mcemexce_date");if(d)d.value="";}' .
+            'else{["mcemexce_from","mcemexce_to"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});}' .
+            '}' .
+            'if(btn){btn.addEventListener("click",function(e){e.preventDefault();setMode(!(adv&&adv.value==="1"));});}' .
+            'setMode(!!(adv&&adv.value==="1"));' .
+            '})();'
+        );
     }
 
     private static function can_view(): bool {
@@ -259,30 +318,6 @@ class MCEMEXCE_Bookings_List_Base {
 
         ob_start();
         ?>
-        <style>
-            .mcems-adminwrap{max-width:1200px;margin:0 auto;}
-            .mcems-panel{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(16,24,40,.06);}
-            .mcems-title{margin:0 0 6px;font-size:1.2rem;font-weight:900;}
-            .mcems-desc{margin:0 0 14px;color:#667085;}
-            .mcems-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;}
-            .mcems-field{display:flex;flex-direction:column;gap:6px;}
-            .mcems-field label{font-size:12px;font-weight:800;color:#344054;}
-            .mcems-field input,.mcems-field select{min-width:240px;padding:9px 10px;border-radius:12px;border:1px solid #d0d5dd;background:#fff;}
-            .mcems-actions{display:flex;gap:10px;align-items:center;}
-            .mcems-btn{appearance:none;border:1px solid #d0d5dd;background:#101828;color:#fff;border-radius:12px;padding:10px 14px;font-weight:900;cursor:pointer;}
-            .mcems-btn:hover{filter:brightness(1.05);}
-            .mcems-link{font-weight:800;color:#344054;text-decoration:none;border:1px solid #d0d5dd;border-radius:12px;padding:10px 14px;background:#fff;}
-            .mcems-link:hover{background:#f9fafb;}
-            .mcems-hint{margin-top:10px;color:#667085;font-size:12px;}
-            .mcems-tablewrap{margin-top:14px;overflow:auto;}
-            table.mcems-table{min-width:1100px;border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid #e5e7eb;border-radius:14px;}
-            table.mcems-table thead th{background:#f9fafb;color:#344054;font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:.02em;padding:10px;border-bottom:1px solid #e5e7eb;}
-            table.mcems-table tbody td{padding:10px;border-bottom:1px solid #f2f4f7;vertical-align:top;}
-            table.mcems-table tbody tr:hover td{background:#fcfcfd;}
-            .mcems-empty{margin-top:12px;padding:12px;border:1px dashed #d0d5dd;border-radius:14px;color:#667085;background:#fcfcfd;}
-            .mcems-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f2f4f7;color:#344054;font-size:12px;font-weight:800;}
-        </style>
-
         <div class="mcems-adminwrap">
             <div class="mcems-panel">
                 <h3 class="mcems-title"><?php echo esc_html__('Bookings list', 'mc-ems-exam-center-for-tutor-lms'); ?></h3>
@@ -355,41 +390,6 @@ class MCEMEXCE_Bookings_List_Base {
                             <button class="mcems-btn" type="submit" name="mcemexce_export" value="csv"><?php echo esc_html__('Export CSV', 'mc-ems-exam-center-for-tutor-lms'); ?></button>
                         <?php endif; ?>
                     </div>
-
-                    <script>
-(function(){
-    var btn = document.getElementById('mcemexce_adv_btn');
-    var adv = document.getElementById('mcemexce_adv');
-    var basicWrap = document.querySelector('.mcems-basic-filters');
-    var advWrap   = document.querySelector('.mcems-advanced-filters');
-
-    function setMode(isAdv){
-        if(adv) adv.value = isAdv ? '1':'0';
-        if(basicWrap) basicWrap.style.display = isAdv ? 'none':'flex';
-        if(advWrap) advWrap.style.display = isAdv ? 'flex':'none';
-        if(btn){
-            btn.setAttribute('aria-pressed', isAdv ? 'true' : 'false');
-            btn.textContent = isAdv ? '<?php echo esc_js(__('Basic search', 'mc-ems-exam-center-for-tutor-lms')); ?>' : '<?php echo esc_js(__('Advanced search', 'mc-ems-exam-center-for-tutor-lms')); ?>';
-        }
-        if(isAdv){
-            var d = document.getElementById('mcemexce_date'); if(d) d.value='';
-        } else {
-            ['mcemexce_from','mcemexce_to'].forEach(function(id){
-                var el=document.getElementById(id); if(el) el.value='';
-            });
-        }
-    }
-
-    if(btn){
-        btn.addEventListener('click', function(e){
-            e.preventDefault();
-            setMode(!(adv && adv.value === '1'));
-        });
-    }
-
-    setMode(!!(adv && adv.value === '1'));
-})();
-                    </script>
                 </form>
 
                 <?php if (!$has_filter): ?>

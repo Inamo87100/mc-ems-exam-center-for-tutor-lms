@@ -889,21 +889,23 @@ class MCEMEXCE_Settings {
             }
 
             // Inline JS: search filter + select-all / deselect-all
-            echo '<script>(function(){';
-            echo 'var input=document.getElementById("' . esc_js($id_filter) . '");';
-            echo 'var list=document.getElementById("' . esc_js($id_list) . '");';
-            echo 'var btnAll=document.getElementById("' . esc_js($id_list . '_all') . '");';
-            echo 'var btnNone=document.getElementById("' . esc_js($id_list . '_none') . '");';
-            echo 'if(input&&list){';
-            echo 'input.addEventListener("input",function(){';
-            echo 'var q=(input.value||"").toLowerCase().trim();';
-            echo 'Array.prototype.forEach.call(list.querySelectorAll("label"),function(lbl){';
-            echo 'lbl.style.display=(!q||(lbl.dataset.label||"").indexOf(q)!==-1)?"":"none";';
-            echo '});});';
-            echo '}';
-            echo 'if(btnAll){btnAll.addEventListener("click",function(e){e.preventDefault();Array.prototype.forEach.call(list.querySelectorAll("input[type=checkbox]"),function(cb){cb.checked=true;});});}';
-            echo 'if(btnNone){btnNone.addEventListener("click",function(e){e.preventDefault();Array.prototype.forEach.call(list.querySelectorAll("input[type=checkbox]"),function(cb){cb.checked=false;});});}';
-            echo '})();</script>';
+            wp_print_inline_script_tag(
+                '(function(){' .
+                'var input=document.getElementById("' . esc_js($id_filter) . '");' .
+                'var list=document.getElementById("' . esc_js($id_list) . '");' .
+                'var btnAll=document.getElementById("' . esc_js($id_list . '_all') . '");' .
+                'var btnNone=document.getElementById("' . esc_js($id_list . '_none') . '");' .
+                'if(input&&list){' .
+                'input.addEventListener("input",function(){' .
+                'var q=(input.value||"").toLowerCase().trim();' .
+                'Array.prototype.forEach.call(list.querySelectorAll("label"),function(lbl){' .
+                'lbl.style.display=(!q||(lbl.dataset.label||"").indexOf(q)!==-1)?"":"none";' .
+                '});});' .
+                '}' .
+                'if(btnAll){btnAll.addEventListener("click",function(e){e.preventDefault();Array.prototype.forEach.call(list.querySelectorAll("input[type=checkbox]"),function(cb){cb.checked=true;});});}' .
+                'if(btnNone){btnNone.addEventListener("click",function(e){e.preventDefault();Array.prototype.forEach.call(list.querySelectorAll("input[type=checkbox]"),function(cb){cb.checked=false;});});}' .
+                '})();'
+            );
         }
 
         echo '</div>';
