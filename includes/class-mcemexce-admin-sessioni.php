@@ -3,6 +3,10 @@ if (!defined('ABSPATH')) exit;
 
 class MCEMEXCE_Admin_Sessioni {
 
+    const FREE_MAX_SESSIONS_PER_DAY  = 1;
+    const FREE_MAX_SEATS_PER_SESSION = 5;
+    const FREE_MAX_ACTIVE_SESSIONS   = 5;
+
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'menu']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
@@ -134,7 +138,7 @@ class MCEMEXCE_Admin_Sessioni {
                 'exportCsv'                   => __('Export CSV', 'mc-ems-exam-center-for-tutor-lms'),
                 'selectExamBeforeGenerating'  => __('Select a Tutor LMS exam before generating sessions.', 'mc-ems-exam-center-for-tutor-lms'),
                 'selectAtLeastOneDate'        => __('Select at least one date from the calendar.', 'mc-ems-exam-center-for-tutor-lms'),
-                'enterAtLeastOneTime'         => __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-exam-center-for-tutor-lms'),
+                'enterAtLeastOneTime'         => __('Enter a valid time (HH:MM).', 'mc-ems-exam-center-for-tutor-lms'),
                 'selectSpecialDate'           => __('Select a date for the special session.', 'mc-ems-exam-center-for-tutor-lms'),
                 'selectSpecialTime'           => __('Select a time for the special session.', 'mc-ems-exam-center-for-tutor-lms'),
                 'selectSpecialCandidate'      => __('Select the candidate for the special session.', 'mc-ems-exam-center-for-tutor-lms'),
@@ -156,7 +160,7 @@ class MCEMEXCE_Admin_Sessioni {
             const standardExam = document.getElementById('mcemexce_exam_id');
             const standardStart  = document.getElementById('mcemexce_date_start');
             const standardEnd    = document.getElementById('mcemexce_date_end');
-            const standardTimes  = document.getElementById('mcemexce_times');
+            const standardTime   = document.getElementById('mcemexce_time');
             const standardCap    = document.getElementById('mcemexce_capacity');
 
             if (!cb) return;
@@ -180,7 +184,7 @@ class MCEMEXCE_Admin_Sessioni {
                     setDisabled(standardExam, true);
                     setDisabled(standardStart, true);
                     setDisabled(standardEnd, true);
-                    setDisabled(standardTimes, true);
+                    setDisabled(standardTime, true);
                     setDisabled(standardCap, true);
                 } else {
                     if (std) std.style.display = 'block';
@@ -199,7 +203,7 @@ class MCEMEXCE_Admin_Sessioni {
                     setDisabled(standardExam, false);
                     setDisabled(standardStart, false);
                     setDisabled(standardEnd, false);
-                    setDisabled(standardTimes, false);
+                    setDisabled(standardTime, false);
                     setDisabled(standardCap, false);
                 }
             }
@@ -232,18 +236,12 @@ class MCEMEXCE_Admin_Sessioni {
                         return;
                     }
 
-                    const ta = document.getElementById('mcemexce_times');
-                    if (ta) {
-                        const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(function(l){
-                            return /^\s*\d{2}:\d{2}\s*$/.test(l);
-                        });
-
-                        if (!hasTime) {
-                            e.preventDefault();
-                            alert(MCEMEXCE_ADMIN.i18n.enterAtLeastOneTime);
-                            ta.focus();
-                            return;
-                        }
+                    const timeInput = document.getElementById('mcemexce_time');
+                    if (timeInput && !/^\d{2}:\d{2}$/.test((timeInput.value || '').trim())) {
+                        e.preventDefault();
+                        alert(MCEMEXCE_ADMIN.i18n.enterAtLeastOneTime);
+                        timeInput.focus();
+                        return;
                     }
                 } else {
                     const sDate = document.getElementById('mcemexce_special_date');
@@ -585,17 +583,26 @@ class MCEMEXCE_Admin_Sessioni {
                 $error  = $result[1] ?? '';
             }
 
-            if ($action === 'update_capacity' && check_admin_referer('mcemexce_update_capacity', 'mcemexce_update_capacity_nonce')) {
-                $result = self::handle_update_capacity();
-                $notice = $result[0] ?? '';
-                $error  = $result[1] ?? '';
-            }
         }
 
         ?>
         <div class="wrap">
             <h1><?php echo esc_html__('Exam Sessions Management', 'mc-ems-exam-center-for-tutor-lms'); ?></h1>
 
+            <div class="notice notice-info inline" style="margin:12px 0 16px;padding:10px 14px;">
+                <p>
+                    <strong><?php echo esc_html__('Session creation limits', 'mc-ems-exam-center-for-tutor-lms'); ?>:</strong>
+                    <?php
+                    printf(
+                        /* translators: 1: max sessions per day, 2: max seats per session, 3: max active sessions */
+                        esc_html__('Max %1$d session(s) per day — Max %2$d seat(s) per session — Max %3$d active sessions at a time.', 'mc-ems-exam-center-for-tutor-lms'),
+                        (int) MCEMEXCE_Admin_Sessioni::FREE_MAX_SESSIONS_PER_DAY,
+                        (int) MCEMEXCE_Admin_Sessioni::FREE_MAX_SEATS_PER_SESSION,
+                        (int) MCEMEXCE_Admin_Sessioni::FREE_MAX_ACTIVE_SESSIONS
+                    );
+                    ?>
+                </p>
+            </div>
 
             <?php if ($notice): ?>
                 <div class="notice notice-success"><p><?php echo esc_html($notice); ?></p></div>
@@ -657,16 +664,15 @@ class MCEMEXCE_Admin_Sessioni {
 
                             <tr>
                                 <th>
-                                    <label for="mcemexce_times"><?php echo esc_html__('Exam session times (one per line)', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
+                                    <label for="mcemexce_time"><?php echo esc_html__('Exam session time', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                                 </th>
                                 <td>
-                                    <textarea
-                                        id="mcemexce_times"
-                                        name="times"
-                                        rows="5"
-                                        cols="40"
-                                        placeholder="08:30&#10;10:30&#10;12:30"
-                                    ></textarea>
+                                    <input
+                                        type="time"
+                                        id="mcemexce_time"
+                                        name="time"
+                                        value=""
+                                    >
                                 </td>
                             </tr>
 
@@ -762,41 +768,6 @@ class MCEMEXCE_Admin_Sessioni {
                     </p>
                 </form>
             </div>
-
-            <hr>
-
-            <div class="card" style="max-width: 1100px;">
-                <h2><?php echo esc_html__('Bulk update session capacity', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
-                <p class="description"><?php echo esc_html__('Override the capacity of all standard (non-special) sessions in bulk.', 'mc-ems-exam-center-for-tutor-lms'); ?></p>
-                <form method="post">
-                    <?php wp_nonce_field('mcemexce_update_capacity', 'mcemexce_update_capacity_nonce'); ?>
-                    <input type="hidden" name="mcemexce_action" value="update_capacity">
-                    <table class="form-table">
-                        <tr>
-                            <th>
-                                <label for="mcemexce_new_capacity"><?php echo esc_html__('New capacity', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
-                            </th>
-                            <td>
-                                <input type="number" id="mcemexce_new_capacity" name="new_capacity" min="1" max="<?php echo (int) $max_capacity; ?>" value="1">
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><?php echo esc_html__('Scope', 'mc-ems-exam-center-for-tutor-lms'); ?></th>
-                            <td>
-                                <label>
-                                    <input type="checkbox" name="only_future" value="1">
-                                    <?php echo esc_html__('Apply only to future sessions (today and later)', 'mc-ems-exam-center-for-tutor-lms'); ?>
-                                </label>
-                            </td>
-                        </tr>
-                    </table>
-                    <p class="submit">
-                        <button type="submit" class="button button-secondary">
-                            <?php echo esc_html__('Update capacity', 'mc-ems-exam-center-for-tutor-lms'); ?>
-                        </button>
-                    </p>
-                </form>
-            </div>
         </div>
 
         <?php
@@ -829,19 +800,10 @@ class MCEMEXCE_Admin_Sessioni {
             return ['', __('Select at least one date from the calendar.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
-        // Build the times array from textarea input.
-        $times_raw = sanitize_textarea_field(wp_unslash($_POST['times'] ?? ''));
-        $times = [];
-        foreach (preg_split("/\r\n|\r|\n/", $times_raw) as $line) {
-            $t = trim($line);
-            if ($t === '') continue;
-            if (!preg_match('/^\d{2}:\d{2}$/', $t)) continue;
-            $times[] = $t;
-        }
-        $times = array_values(array_unique($times));
-        sort($times);
-        if (!$times) {
-            return ['', __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-exam-center-for-tutor-lms')];
+        // Get the single session time from the time input.
+        $time = sanitize_text_field(wp_unslash($_POST['time'] ?? ''));
+        if (!$time || !preg_match('/^\d{2}:\d{2}$/', $time)) {
+            return ['', __('Enter a valid time (HH:MM).', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
 
@@ -854,32 +816,29 @@ class MCEMEXCE_Admin_Sessioni {
 
         foreach ($selected_dates as $date) {
 
-            foreach ($times as $time) {
-
-                try {
-                    $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);
-                    if ($session_dt < $now) {
-                        $skipped++;
-                        continue;
-                    }
-                } catch (\Throwable $e) {
+            try {
+                $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);
+                if ($session_dt < $now) {
                     $skipped++;
                     continue;
                 }
+            } catch (\Throwable $e) {
+                $skipped++;
+                continue;
+            }
 
-                if (self::session_exists($date, $time, $exam_id)) {
-                    $skipped++;
-                    continue;
-                }
+            if (self::session_exists($date, $time, $exam_id)) {
+                $skipped++;
+                continue;
+            }
 
-                $sid = self::create_session($date, $time, $capacity, 0, 0, $exam_id);
+            $sid = self::create_session($date, $time, $capacity, 0, 0, $exam_id);
 
-                if ($sid) {
-                    $created++;
-                } else {
-                    $skipped++;
-                    $insert_errors[] = $date . ' ' . $time;
-                }
+            if ($sid) {
+                $created++;
+            } else {
+                $skipped++;
+                $insert_errors[] = $date . ' ' . $time;
             }
         }
 
@@ -979,47 +938,6 @@ class MCEMEXCE_Admin_Sessioni {
             /* translators: %d: ID of the newly created special exam session */
             __('Special exam session created and exam booked for candidate (session ID: #%d).', 'mc-ems-exam-center-for-tutor-lms'),
             (int) $sid
-        ), ''];
-    }
-
-    private static function handle_update_capacity(): array {
-        check_admin_referer('mcemexce_update_capacity', 'mcemexce_update_capacity_nonce');
-        $new_cap     = max(1, absint($_POST['new_capacity'] ?? 0));
-        $only_future = !empty($_POST['only_future']);
-
-
-        $ids = get_posts([
-            'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-        ]);
-
-        $updated = 0;
-        $today = gmdate('Y-m-d');
-
-        foreach ($ids as $sid) {
-            $sid = (int) $sid;
-            $is_special = (int) get_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_IS_SPECIAL, true);
-            $date = (string) get_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_DATE, true);
-
-            if ($only_future && $date && $date < $today) {
-                continue;
-            }
-
-            if ($is_special === 1) {
-                update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_CAPACITY, 1);
-                continue;
-            }
-
-            update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_CAPACITY, $new_cap);
-            $updated++;
-        }
-
-        return [sprintf(
-            /* translators: %d: number of sessions successfully updated */
-            __('Update completed: %d sessions updated.', 'mc-ems-exam-center-for-tutor-lms'),
-            $updated
         ), ''];
     }
 
