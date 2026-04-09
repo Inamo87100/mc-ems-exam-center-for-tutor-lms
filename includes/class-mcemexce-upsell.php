@@ -11,8 +11,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class MCEMEXCE_Upsell {
 
-/** Upgrade destination URL */
-const UPGRADE_URL = 'https://mambacoding.com/product/exam-center-for-tutor-lms/';
+/**
+	 * Upgrade destination URL.
+	 *
+	 * @var string
+	 */
+	const UPGRADE_URL = 'https://mambacoding.com/product/exam-center-for-tutor-lms/';
 
 // -------------------------------------------------------------------------
 // Bootstrap
