@@ -101,7 +101,6 @@ class MCEMEXCE_Admin_Sessioni {
             'nonce'            => wp_create_nonce('mcemexce_admin'),
             'exportNonce'      => wp_create_nonce('mcemexce_export_csv'),
             'userSearchNonce'  => wp_create_nonce('mcemexce_user_search'),
-            'freePlan'         => self::is_free_plan(),
             'monthNames'       => [
                 __('January','mc-ems-exam-center-for-tutor-lms'),
                 __('February','mc-ems-exam-center-for-tutor-lms'),
@@ -135,7 +134,6 @@ class MCEMEXCE_Admin_Sessioni {
                 'exportCsv'                   => __('Export CSV', 'mc-ems-exam-center-for-tutor-lms'),
                 'selectExamBeforeGenerating'  => __('Select a Tutor LMS exam before generating sessions.', 'mc-ems-exam-center-for-tutor-lms'),
                 'selectAtLeastOneDate'        => __('Select at least one date from the calendar.', 'mc-ems-exam-center-for-tutor-lms'),
-                'selectValidTime'             => __('Select a valid session time.', 'mc-ems-exam-center-for-tutor-lms'),
                 'enterAtLeastOneTime'         => __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-exam-center-for-tutor-lms'),
                 'selectSpecialDate'           => __('Select a date for the special session.', 'mc-ems-exam-center-for-tutor-lms'),
                 'selectSpecialTime'           => __('Select a time for the special session.', 'mc-ems-exam-center-for-tutor-lms'),
@@ -158,7 +156,7 @@ class MCEMEXCE_Admin_Sessioni {
             const standardExam = document.getElementById('mcemexce_exam_id');
             const standardStart  = document.getElementById('mcemexce_date_start');
             const standardEnd    = document.getElementById('mcemexce_date_end');
-            const standardTimes  = document.getElementById(MCEMEXCE_ADMIN.freePlan ? 'mcemexce_time_single' : 'mcemexce_times');
+            const standardTimes  = document.getElementById('mcemexce_times');
             const standardCap    = document.getElementById('mcemexce_capacity');
 
             if (!cb) return;
@@ -234,27 +232,17 @@ class MCEMEXCE_Admin_Sessioni {
                         return;
                     }
 
-                    if (MCEMEXCE_ADMIN.freePlan) {
-                        const ti = document.getElementById('mcemexce_time_single');
-                        if (ti && !ti.value) {
-                            e.preventDefault();
-                            alert(MCEMEXCE_ADMIN.i18n.selectValidTime);
-                            ti.focus();
-                            return;
-                        }
-                    } else {
-                        const ta = document.getElementById('mcemexce_times');
-                        if (ta) {
-                            const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(function(l){
-                                return /^\s*\d{2}:\d{2}\s*$/.test(l);
-                            });
+                    const ta = document.getElementById('mcemexce_times');
+                    if (ta) {
+                        const hasTime = (ta.value || '').split(/\r\n|\r|\n/).some(function(l){
+                            return /^\s*\d{2}:\d{2}\s*$/.test(l);
+                        });
 
-                            if (!hasTime) {
-                                e.preventDefault();
-                                alert(MCEMEXCE_ADMIN.i18n.enterAtLeastOneTime);
-                                ta.focus();
-                                return;
-                            }
+                        if (!hasTime) {
+                            e.preventDefault();
+                            alert(MCEMEXCE_ADMIN.i18n.enterAtLeastOneTime);
+                            ta.focus();
+                            return;
                         }
                     }
                 } else {
@@ -571,12 +559,10 @@ class MCEMEXCE_Admin_Sessioni {
         $exams   = MCEMEXCE_Tutor::get_exams();
         $exam_pt = MCEMEXCE_Tutor::exam_post_type();
 
-        $free_plan    = self::is_free_plan();
-        $max_capacity = $free_plan ? (int) MCEMEXCE_Upsell::FREE_MAX_SEATS_PER_SESSION : 500;
+        $max_capacity = 500;
 
         $notice = '';
         $error  = '';
-        $upgrade_notice = '';
 
         $request_method = isset($_SERVER['REQUEST_METHOD']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'])) : '';
         $posted = ($request_method === 'POST');
@@ -595,16 +581,14 @@ class MCEMEXCE_Admin_Sessioni {
                 } else {
                     $result = self::handle_generate_standard();
                 }
-                $notice         = $result[0] ?? '';
-                $error          = $result[1] ?? '';
-                $upgrade_notice = $result[2] ?? '';
+                $notice = $result[0] ?? '';
+                $error  = $result[1] ?? '';
             }
 
-            if ($action === 'update_capacity' && !$free_plan && check_admin_referer('mcemexce_update_capacity', 'mcemexce_update_capacity_nonce')) {
+            if ($action === 'update_capacity' && check_admin_referer('mcemexce_update_capacity', 'mcemexce_update_capacity_nonce')) {
                 $result = self::handle_update_capacity();
-                $notice         = $result[0] ?? '';
-                $error          = $result[1] ?? '';
-                $upgrade_notice = $result[2] ?? '';
+                $notice = $result[0] ?? '';
+                $error  = $result[1] ?? '';
             }
         }
 
@@ -612,32 +596,6 @@ class MCEMEXCE_Admin_Sessioni {
         <div class="wrap">
             <h1><?php echo esc_html__('Exam Sessions Management', 'mc-ems-exam-center-for-tutor-lms'); ?></h1>
 
-            <?php if ($free_plan): ?>
-            <div class="notice notice-info" style="margin-left:0;">
-                <p>
-                    <strong><?php esc_html_e('MC-EMS Free plan limits:', 'mc-ems-exam-center-for-tutor-lms'); ?></strong>
-                    <?php esc_html_e('1 session per day', 'mc-ems-exam-center-for-tutor-lms'); ?> &bull;
-                    <?php
-                    printf(
-                        /* translators: %d: maximum number of active sessions allowed on the free plan */
-                        esc_html__('max %d active sessions', 'mc-ems-exam-center-for-tutor-lms'),
-                        (int) MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS
-                    );
-                    ?> &bull;
-                    <?php
-                    printf(
-                        /* translators: %d: maximum number of seats per session allowed on the free plan */
-                        esc_html__('max %d seats per session', 'mc-ems-exam-center-for-tutor-lms'),
-                        (int) MCEMEXCE_Upsell::FREE_MAX_SEATS_PER_SESSION
-                    );
-                    ?>
-                    &mdash;
-                    <a href="<?php echo esc_url(MCEMEXCE_Upsell::UPGRADE_URL); ?>" target="_blank" rel="noopener noreferrer">
-                        <?php esc_html_e('Upgrade to MC-EMS Premium', 'mc-ems-exam-center-for-tutor-lms'); ?> &rarr;
-                    </a>
-                </p>
-            </div>
-            <?php endif; ?>
 
             <?php if ($notice): ?>
                 <div class="notice notice-success"><p><?php echo esc_html($notice); ?></p></div>
@@ -647,9 +605,6 @@ class MCEMEXCE_Admin_Sessioni {
                 <div class="notice notice-error"><p><?php echo wp_kses_post($error); ?></p></div>
             <?php endif; ?>
 
-            <?php if ($upgrade_notice): ?>
-                <div class="notice notice-warning"><p><?php echo wp_kses_post($upgrade_notice); ?></p></div>
-            <?php endif; ?>
 
             <div class="card" style="max-width: 1100px;">
                 <h2><?php echo esc_html__('Generate new sessions', 'mc-ems-exam-center-for-tutor-lms'); ?></h2>
@@ -702,20 +657,9 @@ class MCEMEXCE_Admin_Sessioni {
 
                             <tr>
                                 <th>
-                                    <?php if ($free_plan): ?>
-                                    <label for="mcemexce_time_single"><?php echo esc_html__('Exam session time', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
-                                    <?php else: ?>
                                     <label for="mcemexce_times"><?php echo esc_html__('Exam session times (one per line)', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
-                                    <?php endif; ?>
                                 </th>
                                 <td>
-                                    <?php if ($free_plan): ?>
-                                    <input
-                                        type="time"
-                                        id="mcemexce_time_single"
-                                        name="time_single"
-                                    >
-                                    <?php else: ?>
                                     <textarea
                                         id="mcemexce_times"
                                         name="times"
@@ -723,7 +667,6 @@ class MCEMEXCE_Admin_Sessioni {
                                         cols="40"
                                         placeholder="08:30&#10;10:30&#10;12:30"
                                     ></textarea>
-                                    <?php endif; ?>
                                 </td>
                             </tr>
 
@@ -820,7 +763,6 @@ class MCEMEXCE_Admin_Sessioni {
                 </form>
             </div>
 
-            <?php if (!$free_plan): ?>
             <hr>
 
             <div class="card" style="max-width: 1100px;">
@@ -855,7 +797,6 @@ class MCEMEXCE_Admin_Sessioni {
                     </p>
                 </form>
             </div>
-            <?php endif; ?>
         </div>
 
         <?php
@@ -870,19 +811,9 @@ class MCEMEXCE_Admin_Sessioni {
         $exam_id = isset($_POST['exam_id']) ? absint(wp_unslash($_POST['exam_id'])) : 0;
 
         if ($exam_id <= 0) {
-            return ['', __('Select a Tutor LMS exam.', 'mc-ems-exam-center-for-tutor-lms'), ''];
+            return ['', __('Select a Tutor LMS exam.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
-        // Free plan: enforce max seats per session.
-        if (self::is_free_plan() && $capacity > MCEMEXCE_Upsell::FREE_MAX_SEATS_PER_SESSION) {
-            return ['', MCEMEXCE_Upsell::limit_error(
-                sprintf(
-                    /* translators: %d: maximum seats allowed on free plan */
-                    __('The free plan allows a maximum of %d seats per session.', 'mc-ems-exam-center-for-tutor-lms'),
-                    MCEMEXCE_Upsell::FREE_MAX_SEATS_PER_SESSION
-                )
-            ), ''];
-        }
 
         // Validate and deduplicate selected dates.
         $selected_dates = [];
@@ -895,70 +826,35 @@ class MCEMEXCE_Admin_Sessioni {
         sort($selected_dates);
 
         if (!$selected_dates) {
-            return ['', __('Select at least one date from the calendar.', 'mc-ems-exam-center-for-tutor-lms'), ''];
+            return ['', __('Select at least one date from the calendar.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
-        // Build the times array: single input on free plan, textarea on premium.
-        if (self::is_free_plan()) {
-            $time_single = sanitize_text_field(wp_unslash($_POST['time_single'] ?? ''));
-            if (!preg_match('/^\d{2}:\d{2}$/', $time_single)) {
-                return ['', __('Select a valid session time.', 'mc-ems-exam-center-for-tutor-lms'), ''];
-            }
-            $times = [$time_single];
-        } else {
-            $times_raw = sanitize_textarea_field(wp_unslash($_POST['times'] ?? ''));
-            $times = [];
-            foreach (preg_split("/\r\n|\r|\n/", $times_raw) as $line) {
-                $t = trim($line);
-                if ($t === '') continue;
-                if (!preg_match('/^\d{2}:\d{2}$/', $t)) continue;
-                $times[] = $t;
-            }
-            $times = array_values(array_unique($times));
-            sort($times);
-            if (!$times) {
-                return ['', __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-exam-center-for-tutor-lms'), ''];
-            }
+        // Build the times array from textarea input.
+        $times_raw = sanitize_textarea_field(wp_unslash($_POST['times'] ?? ''));
+        $times = [];
+        foreach (preg_split("/\r\n|\r|\n/", $times_raw) as $line) {
+            $t = trim($line);
+            if ($t === '') continue;
+            if (!preg_match('/^\d{2}:\d{2}$/', $t)) continue;
+            $times[] = $t;
+        }
+        $times = array_values(array_unique($times));
+        sort($times);
+        if (!$times) {
+            return ['', __('Enter at least one valid time (HH:MM), one per line.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
-        // Free plan: enforce max active sessions. Check current count before the loop.
-        $is_free_plan   = self::is_free_plan();
-        $current_count  = $is_free_plan ? self::count_future_sessions() : 0;
-
-        if ($is_free_plan && $current_count >= MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS) {
-            return ['', MCEMEXCE_Upsell::limit_error(
-                sprintf(
-                    /* translators: %d: maximum active sessions allowed on free plan */
-                    __('The free plan allows a maximum of %d active sessions. You have reached this limit.', 'mc-ems-exam-center-for-tutor-lms'),
-                    MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS
-                )
-            ), ''];
-        }
 
         $created = 0;
         $skipped = 0;
         $insert_errors = [];
-        $limit_dates_blocked  = [];
-        $limit_cap_reached    = false;
 
         $tz  = wp_timezone();
         $now = new \DateTimeImmutable('now', $tz);
 
         foreach ($selected_dates as $date) {
-            // Free plan: only 1 session per day.
-            if ($is_free_plan && self::has_session_on_date($date)) {
-                $skipped += count($times);
-                $limit_dates_blocked[] = $date;
-                continue;
-            }
 
             foreach ($times as $time) {
-                // Free plan: stop once the active-sessions cap is reached.
-                if ($is_free_plan && ($current_count + $created) >= MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS) {
-                    $skipped++;
-                    $limit_cap_reached = true;
-                    continue;
-                }
 
                 try {
                     $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);
@@ -992,7 +888,7 @@ class MCEMEXCE_Admin_Sessioni {
                 /* translators: %s: comma-separated list of date/time combinations that could not be created */
                 __('Unable to create sessions for: %s', 'mc-ems-exam-center-for-tutor-lms'),
                 implode(', ', array_slice($insert_errors, 0, 5))
-            ), ''];
+            )];
         }
 
         $notice = $created ? sprintf(
@@ -1002,38 +898,7 @@ class MCEMEXCE_Admin_Sessioni {
             $skipped
         ) : '';
 
-        // Build upgrade notice if free-plan limits blocked some sessions.
-        $upgrade_notice = '';
-        if ($is_free_plan && ($limit_dates_blocked || $limit_cap_reached)) {
-            $limit_parts = [];
-            if ($limit_dates_blocked) {
-                $limit_parts[] = sprintf(
-                    /* translators: 1: list of blocked dates, 2: max sessions per day */
-                    __('The free plan allows only %2$d session per day — the following dates were skipped because a session already exists: %1$s.', 'mc-ems-exam-center-for-tutor-lms'),
-                    implode(', ', $limit_dates_blocked),
-                    MCEMEXCE_Upsell::FREE_MAX_SESSIONS_PER_DAY
-                );
-            }
-            if ($limit_cap_reached) {
-                $limit_parts[] = sprintf(
-                    /* translators: %d: maximum active sessions allowed on free plan */
-                    __('The free plan allows a maximum of %d active sessions — additional sessions were not created.', 'mc-ems-exam-center-for-tutor-lms'),
-                    MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS
-                );
-            }
-            $upgrade_notice = MCEMEXCE_Upsell::limit_error(implode(' ', $limit_parts));
-        }
-
-        if (!$created && !$upgrade_notice) {
-            return ['', sprintf(
-                /* translators: 1: number of sessions successfully created, 2: number of sessions skipped */
-                __('Creation completed: %1$d sessions created, %2$d skipped.', 'mc-ems-exam-center-for-tutor-lms'),
-                $created,
-                $skipped
-            ), ''];
-        }
-
-        return [$notice, '', $upgrade_notice];
+        return [$notice, ''];
     }
 
     private static function handle_generate_special(): array {
@@ -1045,26 +910,13 @@ class MCEMEXCE_Admin_Sessioni {
         $exam_id = absint($_POST['special_exam_id'] ?? 0);
 
         if ($exam_id <= 0) {
-            return ['', __('Select a Tutor LMS exam.', 'mc-ems-exam-center-for-tutor-lms'), ''];
+            return ['', __('Select a Tutor LMS exam.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !preg_match('/^\d{2}:\d{2}$/', $time)) {
-            return ['', __('Invalid date/time.', 'mc-ems-exam-center-for-tutor-lms'), ''];
+            return ['', __('Invalid date/time.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
-        // Free plan: enforce max active sessions.
-        if (self::is_free_plan()) {
-            $current_count = self::count_future_sessions();
-            if ($current_count >= MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS) {
-                return ['', MCEMEXCE_Upsell::limit_error(
-                    sprintf(
-                        /* translators: %d: maximum active sessions allowed on free plan */
-                        __('The free plan allows a maximum of %d active sessions. You have reached this limit.', 'mc-ems-exam-center-for-tutor-lms'),
-                        MCEMEXCE_Upsell::FREE_MAX_ACTIVE_SESSIONS
-                    )
-                ), ''];
-            }
-        }
 
         $tz = wp_timezone();
 
@@ -1073,10 +925,10 @@ class MCEMEXCE_Admin_Sessioni {
             $now = new \DateTimeImmutable('now', $tz);
 
             if ($session_dt < $now) {
-                return ['', __('Past sessions cannot be created. Please choose a future date and time.', 'mc-ems-exam-center-for-tutor-lms'), ''];
+                return ['', __('Past sessions cannot be created. Please choose a future date and time.', 'mc-ems-exam-center-for-tutor-lms')];
             }
         } catch (\Throwable $e) {
-            return ['', __('Invalid date/time.', 'mc-ems-exam-center-for-tutor-lms'), ''];
+            return ['', __('Invalid date/time.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
         if ($uid <= 0 && $email) {
@@ -1087,16 +939,16 @@ class MCEMEXCE_Admin_Sessioni {
         }
 
         if ($uid <= 0 || !get_user_by('id', $uid)) {
-            return ['', __('Invalid candidate selection.', 'mc-ems-exam-center-for-tutor-lms'), ''];
+            return ['', __('Invalid candidate selection.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
         if (self::session_exists($date, $time, $exam_id, true)) {
-            return ['', __('A special session already exists with this date/time for this exam.', 'mc-ems-exam-center-for-tutor-lms'), ''];
+            return ['', __('A special session already exists with this date/time for this exam.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
         $sid = self::create_session($date, $time, 1, 1, $uid, $exam_id);
         if (!$sid) {
-            return ['', __('Unable to create exam session.', 'mc-ems-exam-center-for-tutor-lms'), ''];
+            return ['', __('Unable to create exam session.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
         update_post_meta($sid, MCEMEXCE_CPT_Sessioni_Esame::MK_OCCUPATI, [$uid]);
@@ -1127,7 +979,7 @@ class MCEMEXCE_Admin_Sessioni {
             /* translators: %d: ID of the newly created special exam session */
             __('Special exam session created and exam booked for candidate (session ID: #%d).', 'mc-ems-exam-center-for-tutor-lms'),
             (int) $sid
-        ), '', ''];
+        ), ''];
     }
 
     private static function handle_update_capacity(): array {
@@ -1135,16 +987,6 @@ class MCEMEXCE_Admin_Sessioni {
         $new_cap     = max(1, absint($_POST['new_capacity'] ?? 0));
         $only_future = !empty($_POST['only_future']);
 
-        // Free plan: enforce max seats per session.
-        if (self::is_free_plan() && $new_cap > MCEMEXCE_Upsell::FREE_MAX_SEATS_PER_SESSION) {
-            return ['', MCEMEXCE_Upsell::limit_error(
-                sprintf(
-                    /* translators: %d: maximum seats allowed on free plan */
-                    __('The free plan allows a maximum of %d seats per session.', 'mc-ems-exam-center-for-tutor-lms'),
-                    MCEMEXCE_Upsell::FREE_MAX_SEATS_PER_SESSION
-                )
-            ), ''];
-        }
 
         $ids = get_posts([
             'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
@@ -1178,59 +1020,7 @@ class MCEMEXCE_Admin_Sessioni {
             /* translators: %d: number of sessions successfully updated */
             __('Update completed: %d sessions updated.', 'mc-ems-exam-center-for-tutor-lms'),
             $updated
-        ), '', ''];
-    }
-
-    /**
-     * Returns true when MC-EMS Premium is NOT active (i.e. free-plan limits apply).
-     */
-    private static function is_free_plan(): bool {
-        return class_exists('MCEMEXCE_Upsell') && !MCEMEXCE_Upsell::is_premium();
-    }
-
-    /**
-     * Count published sessions whose date is today or in the future.
-     */
-    private static function count_future_sessions(): int {
-        $today = current_time('Y-m-d');
-        $q = new WP_Query([
-            'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            // TODO: Plugin Check slow-query warning – meta_query on postmeta is necessary here;
-            // consider a custom table for large-scale deployments.
-            'meta_query'     => [
-                [
-                    'key'     => MCEMEXCE_CPT_Sessioni_Esame::MK_DATE,
-                    'value'   => $today,
-                    'compare' => '>=',
-                    'type'    => 'DATE',
-                ],
-            ],
-        ]);
-        return (int) $q->found_posts;
-    }
-
-    /**
-     * Check whether any published session (of any time) exists for the given date.
-     */
-    private static function has_session_on_date(string $date): bool {
-        $q = new WP_Query([
-            'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
-            'post_status'    => 'publish',
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
-            // TODO: Plugin Check slow-query warning – meta_query on postmeta is necessary here;
-            // consider a custom table for large-scale deployments.
-            'meta_query'     => [
-                [
-                    'key'   => MCEMEXCE_CPT_Sessioni_Esame::MK_DATE,
-                    'value' => $date,
-                ],
-            ],
-        ]);
-        return $q->have_posts();
+        ), ''];
     }
 
     /**
