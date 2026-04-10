@@ -41,9 +41,19 @@ if ( ! self::is_mcemexce_screen( $screen ) ) {
 return;
 }
 
-// Do not show the upsell notice when premium is already active.
-if ( class_exists( 'MCEMEXCE_Limits' ) && MCEMEXCE_Limits::is_premium() ) {
-return;
+// Do not show the upsell notice when all limits have been raised above the
+// free-plan defaults (e.g., by MC-EMS Premium via WordPress filters).
+if ( class_exists( 'MCEMEXCE_Limits' ) ) {
+    $eff_sessions = MCEMEXCE_Limits::get_max_active_sessions();
+    $eff_seats    = MCEMEXCE_Limits::get_max_seats();
+    $eff_per_day  = MCEMEXCE_Limits::get_max_sessions_per_day();
+    if (
+        $eff_sessions > MCEMEXCE_Limits::FREE_MAX_ACTIVE_SESSIONS
+        && $eff_seats   > MCEMEXCE_Limits::FREE_MAX_SEATS_PER_SESSION
+        && $eff_per_day > MCEMEXCE_Limits::FREE_MAX_SESSIONS_PER_DAY
+    ) {
+        return;
+    }
 }
 ?>
 <div class="notice notice-info is-dismissible">
@@ -55,9 +65,9 @@ if ( class_exists( 'MCEMEXCE_Limits' ) ) {
     printf(
         /* translators: 1: max active sessions, 2: max seats per session, 3: max sessions per day per exam */
         esc_html__( 'Current limits: %1$d active sessions — %2$d seats/session — %3$d session/day per exam.', 'mc-ems-exam-center-for-tutor-lms' ),
-        (int) MCEMEXCE_Limits::FREE_MAX_ACTIVE_SESSIONS,
-        (int) MCEMEXCE_Limits::FREE_MAX_SEATS_PER_SESSION,
-        (int) MCEMEXCE_Limits::FREE_MAX_SESSIONS_PER_DAY
+        (int) MCEMEXCE_Limits::get_max_active_sessions(),
+        (int) MCEMEXCE_Limits::get_max_seats(),
+        (int) MCEMEXCE_Limits::get_max_sessions_per_day()
     );
     echo ' ';
 }
@@ -102,17 +112,17 @@ $upgrade_url = self::UPGRADE_URL;
 <li><?php printf(
     /* translators: %d: max active sessions */
     esc_html__( 'Max %d active sessions at a time', 'mc-ems-exam-center-for-tutor-lms' ),
-    (int) MCEMEXCE_Limits::FREE_MAX_ACTIVE_SESSIONS
+    (int) MCEMEXCE_Limits::get_max_active_sessions()
 ); ?></li>
 <li><?php printf(
     /* translators: %d: max seats per session */
     esc_html__( 'Max %d seats per session', 'mc-ems-exam-center-for-tutor-lms' ),
-    (int) MCEMEXCE_Limits::FREE_MAX_SEATS_PER_SESSION
+    (int) MCEMEXCE_Limits::get_max_seats()
 ); ?></li>
 <li><?php printf(
     /* translators: %d: max sessions per day per exam */
     esc_html__( 'Max %d session per day per exam', 'mc-ems-exam-center-for-tutor-lms' ),
-    (int) MCEMEXCE_Limits::FREE_MAX_SESSIONS_PER_DAY
+    (int) MCEMEXCE_Limits::get_max_sessions_per_day()
 ); ?></li>
 </ul>
 <p style="margin:12px 0 0 0;color:#50575e;">

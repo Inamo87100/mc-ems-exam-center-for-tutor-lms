@@ -531,8 +531,8 @@ echo '</td></tr>';
         // In modalità ♿: capienza sempre 1
         if ($is_spec) $capacity = 1;
 
-        // Free-plan: cap capacity to FREE_MAX_SEATS_PER_SESSION (premium has no ceiling).
-        if ( ! $is_spec && class_exists( 'MCEMEXCE_Limits' ) && ! MCEMEXCE_Limits::is_premium() ) {
+        // Cap capacity to the effective seat limit (filter-driven; premium raises this via 'mcems_base_max_capacity').
+        if ( ! $is_spec && class_exists( 'MCEMEXCE_Limits' ) ) {
             $max_seats = MCEMEXCE_Limits::get_max_seats();
             if ( $capacity > $max_seats ) {
                 $capacity = $max_seats;
@@ -585,7 +585,7 @@ echo '</td></tr>';
             echo '<div class="notice notice-warning"><p>' . wp_kses_post( sprintf(
                 /* translators: 1: max seats limit, 2: upgrade URL */
                 __( 'Seats capped to %1$d — the free version of MC-EMS limits each session to %1$d seats. <a href="%2$s" target="_blank" rel="noopener noreferrer">Upgrade to MC-EMS Premium</a> to remove this limit.', 'mc-ems-exam-center-for-tutor-lms' ),
-                class_exists( 'MCEMEXCE_Limits' ) ? (int) MCEMEXCE_Limits::FREE_MAX_SEATS_PER_SESSION : 5,
+                class_exists( 'MCEMEXCE_Limits' ) ? (int) MCEMEXCE_Limits::get_max_seats() : 5,
                 esc_url( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::upgrade_url() : 'https://mambacoding.com/product/exam-center-for-tutor-lms/' )
             ) ) . '</p></div>';
         }
