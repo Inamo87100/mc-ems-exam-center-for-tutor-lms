@@ -394,7 +394,9 @@ echo '</td></tr>';
 
 
         echo '<tr><th><label>' . esc_html__('Max seats', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
-        printf('<input type="number" min="1" max="500" name="mcemexce_capacity" value="%d" %s %s />',
+        $max_cap_meta = ( class_exists( 'MCEMEXCE_Limits' ) && MCEMEXCE_Limits::is_premium() ) ? 500 : ( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::get_max_seats() : 5 );
+        printf('<input type="number" min="1" max="%d" name="mcemexce_capacity" value="%d" %s %s />',
+            (int) $max_cap_meta,
             (int) $capacity,
             ($is_spec ? 'readonly' : ''),
             esc_attr($disabled)
@@ -529,6 +531,15 @@ echo '</td></tr>';
         // In modalità ♿: capienza sempre 1
         if ($is_spec) $capacity = 1;
 
+        // Free-plan: cap capacity to FREE_MAX_SEATS_PER_SESSION (premium has no ceiling).
+        if ( ! $is_spec && class_exists( 'MCEMEXCE_Limits' ) && ! MCEMEXCE_Limits::is_premium() ) {
+            $max_seats = MCEMEXCE_Limits::get_max_seats();
+            if ( $capacity > $max_seats ) {
+                $capacity = $max_seats;
+                set_transient( 'mcemexce_free_capacity_capped_notice_' . get_current_user_id(), 1, 30 );
+            }
+        }
+
         update_post_meta($post_id, self::MK_DATE, $date);
         update_post_meta($post_id, self::MK_TIME, $time);
         update_post_meta($post_id, self::MK_CAPACITY, $capacity);
@@ -567,6 +578,16 @@ echo '</td></tr>';
         if (get_transient('mcemexce_past_session_readonly_notice')) {
             delete_transient('mcemexce_past_session_readonly_notice');
             echo '<div class="notice notice-warning"><p>' . esc_html__('Past exam sessions are read-only and cannot be modified from the backend.', 'mc-ems-exam-center-for-tutor-lms') . '</p></div>';
+        }
+        $uid = get_current_user_id();
+        if ( $uid && get_transient( 'mcemexce_free_capacity_capped_notice_' . $uid ) ) {
+            delete_transient( 'mcemexce_free_capacity_capped_notice_' . $uid );
+            echo '<div class="notice notice-warning"><p>' . wp_kses_post( sprintf(
+                /* translators: 1: max seats limit, 2: upgrade URL */
+                __( 'Seats capped to %1$d — the free version of MC-EMS limits each session to %1$d seats. <a href="%2$s" target="_blank" rel="noopener noreferrer">Upgrade to MC-EMS Premium</a> to remove this limit.', 'mc-ems-exam-center-for-tutor-lms' ),
+                class_exists( 'MCEMEXCE_Limits' ) ? (int) MCEMEXCE_Limits::FREE_MAX_SEATS_PER_SESSION : 5,
+                esc_url( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::upgrade_url() : '#' )
+            ) ) . '</p></div>';
         }
     }
 
