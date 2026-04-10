@@ -77,64 +77,76 @@ class MCEMEXCE_Limits {
 	}
 
 	// -------------------------------------------------------------------------
-	// Effective limits (filtered, premium-aware)
+	// Effective limits (always filter-driven — no hard is_premium() bypass)
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Returns the maximum number of seats allowed per session.
-	 * Returns PREMIUM_MAX_SEATS when premium is active.
+	 * Returns the effective maximum number of seats allowed per session.
+	 *
+	 * The default is FREE_MAX_SEATS_PER_SESSION (5). Any add-on (e.g., MC-EMS
+	 * Premium) can raise this value by hooking 'mcems_base_max_capacity'.
+	 *
+	 * Hook: add_filter( 'mcems_base_max_capacity', fn() => 500 );
 	 *
 	 * @return int
 	 */
 	public static function get_max_seats(): int {
-		if ( self::is_premium() ) {
-			return self::PREMIUM_MAX_SEATS;
-		}
-
 		/**
-		 * Filters the free-plan per-session seat cap.
+		 * Filters the maximum seats per session.
 		 *
-		 * @param int $max Default value from the FREE_MAX_SEATS_PER_SESSION constant.
+		 * MC-EMS Premium hooks here to raise the cap to PREMIUM_MAX_SEATS (500).
+		 * Any value higher than FREE_MAX_SEATS_PER_SESSION disables the free-plan
+		 * seat restriction and hides the related admin notice.
+		 *
+		 * @param int $max Default FREE_MAX_SEATS_PER_SESSION (5) on free plan.
 		 */
-		return max( 1, (int) apply_filters( 'mcemexce_free_max_seats_per_session', self::FREE_MAX_SEATS_PER_SESSION ) );
+		return max( 1, (int) apply_filters( 'mcems_base_max_capacity', self::FREE_MAX_SEATS_PER_SESSION ) );
 	}
 
 	/**
-	 * Returns the maximum number of active sessions allowed at one time.
-	 * Returns PHP_INT_MAX when premium is active.
+	 * Returns the effective maximum number of active (future/published) sessions.
+	 *
+	 * The default is FREE_MAX_ACTIVE_SESSIONS (5). Any add-on (e.g., MC-EMS
+	 * Premium) can raise this value by hooking 'mcems_base_max_sessions'.
+	 *
+	 * Hook: add_filter( 'mcems_base_max_sessions', fn() => PHP_INT_MAX );
 	 *
 	 * @return int
 	 */
 	public static function get_max_active_sessions(): int {
-		if ( self::is_premium() ) {
-			return PHP_INT_MAX;
-		}
-
 		/**
-		 * Filters the free-plan active-sessions cap.
+		 * Filters the maximum number of active sessions allowed at one time.
 		 *
-		 * @param int $max Default value from the FREE_MAX_ACTIVE_SESSIONS constant.
+		 * MC-EMS Premium hooks here to remove the cap (sets to PHP_INT_MAX).
+		 * Any value higher than FREE_MAX_ACTIVE_SESSIONS disables the free-plan
+		 * session restriction and hides the related admin notice.
+		 *
+		 * @param int $max Default FREE_MAX_ACTIVE_SESSIONS (5) on free plan.
 		 */
-		return max( 1, (int) apply_filters( 'mcemexce_free_max_active_sessions', self::FREE_MAX_ACTIVE_SESSIONS ) );
+		return max( 1, (int) apply_filters( 'mcems_base_max_sessions', self::FREE_MAX_ACTIVE_SESSIONS ) );
 	}
 
 	/**
-	 * Returns the maximum number of sessions per day per exam/course.
-	 * Returns PHP_INT_MAX when premium is active.
+	 * Returns the effective maximum number of sessions per day per exam/course.
+	 *
+	 * The default is FREE_MAX_SESSIONS_PER_DAY (1). Any add-on (e.g., MC-EMS
+	 * Premium) can raise this value by hooking 'mcems_slots_per_day_limit'.
+	 *
+	 * Hook: add_filter( 'mcems_slots_per_day_limit', fn() => PHP_INT_MAX );
 	 *
 	 * @return int
 	 */
 	public static function get_max_sessions_per_day(): int {
-		if ( self::is_premium() ) {
-			return PHP_INT_MAX;
-		}
-
 		/**
-		 * Filters the free-plan sessions-per-day-per-exam cap.
+		 * Filters the maximum number of sessions per day per exam.
 		 *
-		 * @param int $max Default value from the FREE_MAX_SESSIONS_PER_DAY constant.
+		 * MC-EMS Premium hooks here to remove the cap (sets to PHP_INT_MAX).
+		 * Any value higher than FREE_MAX_SESSIONS_PER_DAY disables the free-plan
+		 * per-day restriction and hides the related admin notice.
+		 *
+		 * @param int $max Default FREE_MAX_SESSIONS_PER_DAY (1) on free plan.
 		 */
-		return max( 1, (int) apply_filters( 'mcemexce_free_max_sessions_per_day', self::FREE_MAX_SESSIONS_PER_DAY ) );
+		return max( 1, (int) apply_filters( 'mcems_slots_per_day_limit', self::FREE_MAX_SESSIONS_PER_DAY ) );
 	}
 
 	// -------------------------------------------------------------------------
