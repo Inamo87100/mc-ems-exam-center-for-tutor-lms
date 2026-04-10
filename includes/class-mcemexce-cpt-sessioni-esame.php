@@ -394,7 +394,7 @@ echo '</td></tr>';
 
 
         echo '<tr><th><label>' . esc_html__('Max seats', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
-        $max_cap_meta = ( class_exists( 'MCEMEXCE_Limits' ) && MCEMEXCE_Limits::is_premium() ) ? 500 : ( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::get_max_seats() : 5 );
+        $max_cap_meta = class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::get_max_seats() : 5;
         printf('<input type="number" min="1" max="%d" name="mcemexce_capacity" value="%d" %s %s />',
             (int) $max_cap_meta,
             (int) $capacity,
@@ -586,7 +586,7 @@ echo '</td></tr>';
                 /* translators: 1: max seats limit, 2: upgrade URL */
                 __( 'Seats capped to %1$d — the free version of MC-EMS limits each session to %1$d seats. <a href="%2$s" target="_blank" rel="noopener noreferrer">Upgrade to MC-EMS Premium</a> to remove this limit.', 'mc-ems-exam-center-for-tutor-lms' ),
                 class_exists( 'MCEMEXCE_Limits' ) ? (int) MCEMEXCE_Limits::FREE_MAX_SEATS_PER_SESSION : 5,
-                esc_url( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::upgrade_url() : '#' )
+                esc_url( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::upgrade_url() : 'https://mambacoding.com/product/exam-center-for-tutor-lms/' )
             ) ) . '</p></div>';
         }
     }

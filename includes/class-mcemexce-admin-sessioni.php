@@ -554,7 +554,7 @@ class MCEMEXCE_Admin_Sessioni {
         $exam_pt = MCEMEXCE_Tutor::exam_post_type();
 
         $is_premium   = class_exists( 'MCEMEXCE_Limits' ) && MCEMEXCE_Limits::is_premium();
-        $max_capacity = $is_premium ? 500 : ( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::get_max_seats() : 5 );
+        $max_capacity = class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::get_max_seats() : 5;
 
         $notice = '';
         $error  = '';
@@ -811,12 +811,14 @@ class MCEMEXCE_Admin_Sessioni {
 
         // -----------------------------------------------------------------
         // Free-plan limits (enforced server-side; not bypassable by UI).
+        // The getter methods already return appropriate values for both
+        // free and premium plans — no need to check is_premium() here.
         // -----------------------------------------------------------------
-        $is_premium      = class_exists( 'MCEMEXCE_Limits' ) && MCEMEXCE_Limits::is_premium();
-        $max_active      = $is_premium ? PHP_INT_MAX : ( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::get_max_active_sessions()   : 5 );
-        $max_per_day     = $is_premium ? PHP_INT_MAX : ( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::get_max_sessions_per_day()  : 1 );
-        $max_seats       = $is_premium ? 500         : ( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::get_max_seats()             : 5 );
-        $active_count    = $is_premium ? 0           : ( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::count_active_sessions()     : 0 );
+        $is_premium   = class_exists( 'MCEMEXCE_Limits' ) && MCEMEXCE_Limits::is_premium();
+        $max_active   = class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::get_max_active_sessions()   : 5;
+        $max_per_day  = class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::get_max_sessions_per_day()  : 1;
+        $max_seats    = class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::get_max_seats()             : 5;
+        $active_count = ( $is_premium || ! class_exists( 'MCEMEXCE_Limits' ) ) ? 0 : MCEMEXCE_Limits::count_active_sessions();
 
         // Cap capacity to the per-session seat limit.
         if ( $capacity > $max_seats ) {
@@ -829,7 +831,7 @@ class MCEMEXCE_Admin_Sessioni {
                 /* translators: 1: max active sessions limit, 2: upgrade URL */
                 __( 'Active sessions limit reached (%1$d) in the free version. <a href="%2$s" target="_blank" rel="noopener noreferrer">Upgrade to MC-EMS Premium</a> to remove this limit.', 'mc-ems-exam-center-for-tutor-lms' ),
                 (int) $max_active,
-                esc_url( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::upgrade_url() : '#' )
+                esc_url( class_exists( 'MCEMEXCE_Limits' ) ? MCEMEXCE_Limits::upgrade_url() : 'https://mambacoding.com/product/exam-center-for-tutor-lms/' )
             ) ) ];
         }
 

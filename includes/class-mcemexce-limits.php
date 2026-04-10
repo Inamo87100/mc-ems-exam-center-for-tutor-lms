@@ -21,6 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class MCEMEXCE_Limits {
 
+	/**
+	 * Maximum seats cap applied in the Premium tier (practical ceiling for HTML inputs).
+	 *
+	 * @var int
+	 */
+	const PREMIUM_MAX_SEATS = 500;
+
 	// -------------------------------------------------------------------------
 	// Free-plan hard limits (documented constants)
 	// -------------------------------------------------------------------------
@@ -75,13 +82,13 @@ class MCEMEXCE_Limits {
 
 	/**
 	 * Returns the maximum number of seats allowed per session.
-	 * Returns PHP_INT_MAX when premium is active.
+	 * Returns PREMIUM_MAX_SEATS when premium is active.
 	 *
 	 * @return int
 	 */
 	public static function get_max_seats(): int {
 		if ( self::is_premium() ) {
-			return PHP_INT_MAX;
+			return self::PREMIUM_MAX_SEATS;
 		}
 
 		/**
