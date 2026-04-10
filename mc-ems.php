@@ -23,6 +23,7 @@ define('MCEMEXCE_PLUGIN_PATH', plugin_dir_path(__FILE__));
 // Load all classes with file existence checks
 $mcemexce_class_files = [
     'includes/class-mcemexce-tutor.php',
+    'includes/class-mcemexce-limits.php',
     'includes/class-mcemexce-upsell.php',
     'includes/class-mcemexce-settings.php',
     'includes/class-mcemexce-upgrader.php',

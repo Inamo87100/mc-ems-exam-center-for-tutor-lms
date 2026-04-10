@@ -86,11 +86,19 @@ When access is blocked:
 * System message customization
 * Administrative permission management
 
-= All Features Included =
+= Free Version – Features & Limits =
 
-All features listed below are fully available without any restrictions, license keys, or activation codes:
+The free version includes all core features. The following limits apply and can be removed by upgrading to MC-EMS Premium:
 
-* Exam sessions (unlimited)
+**Free version limits:**
+
+* Max 5 active sessions at a time
+* Max 5 seats per session
+* Max 1 session per day per exam
+
+**Features:**
+
+* Exam sessions (up to 5 active)
 * Exam booking
 * Booking calendar
 * User booking management
@@ -99,8 +107,15 @@ All features listed below are fully available without any restrictions, license 
 * Administrative session calendar
 * Proctor assignment
 * Tutor LMS integration
-* Multiple time slots per day
+
+**MC-EMS Premium removes all limits and adds:**
+
+* Unlimited active sessions
 * Session capacity up to 500 seats
+* Multiple time slots per day per exam
+* Priority support
+
+All limits are enforced transparently in the admin interface. When a limit is reached, a clear notice explains what happened and includes a link to MC-EMS Premium.
 
 = Requirements =
 
