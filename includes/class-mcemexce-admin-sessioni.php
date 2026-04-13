@@ -681,12 +681,33 @@ class MCEMEXCE_Admin_Sessioni {
                                     <label for="mcemexce_time"><?php echo esc_html__('Exam session time', 'mc-ems-exam-center-for-tutor-lms'); ?></label>
                                 </th>
                                 <td>
+                                    <?php
+                                    // New sessions have no pre-filled time and are never disabled at creation time.
+                                    $time_value = '';
+                                    $disabled   = '';
+                                    /**
+                                     * Filter to allow plugins to override the default time input field on the Create sessions admin page.
+                                     *
+                                     * Return a non-empty HTML string to replace the default input[type="time"].
+                                     * Return an empty string (the default) to render the standard time input.
+                                     * Callbacks are responsible for properly escaping their output before returning it.
+                                     *
+                                     * @param string $html       HTML to output for the field. Return empty string to use the default input.
+                                     * @param string $time_value Current time value (empty string for new sessions).
+                                     * @param string $disabled   Disabled HTML attribute string if the field should be read-only, otherwise empty string.
+                                     */
+                                    $field_html = apply_filters( 'mcems_admin_create_session_time_field_html', '', $time_value, $disabled );
+                                    if ( $field_html !== '' ) {
+                                        echo $field_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Callbacks must escape their own output.
+                                    } else {
+                                    ?>
                                     <input
                                         type="time"
                                         id="mcemexce_time"
                                         name="time"
                                         value=""
                                     >
+                                    <?php } ?>
                                 </td>
                             </tr>
 
