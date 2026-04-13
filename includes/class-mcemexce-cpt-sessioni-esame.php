@@ -321,6 +321,14 @@ class MCEMEXCE_CPT_Sessioni_Esame {
         );
     }
 
+    /**
+     * Renders the session edit metabox HTML.
+     *
+     * Outputs all form fields for an exam session (exam, date, time, seats, proctor, special requirements).
+     * The Time field can be overridden by external plugins via the 'mcems_admin_session_time_field_html' filter.
+     *
+     * @param WP_Post $post Current session post object.
+     */
     public static function metabox_html($post) {
         wp_nonce_field('mcemexce_session_save', 'mcemexce_session_nonce');
 
@@ -387,7 +395,31 @@ echo '</td></tr>';
         echo '</td></tr>';
 
         echo '<tr><th><label>' . esc_html__('Time', 'mc-ems-exam-center-for-tutor-lms') . '</label></th><td>';
-        printf('<input type="time" id="mcemexce_time_input" name="mcemexce_time" value="%s" %s />', esc_attr($time), esc_attr($disabled));
+
+        /**
+         * Filter to allow plugins to override the default time input field in the session edit metabox.
+         *
+         * Return a non-empty HTML string to replace the default input[type="time"].
+         * Return an empty string (the default) to render the standard time input.
+         * Callbacks are responsible for properly escaping their output before returning it.
+         *
+         * @param string  $html     HTML to output for the field. Return empty string to use the default input.
+         * @param string  $value    Current time value (e.g. "09:30").
+         * @param string  $disabled Disabled HTML attribute string if the session is read-only, otherwise empty string.
+         * @param WP_Post $post     Current session post object.
+         */
+        $time_field_html = apply_filters( 'mcems_admin_session_time_field_html', '', $time, $disabled, $post );
+
+        if ( $time_field_html !== '' ) {
+            echo $time_field_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Callbacks must escape their own output.
+        } else {
+            printf(
+                '<input type="time" id="mcemexce_time_input" name="mcemexce_time" value="%s" %s />',
+                esc_attr( $time ),
+                esc_attr( $disabled )
+            );
+        }
+
         echo '</td></tr>';
 
         // Prevent selecting past time when date is today — handled via wp_add_inline_script in enqueue_metabox_scripts().
