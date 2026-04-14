@@ -813,11 +813,7 @@ class MCEMEXCE_Admin_Sessioni {
         $selected_dates_raw = isset($_POST['selected_dates']) && is_array($_POST['selected_dates'])
             ? array_map('sanitize_text_field', wp_unslash($_POST['selected_dates']))
             : [];
-        $capacity_raw = isset($_POST['capacity']) ? wp_unslash($_POST['capacity']) : null;
-        if ($capacity_raw === null || $capacity_raw === '') {
-            return ['', __('Enter a valid seats value.', 'mc-ems-exam-center-for-tutor-lms')];
-        }
-        $capacity = absint($capacity_raw);
+        $capacity = isset($_POST['capacity']) ? absint(wp_unslash($_POST['capacity'])) : 0;
         if ($capacity < 1) {
             return ['', __('Enter a valid seats value.', 'mc-ems-exam-center-for-tutor-lms')];
         }
@@ -913,12 +909,7 @@ class MCEMEXCE_Admin_Sessioni {
 
             foreach ($session_times as $time) {
                 // Guard clause: create standard sessions only for complete/validated combinations.
-                if (
-                    !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)
-                    || !preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $time)
-                    || $exam_id <= 0
-                    || $capacity < 1
-                ) {
+                if ($date === '' || $time === '') {
                     $skipped++;
                     continue;
                 }
