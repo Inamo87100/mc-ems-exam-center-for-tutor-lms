@@ -846,7 +846,7 @@ class MCEMEXCE_Admin_Sessioni {
         // Normalize, validate (24h HH:MM), and deduplicate all posted times.
         $session_times = [];
         foreach ($times_raw as $raw_time) {
-            $raw_time = trim((string) $raw_time);
+            $raw_time = trim($raw_time);
             if ($raw_time === '') {
                 continue;
             }
@@ -895,8 +895,6 @@ class MCEMEXCE_Admin_Sessioni {
 
         $tz  = wp_timezone();
         $now = new \DateTimeImmutable('now', $tz);
-        $created_for_date = [];
-
         // Create one session for each date/time combination.
         foreach ($selected_dates as $date) {
             // Cache the current per-day count once, then add in-memory creations from this batch.
@@ -904,7 +902,7 @@ class MCEMEXCE_Admin_Sessioni {
             if ( class_exists( 'MCEMEXCE_Limits' ) ) {
                 $sessions_this_day_base = MCEMEXCE_Limits::count_sessions_for_exam_on_date( $exam_id, $date );
             }
-            $created_for_date[$date] = 0;
+            $created_this_date = 0;
 
             foreach ($session_times as $time) {
 
@@ -921,7 +919,7 @@ class MCEMEXCE_Admin_Sessioni {
 
                 // Enforce the sessions-per-day-per-exam limit for each date/time pair.
                 if ( class_exists( 'MCEMEXCE_Limits' ) ) {
-                    if ( ( $sessions_this_day_base + $created_for_date[$date] ) >= $max_per_day ) {
+                    if ( ( $sessions_this_day_base + $created_this_date ) >= $max_per_day ) {
                         $skipped++;
                         continue;
                     }
@@ -943,7 +941,7 @@ class MCEMEXCE_Admin_Sessioni {
 
                 if ($sid) {
                     $created++;
-                    $created_for_date[$date]++;
+                    $created_this_date++;
                 } else {
                     $skipped++;
                     $insert_errors[] = $date . ' ' . $time;
