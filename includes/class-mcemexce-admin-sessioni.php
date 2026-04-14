@@ -835,9 +835,29 @@ class MCEMEXCE_Admin_Sessioni {
             return ['', __('Select at least one date from the calendar.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
-        // Get the single session time from the time input.
-        $time = sanitize_text_field(wp_unslash($_POST['time'] ?? ''));
-        if (!$time || !preg_match('/^\d{2}:\d{2}$/', $time)) {
+        // Accept both legacy scalar "time" and premium "session_times[]" input.
+        $times_raw = [];
+        if (isset($_POST['session_times']) && is_array($_POST['session_times'])) {
+            $times_raw = array_map('sanitize_text_field', wp_unslash($_POST['session_times']));
+        } else {
+            $times_raw = [sanitize_text_field(wp_unslash($_POST['time'] ?? ''))];
+        }
+
+        // Normalize, validate (24h HH:MM), and deduplicate all posted times.
+        $session_times = [];
+        foreach ($times_raw as $raw_time) {
+            $raw_time = trim((string) $raw_time);
+            if ($raw_time === '') {
+                continue;
+            }
+            if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $raw_time)) {
+                return ['', __('Enter a valid time (HH:MM).', 'mc-ems-exam-center-for-tutor-lms')];
+            }
+            $session_times[] = $raw_time;
+        }
+        $session_times = array_values(array_unique($session_times));
+
+        if (!$session_times) {
             return ['', __('Enter a valid time (HH:MM).', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
@@ -875,47 +895,50 @@ class MCEMEXCE_Admin_Sessioni {
         $tz  = wp_timezone();
         $now = new \DateTimeImmutable('now', $tz);
 
+        // Create one session for each date/time combination.
         foreach ($selected_dates as $date) {
+            foreach ($session_times as $time) {
 
-            try {
-                $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);
-                if ($session_dt < $now) {
+                try {
+                    $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);
+                    if ($session_dt < $now) {
+                        $skipped++;
+                        continue;
+                    }
+                } catch (\Throwable $e) {
                     $skipped++;
                     continue;
                 }
-            } catch (\Throwable $e) {
-                $skipped++;
-                continue;
-            }
 
-            // Enforce the sessions-per-day-per-exam limit.
-            if ( class_exists( 'MCEMEXCE_Limits' ) ) {
-                $sessions_this_day = MCEMEXCE_Limits::count_sessions_for_exam_on_date( $exam_id, $date );
-                if ( $sessions_this_day >= $max_per_day ) {
+                // Enforce the sessions-per-day-per-exam limit for each date/time pair.
+                if ( class_exists( 'MCEMEXCE_Limits' ) ) {
+                    $sessions_this_day = MCEMEXCE_Limits::count_sessions_for_exam_on_date( $exam_id, $date );
+                    if ( $sessions_this_day >= $max_per_day ) {
+                        $skipped++;
+                        continue;
+                    }
+                }
+
+                // Enforce the overall active-sessions ceiling (accounting
+                // for sessions already created in this batch).
+                if ( ( $active_count + $created ) >= $max_active ) {
                     $skipped++;
                     continue;
                 }
-            }
 
-            // Enforce the overall active-sessions ceiling (accounting
-            // for sessions already created in this batch).
-            if ( ( $active_count + $created ) >= $max_active ) {
-                $skipped++;
-                continue;
-            }
+                if (self::session_exists($date, $time, $exam_id)) {
+                    $skipped++;
+                    continue;
+                }
 
-            if (self::session_exists($date, $time, $exam_id)) {
-                $skipped++;
-                continue;
-            }
+                $sid = self::create_session($date, $time, $capacity, 0, 0, $exam_id);
 
-            $sid = self::create_session($date, $time, $capacity, 0, 0, $exam_id);
-
-            if ($sid) {
-                $created++;
-            } else {
-                $skipped++;
-                $insert_errors[] = $date . ' ' . $time;
+                if ($sid) {
+                    $created++;
+                } else {
+                    $skipped++;
+                    $insert_errors[] = $date . ' ' . $time;
+                }
             }
         }
 
