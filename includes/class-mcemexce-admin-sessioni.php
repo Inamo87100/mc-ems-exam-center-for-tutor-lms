@@ -850,6 +850,7 @@ class MCEMEXCE_Admin_Sessioni {
             if ($raw_time === '') {
                 continue;
             }
+            // Use strict 24-hour validation (00:00-23:59) for every submitted time.
             if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $raw_time)) {
                 return ['', __('Enter a valid time (HH:MM).', 'mc-ems-exam-center-for-tutor-lms')];
             }
@@ -894,9 +895,17 @@ class MCEMEXCE_Admin_Sessioni {
 
         $tz  = wp_timezone();
         $now = new \DateTimeImmutable('now', $tz);
+        $created_for_date = [];
 
         // Create one session for each date/time combination.
         foreach ($selected_dates as $date) {
+            // Cache the current per-day count once, then add in-memory creations from this batch.
+            $sessions_this_day_base = 0;
+            if ( class_exists( 'MCEMEXCE_Limits' ) ) {
+                $sessions_this_day_base = MCEMEXCE_Limits::count_sessions_for_exam_on_date( $exam_id, $date );
+            }
+            $created_for_date[$date] = 0;
+
             foreach ($session_times as $time) {
 
                 try {
@@ -912,8 +921,7 @@ class MCEMEXCE_Admin_Sessioni {
 
                 // Enforce the sessions-per-day-per-exam limit for each date/time pair.
                 if ( class_exists( 'MCEMEXCE_Limits' ) ) {
-                    $sessions_this_day = MCEMEXCE_Limits::count_sessions_for_exam_on_date( $exam_id, $date );
-                    if ( $sessions_this_day >= $max_per_day ) {
+                    if ( ( $sessions_this_day_base + $created_for_date[$date] ) >= $max_per_day ) {
                         $skipped++;
                         continue;
                     }
@@ -935,6 +943,7 @@ class MCEMEXCE_Admin_Sessioni {
 
                 if ($sid) {
                     $created++;
+                    $created_for_date[$date]++;
                 } else {
                     $skipped++;
                     $insert_errors[] = $date . ' ' . $time;
