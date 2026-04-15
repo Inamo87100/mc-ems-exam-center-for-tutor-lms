@@ -814,6 +814,15 @@ class MCEMEXCE_Admin_Sessioni {
             ? array_map('sanitize_text_field', wp_unslash($_POST['selected_dates']))
             : [];
         $capacity = isset($_POST['capacity']) ? absint(wp_unslash($_POST['capacity'])) : 0;
+        // Debug logging is enabled by default and can be disabled with:
+        // add_filter('mcemexce_session_generation_debug_logging', '__return_false');
+        $debug_session_generation = (bool) apply_filters('mcemexce_session_generation_debug_logging', true);
+        $debug_log = static function (string $message) use ($debug_session_generation): void {
+            if ($debug_session_generation) {
+                error_log('[MC-EMS][handle_generate_standard] ' . $message);
+            }
+        };
+
         if ($capacity < 1) {
             return ['', __('Enter a valid seats value.', 'mc-ems-exam-center-for-tutor-lms')];
         }
@@ -824,15 +833,25 @@ class MCEMEXCE_Admin_Sessioni {
         }
 
 
-        // Validate and deduplicate selected dates.
+        // Sanitize, validate and deduplicate selected dates.
         $selected_dates = [];
         foreach ($selected_dates_raw as $d) {
+            $d = trim((string) $d);
+            if ($d === '') {
+                continue;
+            }
             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)) {
                 $selected_dates[] = $d;
             }
         }
         $selected_dates = array_values(array_unique($selected_dates));
         sort($selected_dates);
+
+        $debug_log(sprintf(
+            'selected_dates raw=%s sanitized=%s',
+            wp_json_encode($selected_dates_raw),
+            wp_json_encode($selected_dates)
+        ));
 
         if (!$selected_dates) {
             return ['', __('Select at least one date from the calendar.', 'mc-ems-exam-center-for-tutor-lms')];
@@ -860,6 +879,12 @@ class MCEMEXCE_Admin_Sessioni {
             $session_times[] = $raw_time;
         }
         $session_times = array_values(array_unique($session_times));
+
+        $debug_log(sprintf(
+            'session_times raw=%s sanitized=%s',
+            wp_json_encode($times_raw),
+            wp_json_encode($session_times)
+        ));
 
         if (!$session_times) {
             return ['', __('Enter a valid time (HH:MM).', 'mc-ems-exam-center-for-tutor-lms')];
@@ -908,8 +933,25 @@ class MCEMEXCE_Admin_Sessioni {
             $created_this_date = 0;
 
             foreach ($session_times as $time) {
+                $debug_log(sprintf(
+                    'attempt date=%s time=%s exam_id=%d capacity=%d',
+                    (string) $date,
+                    (string) $time,
+                    (int) $exam_id,
+                    (int) $capacity
+                ));
+
                 // Guard clause: create standard sessions only for complete/validated combinations.
-                if ($date === '' || $time === '') {
+                $is_valid_date = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $date) === 1;
+                $is_valid_time = preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', (string) $time) === 1;
+                if (!$is_valid_date || !$is_valid_time || $capacity < 1 || $exam_id <= 0) {
+                    $debug_log(sprintf(
+                        'skip invalid payload date=%s time=%s exam_id=%d capacity=%d',
+                        (string) $date,
+                        (string) $time,
+                        (int) $exam_id,
+                        (int) $capacity
+                    ));
                     $skipped++;
                     continue;
                 }
@@ -945,6 +987,13 @@ class MCEMEXCE_Admin_Sessioni {
                     continue;
                 }
 
+                $debug_log(sprintf(
+                    'create_session date=%s time=%s exam_id=%d capacity=%d',
+                    (string) $date,
+                    (string) $time,
+                    (int) $exam_id,
+                    (int) $capacity
+                ));
                 $sid = self::create_session($date, $time, $capacity, 0, 0, $exam_id);
 
                 if ($sid) {
