@@ -131,6 +131,102 @@ All limits are enforced transparently in the admin interface. When a limit is re
 4. Create exam sessions
 5. Insert the shortcodes into your site pages
 
+== Frequently Asked Questions ==
+
+= What is EC and what is it used for? =
+
+EC is an advanced WordPress plugin that transforms Tutor LMS into a complete exam session management system.
+
+It allows administrators to organize exam calendars, manage student bookings, and automatically control access to exams based on a valid reservation.
+
+= What does EC add compared to the original Tutor LMS? =
+
+Tutor LMS mainly manages courses and quizzes. EC adds essential functionality for managing real examination sessions, including:
+
+* Exam session management (date, time, capacity)
+* Exam booking through an interactive calendar
+* Dedicated administrative dashboard for bookings
+* Access control to exams based on valid reservations
+* CSV export of bookings and session data
+* Assignment of proctors to sessions
+* Advanced role and permission management
+
+In practice, EC makes Tutor LMS suitable for professional and certification-based environments.
+
+= Can students view available sessions and book autonomously? =
+
+Yes. Using the shortcode:
+
+[mcemexce_book_exam]
+
+students can view available sessions filtered by date and book directly from the interactive calendar.
+
+This significantly reduces manual administrative work and provides a modern and user-friendly experience.
+
+= Can students manage their own bookings? =
+
+Yes. Using the shortcode:
+
+[mcemexce_manage_booking]
+
+each student can:
+
+* View existing bookings
+* Check session details
+* Cancel bookings (if allowed)
+* Verify exam date, time, and information
+
+= Can administrators manage many sessions and export bookings? =
+
+Yes. From the WordPress dashboard administrators can:
+
+* Create and modify exam sessions
+* View all bookings
+* Export booking data in CSV format
+* Assign proctors to sessions
+
+This provides full operational control for organizations managing a large number of candidates.
+
+= How customizable is the exam session management system? =
+
+The system is highly configurable. Administrators can define:
+
+* Session date, time, associated exam, and capacity
+* Custom roles and permissions (administrators, proctors, students)
+* Role-based access to shortcodes
+* Email notifications for confirmations, alerts, and reminders
+
+= Is there an access control system to allow only booked users to take the exam? =
+
+Yes. EC can automatically block access to Tutor LMS exams for users who do not have a valid booking for that session.
+
+This ensures security, organization, and compliance with examination rules without manual intervention.
+
+= Are there limitations in the base version? =
+
+Yes. The base version allows management of:
+
+* Up to 5 seats per session
+* One time slot per day
+
+The premium version increases these limits (up to 500 seats per session and multiple daily slots) and includes priority support.
+
+= Is EC fully integrated with Tutor LMS and WordPress? =
+
+Yes. EC works natively within WordPress and integrates directly with Tutor LMS without requiring complex configuration or code modifications.
+
+All management operations are performed from the standard WordPress administration interface.
+
+= What are the minimum requirements and compatibility details? =
+
+EC requires:
+
+* WordPress 6.0 or higher
+* PHP 7.4 or higher
+* Tutor LMS installed and active
+
+All plugin strings are fully internationalized and compatible with translation tools such as Loco Translate.
+
 == Changelog ==
 
 = 1.2.6 =
