@@ -211,14 +211,46 @@ class MCEMEXCE_Admin_Sessioni {
         (function(){
             const genForm = document.getElementById('mcems-generate-form');
             if (!genForm) return;
+            const submitBtn = genForm.querySelector('button[name="mcemexce_submit_generate"]');
+            let isSubmitting = false;
+
+            function lockSubmit() {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('disabled');
+                    submitBtn.setAttribute('aria-disabled', 'true');
+                }
+            }
+
+            function unlockSubmit() {
+                isSubmitting = false;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('disabled');
+                    submitBtn.removeAttribute('aria-disabled');
+                }
+            }
+
+            // Disable immediately on click to reduce accidental double-submits.
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function(){
+                    lockSubmit();
+                });
+            }
 
             genForm.addEventListener('submit', function(e){
+                if (isSubmitting) {
+                    e.preventDefault();
+                    return;
+                }
+
                 const special = document.getElementById('mcemexce_generate_special');
                 const isSpecial = special && special.checked;
 
                 const sel = document.getElementById(isSpecial ? 'mcemexce_special_exam_id' : 'mcemexce_exam_id');
                 if (sel && !sel.value) {
                     e.preventDefault();
+                    unlockSubmit();
                     alert(MCEMEXCE_ADMIN.i18n.selectExamBeforeGenerating);
                     sel.focus();
                     return;
@@ -228,6 +260,7 @@ class MCEMEXCE_Admin_Sessioni {
                     const calContainer = document.getElementById('mcems-selected-dates');
                     if (calContainer && calContainer.querySelectorAll('input[name="selected_dates[]"]').length === 0) {
                         e.preventDefault();
+                        unlockSubmit();
                         alert(MCEMEXCE_ADMIN.i18n.selectAtLeastOneDate);
                         return;
                     }
@@ -235,6 +268,7 @@ class MCEMEXCE_Admin_Sessioni {
                     const timeInput = document.getElementById('mcemexce_time');
                     if (timeInput && !/^\d{2}:\d{2}$/.test((timeInput.value || '').trim())) {
                         e.preventDefault();
+                        unlockSubmit();
                         alert(MCEMEXCE_ADMIN.i18n.enterAtLeastOneTime);
                         timeInput.focus();
                         return;
@@ -247,6 +281,7 @@ class MCEMEXCE_Admin_Sessioni {
 
                     if (sDate && !sDate.value) {
                         e.preventDefault();
+                        unlockSubmit();
                         alert(MCEMEXCE_ADMIN.i18n.selectSpecialDate);
                         sDate.focus();
                         return;
@@ -254,6 +289,7 @@ class MCEMEXCE_Admin_Sessioni {
 
                     if (sTime && !sTime.value) {
                         e.preventDefault();
+                        unlockSubmit();
                         alert(MCEMEXCE_ADMIN.i18n.selectSpecialTime);
                         sTime.focus();
                         return;
@@ -261,11 +297,15 @@ class MCEMEXCE_Admin_Sessioni {
 
                     if (!sUserId || !sUserId.value) {
                         e.preventDefault();
+                        unlockSubmit();
                         alert(MCEMEXCE_ADMIN.i18n.selectSpecialCandidate);
                         if (sUser) sUser.focus();
                         return;
                     }
                 }
+
+                isSubmitting = true;
+                lockSubmit();
             });
         })();
 
@@ -1036,7 +1076,7 @@ class MCEMEXCE_Admin_Sessioni {
             return ['', __('Select a Tutor LMS exam.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !preg_match('/^\d{2}:\d{2}$/', $time)) {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $time)) {
             return ['', __('Invalid date/time.', 'mc-ems-exam-center-for-tutor-lms')];
         }
 
@@ -1183,7 +1223,7 @@ class MCEMEXCE_Admin_Sessioni {
 
         $q = new WP_Query([
             'post_type'      => MCEMEXCE_CPT_Sessioni_Esame::CPT,
-            'post_status'    => 'publish',
+            'post_status'    => ['publish', 'draft', 'pending', 'future', 'private'],
             'posts_per_page' => 1,
             'fields'         => 'ids',
             // TODO: Plugin Check slow-query warning – meta_query on postmeta is necessary here;
