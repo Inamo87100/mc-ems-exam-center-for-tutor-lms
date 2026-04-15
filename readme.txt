@@ -227,6 +227,16 @@ EC requires:
 
 All plugin strings are fully internationalized and compatible with translation tools such as Loco Translate.
 
+== Screenshots ==
+
+1. Generate new exam sessions using the session creation interface
+2. View and manage all exam sessions in the administrator dashboard
+3. Students can book exam sessions using the interactive booking interface
+4. Students can manage and cancel their existing bookings
+5. Administrators can view, filter, and export bookings in CSV format
+6. Calendar view showing available exam sessions and availability status
+7. Access control message displayed when a user attempts to access an exam without a valid booking
+
 == Changelog ==
 
 = 1.2.6 =
