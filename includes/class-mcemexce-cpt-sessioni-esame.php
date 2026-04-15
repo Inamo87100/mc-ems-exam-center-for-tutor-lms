@@ -14,6 +14,8 @@ class MCEMEXCE_CPT_Sessioni_Esame {
     const MK_IS_SPECIAL      = 'slot_esigenze_speciali';      // 1|0
     const MK_SPECIAL_USER_ID = 'slot_esigenze_speciali_user'; // int
     const MK_EXAM_ID      = 'slot_corso_id'; // int Tutor LMS exam ID
+    const DATE_PATTERN    = '/^\d{4}-\d{2}-\d{2}$/';
+    const TIME_PATTERN    = '/^(?:[01]\d|2[0-3]):[0-5]\d$/';
 
     // === Legacy meta keys from previous NF-EMS builds (auto-migrated) ===
     const L_MK_DATE            = '_mcemexce_slot_date';
@@ -28,6 +30,7 @@ class MCEMEXCE_CPT_Sessioni_Esame {
         add_action('init', [__CLASS__, 'register_cpt']);
         // Centralize session creation in "Exam Sessions Management".
         add_action('admin_menu', [__CLASS__, 'tweak_admin_menu'], 99);
+        add_action('admin_init', [__CLASS__, 'block_direct_new_session_access']);
         add_action('add_meta_boxes', [__CLASS__, 'add_metaboxes']);
         add_action('save_post', [__CLASS__, 'save_metabox'], 10, 2);
         add_action('admin_notices', [__CLASS__, 'admin_notices']);
@@ -107,8 +110,31 @@ class MCEMEXCE_CPT_Sessioni_Esame {
         $manage_url = admin_url('edit.php?post_type=' . self::CPT . '&page=mcemexce-manage-sessions');
         wp_add_inline_script(
             'mcems-admin',
-            '(function(){var h1=document.querySelector(".wrap h1");if(!h1)return;var btn=document.createElement("a");btn.className="page-title-action";btn.href=' . wp_json_encode($manage_url) . ';btn.textContent=' . wp_json_encode(__('Add new session', 'mc-ems-exam-center-for-tutor-lms')) . ';h1.appendChild(document.createTextNode(" "));h1.appendChild(btn);})();'
+            '(function(){var h1=document.querySelector(".wrap h1");if(!h1)return;var btn=document.createElement("a");btn.className="page-title-action";btn.href=' . wp_json_encode($manage_url) . ';btn.textContent=' . wp_json_encode(__('Create sessions', 'mc-ems-exam-center-for-tutor-lms')) . ';h1.appendChild(document.createTextNode(" "));h1.appendChild(btn);})();'
         );
+    }
+
+    /**
+     * Redirect direct access to post-new.php for this CPT to the managed creation page.
+     * This prevents creating sessions from the native editor screen.
+     */
+    public static function block_direct_new_session_access(): void {
+        if (!is_admin()) {
+            return;
+        }
+
+        global $pagenow;
+        if ($pagenow !== 'post-new.php') {
+            return;
+        }
+
+        $post_type = isset($_GET['post_type']) ? sanitize_key(wp_unslash($_GET['post_type'])) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing parameter
+        if ($post_type !== self::CPT) {
+            return;
+        }
+
+        wp_safe_redirect(admin_url('edit.php?post_type=' . self::CPT . '&page=mcemexce-manage-sessions'));
+        exit;
     }
 
     public static function register_rest_routes(): void {
@@ -306,6 +332,10 @@ class MCEMEXCE_CPT_Sessioni_Esame {
             'menu_icon'       => 'dashicons-calendar-alt',
             'supports'        => ['title'],
             'capability_type' => 'post',
+            // Block native "Add New" for this CPT while keeping edit capabilities.
+            'capabilities'    => [
+                'create_posts' => 'do_not_allow',
+            ],
             'map_meta_cap'    => true,
         ]);
     }
@@ -528,9 +558,28 @@ echo '</td></tr>';
 
         $date = isset($_POST['mcemexce_date']) ? sanitize_text_field(wp_unslash($_POST['mcemexce_date'])) : '';
         $time = isset($_POST['mcemexce_time']) ? sanitize_text_field(wp_unslash($_POST['mcemexce_time'])) : '';
+        $exam_id = isset($_POST['mcemexce_exam_id']) ? absint(wp_unslash($_POST['mcemexce_exam_id'])) : 0;
+
+        // Required-field guard: never save incomplete sessions from the editor flow.
+        if ($date === '' || $time === '' || $exam_id <= 0) {
+            set_transient('mcemexce_required_session_fields_notice_' . get_current_user_id(), 1, 30);
+            return;
+        }
+
+        // Validate date/time format strictly to avoid malformed values.
+        if (!preg_match(self::DATE_PATTERN, $date) || !preg_match(self::TIME_PATTERN, $time)) {
+            set_transient('mcemexce_required_session_fields_notice_' . get_current_user_id(), 1, 30);
+            return;
+        }
+
+        // Collision guard: reject duplicate date+time+exam tuples from metabox edits.
+        if (self::session_collision_exists($date, $time, $exam_id, (int) $post_id)) {
+            set_transient('mcemexce_duplicate_session_notice_' . get_current_user_id(), 1, 30);
+            return;
+        }
 
         // Block past sessions (date + time).
-        if ($date && $time && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && preg_match('/^\d{2}:\d{2}$/', $time)) {
+        if ($date && $time) {
             $tz = wp_timezone();
             try {
                 $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);
@@ -554,8 +603,6 @@ echo '</td></tr>';
         $proctor  = isset($_POST['mcemexce_proctor_user_id']) ? absint(wp_unslash($_POST['mcemexce_proctor_user_id'])) : 0;
         $is_spec  = !empty($_POST['mcemexce_is_special']) ? 1 : 0;
         $spec_uid = isset($_POST['mcemexce_special_user_id']) ? absint(wp_unslash($_POST['mcemexce_special_user_id'])) : 0;
-
-        $exam_id = isset($_POST['mcemexce_exam_id']) ? absint(wp_unslash($_POST['mcemexce_exam_id'])) : 0;
 
         $capacity = isset($_POST['mcemexce_capacity']) ? absint(wp_unslash($_POST['mcemexce_capacity'])) : 10;
         if ($capacity < 1) $capacity = 1;
@@ -612,6 +659,14 @@ echo '</td></tr>';
             echo '<div class="notice notice-warning"><p>' . esc_html__('Past exam sessions are read-only and cannot be modified from the backend.', 'mc-ems-exam-center-for-tutor-lms') . '</p></div>';
         }
         $uid = get_current_user_id();
+        if ($uid && get_transient('mcemexce_required_session_fields_notice_' . $uid)) {
+            delete_transient('mcemexce_required_session_fields_notice_' . $uid);
+            echo '<div class="notice notice-error"><p>' . esc_html__('Date, time, and exam are required and must be valid before saving a session.', 'mc-ems-exam-center-for-tutor-lms') . '</p></div>';
+        }
+        if ($uid && get_transient('mcemexce_duplicate_session_notice_' . $uid)) {
+            delete_transient('mcemexce_duplicate_session_notice_' . $uid);
+            echo '<div class="notice notice-error"><p>' . esc_html__('A session with the same date, time, and exam already exists.', 'mc-ems-exam-center-for-tutor-lms') . '</p></div>';
+        }
         if ( $uid && get_transient( 'mcemexce_free_capacity_capped_notice_' . $uid ) ) {
             delete_transient( 'mcemexce_free_capacity_capped_notice_' . $uid );
             echo '<div class="notice notice-warning"><p>' . wp_kses_post( sprintf(
@@ -631,7 +686,7 @@ echo '</td></tr>';
 
     private static function is_past_session($date, $time): bool {
         if (!$date || !$time) return false;
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !preg_match('/^\d{2}:\d{2}$/', $time)) return false;
+        if (!preg_match(self::DATE_PATTERN, $date) || !preg_match(self::TIME_PATTERN, $time)) return false;
         try {
             $tz = wp_timezone();
             $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);
@@ -640,6 +695,39 @@ echo '</td></tr>';
         } catch (\Throwable $e) {
             return false;
         }
+    }
+
+    /**
+     * Detect if another session already uses the same date/time/exam tuple.
+     *
+     * @param string $date Date in Y-m-d format.
+     * @param string $time Time in H:i format.
+     * @param int    $exam_id Tutor LMS exam ID.
+     * @param int    $exclude_post_id Current post ID to exclude when editing.
+     */
+    private static function session_collision_exists(string $date, string $time, int $exam_id, int $exclude_post_id = 0): bool {
+        if ($date === '' || $time === '' || $exam_id <= 0) {
+            return false;
+        }
+
+        $query_args = [
+            'post_type'      => self::CPT,
+            'post_status'    => ['publish', 'draft', 'pending', 'future', 'private'],
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                ['key' => self::MK_DATE, 'value' => $date],
+                ['key' => self::MK_TIME, 'value' => $time],
+                ['key' => self::MK_EXAM_ID, 'value' => $exam_id],
+            ],
+        ];
+
+        if ($exclude_post_id > 0) {
+            $query_args['post__not_in'] = [$exclude_post_id];
+        }
+
+        $query = new \WP_Query($query_args);
+        return $query->have_posts();
     }
 
     public static function columns($cols) {
