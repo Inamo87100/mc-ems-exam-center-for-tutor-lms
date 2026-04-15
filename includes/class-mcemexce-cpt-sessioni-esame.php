@@ -14,6 +14,8 @@ class MCEMEXCE_CPT_Sessioni_Esame {
     const MK_IS_SPECIAL      = 'slot_esigenze_speciali';      // 1|0
     const MK_SPECIAL_USER_ID = 'slot_esigenze_speciali_user'; // int
     const MK_EXAM_ID      = 'slot_corso_id'; // int Tutor LMS exam ID
+    const DATE_PATTERN    = '/^\d{4}-\d{2}-\d{2}$/';
+    const TIME_PATTERN    = '/^(?:[01]\d|2[0-3]):[0-5]\d$/';
 
     // === Legacy meta keys from previous NF-EMS builds (auto-migrated) ===
     const L_MK_DATE            = '_mcemexce_slot_date';
@@ -131,7 +133,6 @@ class MCEMEXCE_CPT_Sessioni_Esame {
             return;
         }
 
-        set_transient('mcemexce_block_new_session_notice_' . get_current_user_id(), 1, 30);
         wp_safe_redirect(admin_url('edit.php?post_type=' . self::CPT . '&page=mcemexce-manage-sessions'));
         exit;
     }
@@ -566,7 +567,7 @@ echo '</td></tr>';
         }
 
         // Validate date/time format strictly to avoid malformed values.
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $time)) {
+        if (!preg_match(self::DATE_PATTERN, $date) || !preg_match(self::TIME_PATTERN, $time)) {
             set_transient('mcemexce_required_session_fields_notice_' . get_current_user_id(), 1, 30);
             return;
         }
@@ -578,7 +579,7 @@ echo '</td></tr>';
         }
 
         // Block past sessions (date + time).
-        if ($date && $time && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $time)) {
+        if ($date && $time) {
             $tz = wp_timezone();
             try {
                 $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);
@@ -658,10 +659,6 @@ echo '</td></tr>';
             echo '<div class="notice notice-warning"><p>' . esc_html__('Past exam sessions are read-only and cannot be modified from the backend.', 'mc-ems-exam-center-for-tutor-lms') . '</p></div>';
         }
         $uid = get_current_user_id();
-        if ($uid && get_transient('mcemexce_block_new_session_notice_' . $uid)) {
-            delete_transient('mcemexce_block_new_session_notice_' . $uid);
-            echo '<div class="notice notice-warning"><p>' . esc_html__('New sessions cannot be created from the native editor. Use the "Create sessions" screen.', 'mc-ems-exam-center-for-tutor-lms') . '</p></div>';
-        }
         if ($uid && get_transient('mcemexce_required_session_fields_notice_' . $uid)) {
             delete_transient('mcemexce_required_session_fields_notice_' . $uid);
             echo '<div class="notice notice-error"><p>' . esc_html__('Date, time, and exam are required and must be valid before saving a session.', 'mc-ems-exam-center-for-tutor-lms') . '</p></div>';
@@ -689,7 +686,7 @@ echo '</td></tr>';
 
     private static function is_past_session($date, $time): bool {
         if (!$date || !$time) return false;
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !preg_match('/^\d{2}:\d{2}$/', $time)) return false;
+        if (!preg_match(self::DATE_PATTERN, $date) || !preg_match(self::TIME_PATTERN, $time)) return false;
         try {
             $tz = wp_timezone();
             $session_dt = new \DateTimeImmutable($date . ' ' . $time . ':00', $tz);

@@ -212,37 +212,39 @@ class MCEMEXCE_Admin_Sessioni {
             const genForm = document.getElementById('mcems-generate-form');
             if (!genForm) return;
             const submitBtn = genForm.querySelector('button[name="mcemexce_submit_generate"]');
-            let isSubmitting = false;
 
             function lockSubmit() {
                 if (submitBtn) {
                     submitBtn.disabled = true;
                     submitBtn.classList.add('disabled');
-                    submitBtn.setAttribute('aria-disabled', 'true');
                 }
             }
 
             function unlockSubmit() {
-                isSubmitting = false;
+                genForm.dataset.mcemsSubmitted = '0';
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.classList.remove('disabled');
-                    submitBtn.removeAttribute('aria-disabled');
                 }
             }
 
             // Disable immediately on click to reduce accidental double-submits.
             if (submitBtn) {
                 submitBtn.addEventListener('click', function(){
+                    if (genForm.dataset.mcemsSubmitted === '1') {
+                        return;
+                    }
                     lockSubmit();
                 });
             }
 
             genForm.addEventListener('submit', function(e){
-                if (isSubmitting) {
+                if (genForm.dataset.mcemsSubmitted === '1') {
                     e.preventDefault();
                     return;
                 }
+                genForm.dataset.mcemsSubmitted = '1';
+                lockSubmit();
 
                 const special = document.getElementById('mcemexce_generate_special');
                 const isSpecial = special && special.checked;
@@ -266,7 +268,7 @@ class MCEMEXCE_Admin_Sessioni {
                     }
 
                     const timeInput = document.getElementById('mcemexce_time');
-                    if (timeInput && !/^\d{2}:\d{2}$/.test((timeInput.value || '').trim())) {
+                    if (timeInput && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test((timeInput.value || '').trim())) {
                         e.preventDefault();
                         unlockSubmit();
                         alert(MCEMEXCE_ADMIN.i18n.enterAtLeastOneTime);
@@ -304,8 +306,6 @@ class MCEMEXCE_Admin_Sessioni {
                     }
                 }
 
-                isSubmitting = true;
-                lockSubmit();
             });
         })();
 
