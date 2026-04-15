@@ -133,6 +133,11 @@ All limits are enforced transparently in the admin interface. When a limit is re
 
 == Changelog ==
 
+= 1.2.6 =
+* Initial public release on WordPress.org
+* Improved stability and compatibility with Tutor LMS
+* Code cleanup and performance improvements
+
 = 1.1.0 =
 * Added Quiz Statistics admin page with per-quiz aggregated data (attempts, students, scores, pass/fail rate)
 * Added Recalculate action to rebuild stats from Tutor LMS quiz attempts
