@@ -39,19 +39,19 @@ MC-EMS introduces a Custom Post Type dedicated to exam sessions (mcems_exam_sess
 
 = Exam Booking via Calendar =
 
-**Shortcode:** `[mcems_book_exam]`
+**Shortcode:** `[mcemexce_book_exam]`
 
 Students can book an exam session through an interactive calendar that shows all available sessions filtered by date.
 
 = Student Booking Management =
 
-**Shortcode:** `[mcems_manage_booking]`
+**Shortcode:** `[mcemexce_manage_booking]`
 
 Students can view and manage their booking, check the exam date and time, see the details of the associated exam, and cancel the booking when allowed.
 
 = Booking Management with Search and CSV Export =
 
-**Shortcode:** `[mcems_bookings_list]`
+**Shortcode:** `[mcemexce_bookings_list]`
 
 * Complete booking list
 * Search by date or date range
@@ -62,7 +62,7 @@ Students can view and manage their booking, check the exam date and time, see th
 
 = Administrative Session Calendar =
 
-**Shortcode:** `[mcems_sessions_calendar]`
+**Shortcode:** `[mcemexce_sessions_calendar]`
 
 The administrative calendar allows you to view all exam sessions, check available seats, assign proctors, and monitor booking status.
 
@@ -236,6 +236,10 @@ All plugin strings are fully internationalized and compatible with translation t
 5. Administrators can view, filter, and export bookings in CSV format
 6. Calendar view showing available exam sessions and availability status
 7. Access control message displayed when a user attempts to access an exam without a valid booking
+8. Booking and cancellation settings for exam sessions
+9. Shortcode assignment settings for booking and booking management pages
+10. Role-based access control settings for administrators, proctors, and students
+11. Advanced exam access settings, including booking validity rules and protected exams
 
 == Changelog ==
 
